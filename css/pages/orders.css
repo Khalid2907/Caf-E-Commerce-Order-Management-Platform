@@ -1,0 +1,333 @@
+/* ==========================================================================
+   COMMON GROUND — Customer Account & My Orders ("06 · My orders")
+   Matches Figma Frame 6:23 (Desktop 1440px)
+   ========================================================================== */
+
+.account-workspace {
+  padding-block: 32px 64px;
+}
+
+.account-eyebrow {
+  margin-block-end: 12px;
+}
+
+.account-greeting {
+  font-size: clamp(2.25rem, 3.2vw + 0.5rem, 3rem); /* 48px Instrument Serif */
+  line-height: 1.15;
+  margin-block-end: 36px;
+}
+
+/* Two-Column Account Layout: 224px Sidebar | 1056px Content (32px gap = 1312px) */
+.account-grid {
+  display: grid;
+  grid-template-columns: 224px minmax(0, 1056px);
+  justify-content: space-between;
+  align-items: start;
+  gap: var(--space-32);
+}
+
+/* Left Account Navigation (Figma node 6:606) */
+.account-nav__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.account-nav__link {
+  display: flex;
+  align-items: center;
+  inline-size: 100%;
+  block-size: 44px;
+  padding-inline: 16px;
+  border-radius: var(--radius-md); /* 8px */
+  font-family: var(--font-sans);
+  font-size: var(--text-base); /* 14px */
+  color: var(--color-muted);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.account-nav__link:hover {
+  color: var(--color-pine);
+  background-color: rgba(232, 238, 230, 0.5);
+}
+
+.account-nav__link[aria-current="page"],
+.account-nav__link.is-active {
+  background-color: var(--color-sage);
+  color: var(--color-pine);
+  font-weight: var(--weight-semibold);
+}
+
+.account-nav__divider {
+  block-size: 1px;
+  background-color: var(--color-line);
+  margin-block: 20px;
+}
+
+/* Right Content Column */
+.account-main {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* Regulars Club Rewards Card (Figma node 6:616 — 1056x153px) */
+.rewards-banner {
+  background-color: var(--color-pine);
+  color: var(--color-paper);
+  border-radius: var(--radius-xl); /* 12px */
+  min-block-size: 153px;
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-32);
+  flex-wrap: wrap;
+}
+
+.rewards-banner__eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs); /* 11px Bold Sage */
+  font-weight: var(--weight-bold);
+  color: var(--color-sage);
+  text-transform: uppercase;
+  margin-block-end: 12px;
+}
+
+.rewards-banner__title {
+  font-family: var(--font-serif);
+  font-size: 1.9375rem; /* 31px Instrument Serif */
+  font-weight: var(--weight-regular);
+  line-height: 1.2;
+  color: var(--color-paper);
+  margin-block-end: 14px;
+}
+
+.rewards-banner__progress {
+  font-family: var(--font-sans);
+  font-size: var(--text-md-sm); /* 13px Regular Sage */
+  color: var(--color-sage);
+}
+
+.rewards-banner__score {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-inline-size: 140px;
+}
+
+.rewards-banner__points-num {
+  font-family: var(--font-sans);
+  font-size: 2.875rem; /* 46px SemiBold Paper */
+  font-weight: var(--weight-semibold);
+  line-height: 1.1;
+  color: var(--color-paper);
+}
+
+.rewards-banner__points-label {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs); /* 11px Bold Sage */
+  font-weight: var(--weight-bold);
+  color: var(--color-sage);
+  text-transform: uppercase;
+  margin-block-start: 6px;
+}
+
+/* Your Orders Section Header */
+.orders-section__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-16);
+}
+
+.orders-section__title {
+  font-family: var(--font-sans);
+  font-size: var(--text-4xl); /* 24px SemiBold Ink */
+  font-weight: var(--weight-semibold);
+  color: var(--color-ink);
+}
+
+.orders-section__filter {
+  font-family: var(--font-sans);
+  font-size: var(--text-base); /* 14px Regular Muted */
+  color: var(--color-muted);
+}
+
+/* Active Order Highlight Card (Figma node 6:624 — 1056x125px) */
+.active-order-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-pine);
+  border-radius: var(--radius-lg); /* 10px */
+  min-block-size: 125px;
+  padding: 22px 24px;
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--space-16);
+}
+
+.active-order-card__details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.active-order-card__number {
+  font-family: var(--font-sans);
+  font-size: var(--text-body); /* 16px SemiBold Ink */
+  font-weight: var(--weight-semibold);
+  color: var(--color-ink);
+}
+
+.active-order-card__items {
+  font-family: var(--font-sans);
+  font-size: var(--text-base); /* 14px Regular Muted */
+  color: var(--color-muted);
+}
+
+.active-order-card__meta {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm); /* 12px Regular Muted */
+  color: var(--color-muted);
+}
+
+.active-order-card__cta {
+  align-self: center;
+  min-inline-size: 198px;
+}
+
+/* Past Orders Table Card (Figma node 6:632 — 1056x237px) */
+.order-history-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg); /* 10px */
+  padding: 8px 23px;
+  overflow-x: auto;
+}
+
+.order-table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  text-align: start;
+}
+
+.order-table th {
+  padding-block: 14px;
+  border-block-end: 1px solid var(--color-line);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs); /* 11px SemiBold Muted */
+  font-weight: var(--weight-semibold);
+  color: var(--color-muted);
+  text-transform: uppercase;
+  text-align: start;
+}
+
+.order-table td {
+  padding-block: 18px;
+  border-block-end: 1px solid var(--color-line);
+  font-family: var(--font-sans);
+  font-size: var(--text-md-sm); /* 13px */
+  color: var(--color-ink);
+}
+
+.order-table tr:last-child td {
+  border-block-end: none;
+}
+
+.order-table__id {
+  font-size: var(--text-base); /* 14px SemiBold Pine */
+  font-weight: var(--weight-semibold);
+  color: var(--color-pine);
+}
+
+.order-table__date {
+  color: var(--color-muted);
+}
+
+.order-table__total {
+  font-weight: var(--weight-semibold);
+}
+
+.order-table__action {
+  text-align: end;
+}
+
+.reorder-btn {
+  font-family: var(--font-sans);
+  font-size: var(--text-md-sm); /* 13px SemiBold Pine */
+  font-weight: var(--weight-semibold);
+  color: var(--color-pine);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.reorder-btn:hover {
+  background-color: var(--color-sage);
+}
+
+/* Make It Your Usual Banner (Figma node 6:655 — 1056x102px) */
+.usual-banner {
+  background-color: var(--color-sage);
+  color: var(--color-pine);
+  border-radius: var(--radius-lg); /* 10px */
+  min-block-size: 102px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-24);
+  flex-wrap: wrap;
+}
+
+.usual-banner__title {
+  font-size: 1.5625rem; /* 25px Instrument Serif */
+  line-height: 1.25;
+  margin-block-end: 6px;
+}
+
+.usual-banner__desc {
+  font-family: var(--font-sans);
+  font-size: var(--text-md-sm); /* 13px Regular Pine */
+}
+
+.usual-banner__cta {
+  min-inline-size: 202px;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints (Tablet & Mobile)
+   ========================================================================== */
+@media (max-width: 1199px) {
+  .account-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .account-nav__list {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-block-end: var(--space-8);
+  }
+
+  .account-nav__link {
+    inline-size: auto;
+    white-space: nowrap;
+  }
+
+  .account-nav__divider {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .active-order-card {
+    grid-template-columns: 1fr;
+  }
+
+  .active-order-card__cta {
+    inline-size: 100%;
+  }
+}

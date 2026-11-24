@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Orders &amp; Regulars Club — Common Ground</title>
+    <meta
+      name="description"
+      content="View your Common Ground loyalty rewards balance, track active orders, and reorder your favorites."
+    />
+
+    <!-- Google Fonts: Instrument Serif & DM Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Modular CSS -->
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/pages/orders.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <!-- Top Announcement Strip -->
+    <div class="announcement-strip" role="region" aria-label="Store announcement">
+      <div class="announcement-strip__inner">
+        <p class="announcement-strip__text">
+          YOUR DAILY RITUAL, JUST A LITTLE EASIER.&nbsp;&nbsp;•&nbsp;&nbsp;ORDER AHEAD &amp; SKIP THE QUEUE
+        </p>
+      </div>
+    </div>
+
+    <!-- Primary Site Header -->
+    <header class="site-header">
+      <div class="site-header__bar">
+        <div class="site-header__inner">
+          <div class="site-brand">
+            <a class="site-brand__logo" href="index.html" aria-label="Common Ground home">
+              <span>COMMON</span>
+              <span>GROUND</span>
+            </a>
+            <span class="site-brand__tagline">Coffee, considered.</span>
+          </div>
+
+          <nav class="site-nav" aria-label="Primary">
+            <ul class="site-nav__list">
+              <li>
+                <a class="site-nav__link" href="menu.html" aria-current="page">Order online</a>
+              </li>
+              <li>
+                <a class="site-nav__link" href="menu.html?category=coffee">Our coffee</a>
+              </li>
+              <li>
+                <a class="site-nav__link" href="index.html#origin-story">Our story</a>
+              </li>
+            </ul>
+          </nav>
+
+          <div class="site-header__actions">
+            <a class="account-link" href="orders.html">
+              <img
+                class="account-link__icon"
+                src="assets/icons/account.svg"
+                alt=""
+                width="22"
+                height="22"
+              />
+              <span>My account</span>
+            </a>
+
+            <a
+              class="btn btn--primary bag-button"
+              href="menu.html#your-bag"
+              data-bag-button
+              aria-label="Shopping bag, 2 items"
+            >
+              Bag · 2
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <section class="account-workspace" aria-labelledby="account-greeting-title">
+        <div class="container">
+          <p class="eyebrow account-eyebrow">YOUR CORNER OF COMMON GROUND</p>
+          <h1 id="account-greeting-title" class="heading-serif account-greeting">
+            Good morning, Alex.
+          </h1>
+
+          <div class="account-grid">
+            <!-- Left Account Navigation (Figma node 6:606) -->
+            <aside class="account-nav" aria-label="Account sections">
+              <ul class="account-nav__list">
+                <li>
+                  <a class="account-nav__link is-active" href="orders.html" aria-current="page"
+                    >My orders</a
+                  >
+                </li>
+                <li>
+                  <a class="account-nav__link" href="menu.html">My favorites</a>
+                </li>
+                <li>
+                  <a class="account-nav__link" href="#rewards-card">Rewards</a>
+                </li>
+                <li>
+                  <a class="account-nav__link" href="checkout.html">Personal details</a>
+                </li>
+                <li>
+                  <a class="account-nav__link" href="checkout.html?mode=delivery"
+                    >Saved addresses</a
+                  >
+                </li>
+                <li>
+                  <a class="account-nav__link" href="checkout.html">Payment methods</a>
+                </li>
+              </ul>
+
+              <div class="account-nav__divider" role="separator"></div>
+
+              <a class="account-nav__link" href="signin.html">Sign out</a>
+            </aside>
+
+            <!-- Right Account Workspace -->
+            <div class="account-main">
+              <!-- Regulars Club Loyalty Card (Figma node 6:616) -->
+              <div id="rewards-card" class="rewards-banner">
+                <div>
+                  <p class="rewards-banner__eyebrow">THE REGULARS CLUB</p>
+                  <h2 class="rewards-banner__title">Your next cup is getting closer.</h2>
+                  <p class="rewards-banner__progress">
+                    120 / 200 points&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;80 points to a coffee on us
+                  </p>
+                </div>
+
+                <div class="rewards-banner__score">
+                  <span class="rewards-banner__points-num">120</span>
+                  <span class="rewards-banner__points-label">POINTS</span>
+                </div>
+              </div>
+
+              <!-- Your Orders Section -->
+              <div class="orders-section__header">
+                <h2 class="orders-section__title">Your orders</h2>
+                <span class="orders-section__filter">All orders&nbsp;&nbsp;⌄</span>
+              </div>
+
+              <!-- Active Order Highlight Card (Figma node 6:624) -->
+              <article class="active-order-card" aria-label="Active order">
+                <div>
+                  <span
+                    id="active-order-status"
+                    class="status-badge status-badge--preparing"
+                    >Preparing</span
+                  >
+                </div>
+
+                <div class="active-order-card__details">
+                  <h3 id="active-order-number" class="active-order-card__number">Order #1048</h3>
+                  <p id="active-order-items" class="active-order-card__items">
+                    Iced oat latte, almond croissant
+                  </p>
+                  <p id="active-order-meta" class="active-order-card__meta">
+                    Today · 10:14 am&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;Pickup · $10.60
+                  </p>
+                </div>
+
+                <a class="btn btn--primary active-order-card__cta" href="tracking.html">
+                  <span>Track order</span>
+                  <span aria-hidden="true">→</span>
+                </a>
+              </article>
+
+              <!-- Past Orders Table (Figma node 6:632) -->
+              <div class="order-history-card">
+                <table class="order-table">
+                  <caption class="sr-only">
+                    Past order history
+                  </caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">ORDER</th>
+                      <th scope="col">DATE</th>
+                      <th scope="col">ITEMS</th>
+                      <th scope="col">TOTAL</th>
+                      <th scope="col"><span class="sr-only">Actions</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="past-orders-tbody"></tbody>
+                </table>
+              </div>
+
+              <!-- Saved Favorite Callout (Figma node 6:655) -->
+              <div class="usual-banner">
+                <div>
+                  <h2 class="heading-serif usual-banner__title">Make it your usual.</h2>
+                  <p class="usual-banner__desc">
+                    Save your favorite customizations for a faster next order.
+                  </p>
+                </div>
+
+                <a class="btn btn--secondary usual-banner__cta" href="menu.html">
+                  Browse the menu
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__top">
+          <div class="site-footer__brand">
+            <p class="site-footer__brand-title">COMMON GROUND</p>
+            <p class="site-footer__brand-subtitle">A good place to start.</p>
+          </div>
+
+          <div class="site-footer__col">
+            <h2 class="site-footer__col-title">VISIT THE CAFÉ</h2>
+            <p class="site-footer__col-text">
+              42 Maple Street, Portland, OR<br />
+              Mon–Fri&nbsp;&nbsp;7am–6pm&nbsp;&nbsp;/&nbsp;&nbsp;Sat–Sun&nbsp;&nbsp;8am–5pm
+            </p>
+          </div>
+
+          <div class="site-footer__col">
+            <h2 class="site-footer__col-title">GET IN TOUCH</h2>
+            <p class="site-footer__col-text">
+              <a class="site-footer__external-link" href="mailto:hello@commonground.coffee">
+                hello@commonground.coffee
+              </a>
+              <br />
+              <a
+                class="site-footer__external-link"
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>Instagram</span>
+                <span aria-hidden="true">↗</span>
+              </a>
+            </p>
+          </div>
+        </div>
+
+        <div class="site-footer__bottom">
+          <p>© 2026 Common Ground Coffee</p>
+          <ul class="site-footer__legal" aria-label="Legal">
+            <li><a href="#privacy">Privacy</a></li>
+            <li><a href="#terms">Terms</a></li>
+            <li><a href="#accessibility">Accessibility</a></li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+      <a class="mobile-bottom-nav__item" href="menu.html">
+        <img
+          class="mobile-bottom-nav__icon"
+          src="assets/icons/nav-menu.svg"
+          alt=""
+          width="24"
+          height="24"
+        />
+        <span>Menu</span>
+      </a>
+      <a class="mobile-bottom-nav__item" href="orders.html" aria-current="page">
+        <img
+          class="mobile-bottom-nav__icon"
+          src="assets/icons/nav-orders.svg"
+          alt=""
+          width="24"
+          height="24"
+        />
+        <span>Orders</span>
+      </a>
+      <a class="mobile-bottom-nav__item" href="signin.html">
+        <img
+          class="mobile-bottom-nav__icon"
+          src="assets/icons/nav-account.svg"
+          alt=""
+          width="24"
+          height="24"
+        />
+        <span>Account</span>
+      </a>
+    </nav>
+
+    <script type="module" src="js/pages/orders.js"></script>
+  </body>
+</html>

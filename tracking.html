@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order #1048 Tracking — Common Ground</title>
+    <meta
+      name="description"
+      content="Track your Common Ground café order in real time from confirmed to ready for pickup."
+    />
+
+    <!-- Google Fonts: Instrument Serif & DM Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Modular CSS -->
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/pages/tracking.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <!-- Top Announcement Strip -->
+    <div class="announcement-strip" role="region" aria-label="Store announcement">
+      <div class="announcement-strip__inner">
+        <p class="announcement-strip__text">
+          YOUR DAILY RITUAL, JUST A LITTLE EASIER.&nbsp;&nbsp;•&nbsp;&nbsp;ORDER AHEAD &amp; SKIP THE QUEUE
+        </p>
+      </div>
+    </div>
+
+    <!-- Primary Site Header -->
+    <header class="site-header">
+      <div class="site-header__bar">
+        <div class="site-header__inner">
+          <div class="site-brand">
+            <a class="site-brand__logo" href="index.html" aria-label="Common Ground home">
+              <span>COMMON</span>
+              <span>GROUND</span>
+            </a>
+            <span class="site-brand__tagline">Coffee, considered.</span>
+          </div>
+
+          <nav class="site-nav" aria-label="Primary">
+            <ul class="site-nav__list">
+              <li>
+                <a class="site-nav__link" href="menu.html" aria-current="page">Order online</a>
+              </li>
+              <li>
+                <a class="site-nav__link" href="menu.html?category=coffee">Our coffee</a>
+              </li>
+              <li>
+                <a class="site-nav__link" href="index.html#origin-story">Our story</a>
+              </li>
+            </ul>
+          </nav>
+
+          <div class="site-header__actions">
+            <a class="account-link" href="orders.html">
+              <img
+                class="account-link__icon"
+                src="assets/icons/account.svg"
+                alt=""
+                width="22"
+                height="22"
+              />
+              <span>My account</span>
+            </a>
+
+            <a
+              class="btn btn--primary bag-button"
+              href="menu.html#your-bag"
+              data-bag-button
+              aria-label="Shopping bag, 2 items"
+            >
+              Bag · 2
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <section class="tracking-workspace" aria-labelledby="tracking-page-title">
+        <div class="container">
+          <p id="tracking-order-eyebrow" class="tracking-eyebrow">
+            ORDER #1048&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;TUESDAY, NOVEMBER 24
+          </p>
+
+          <h1 id="tracking-page-title" class="heading-serif tracking-title">
+            Your ritual is in the making.
+          </h1>
+
+          <p id="tracking-order-subtitle" class="tracking-subtitle">
+            Thanks, Alex. We’ll let you know the moment it’s ready.
+          </p>
+
+          <div class="tracking-grid">
+            <!-- Left Column: Live Status Stepper, SMS Banner & Membership Invite -->
+            <div class="tracking-left">
+              <!-- Live Order Status Card (Figma node 6:555) -->
+              <article class="live-status-card" aria-label="Live order status">
+                <div class="live-status-card__top">
+                  <span
+                    id="tracking-status-badge"
+                    class="status-badge status-badge--preparing"
+                    aria-live="polite"
+                    >Preparing</span
+                  >
+                  <button
+                    id="simulate-next-step-btn"
+                    type="button"
+                    class="live-status-card__sim-btn"
+                    title="Simulate barista advancing order status"
+                  >
+                    Simulate next stage →
+                  </button>
+                </div>
+
+                <p id="tracking-eta-label" class="live-status-card__eta-label">Estimated pickup</p>
+                <p id="tracking-eta-window" class="heading-serif live-status-card__eta-window">
+                  10:25–10:30 am
+                </p>
+                <p class="live-status-card__care-note">A little care in every cup.</p>
+
+                <!-- 4-Step Progress Stepper (Figma nodes 6:561–6:578) -->
+                <div
+                  id="tracking-stepper"
+                  class="progress-stepper"
+                  role="group"
+                  aria-label="Order progress stages"
+                >
+                  <div class="progress-stepper__track" aria-hidden="true">
+                    <div
+                      id="stepper-track-fill"
+                      class="progress-stepper__fill"
+                      style="inline-size: 33%"
+                    ></div>
+                  </div>
+
+                  <button type="button" class="stepper-node is-completed" data-step-index="0">
+                    <span class="stepper-node__circle">✓</span>
+                    <span class="stepper-node__title">Confirmed</span>
+                    <span class="stepper-node__meta">10:14 am</span>
+                  </button>
+
+                  <button type="button" class="stepper-node is-active" data-step-index="1">
+                    <span class="stepper-node__circle">2</span>
+                    <span class="stepper-node__title">Preparing</span>
+                    <span class="stepper-node__meta">Started at 10:16 am</span>
+                  </button>
+
+                  <button type="button" class="stepper-node" data-step-index="2">
+                    <span class="stepper-node__circle">3</span>
+                    <span class="stepper-node__title">Ready for pickup</span>
+                    <span class="stepper-node__meta">We’ll text you</span>
+                  </button>
+
+                  <button type="button" class="stepper-node" data-step-index="3">
+                    <span class="stepper-node__circle">4</span>
+                    <span class="stepper-node__title">Picked up</span>
+                    <span class="stepper-node__meta">Enjoy your day</span>
+                  </button>
+                </div>
+              </article>
+
+              <!-- SMS Notifications Banner (Figma node 6:579) -->
+              <div class="sms-updates-banner" role="status">
+                <p class="sms-updates-banner__title">✓&nbsp;&nbsp;Updates are on</p>
+                <p id="tracking-sms-body" class="sms-updates-banner__body">
+                  We’ll text (503) 555-0142 when your order is ready. No refreshing needed.
+                </p>
+              </div>
+
+              <!-- Post-Purchase Regulars Club Invite (Figma node 6:582) -->
+              <div class="regulars-invite-card">
+                <div>
+                  <h2 class="heading-serif regulars-invite-card__title">
+                    A little more rewarding.
+                  </h2>
+                  <p class="regulars-invite-card__desc">
+                    Create an account to save your usual and earn points on every visit.
+                  </p>
+                </div>
+                <a class="regulars-invite-card__link" href="signin.html">
+                  <span>Join the regulars</span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Right Column: Pickup Directions & Itemized Receipt -->
+            <aside class="tracking-right" aria-label="Pickup details and receipt">
+              <!-- Pickup Info Card (Figma node 6:586) -->
+              <div class="pickup-info-card">
+                <p id="pickup-card-eyebrow" class="pickup-info-card__eyebrow">
+                  PICKUP AT MAPLE STREET
+                </p>
+                <h2 id="pickup-card-title" class="pickup-info-card__title">We’ll see you soon.</h2>
+                <p id="pickup-card-address" class="pickup-info-card__address">
+                  42 Maple Street, Portland, OR<br />
+                  Open today until 6:00 pm
+                </p>
+                <p class="pickup-info-card__instructions">
+                  Head to the pickup counter and tell us your name<br />
+                  or order number. We’ll take it from there.
+                </p>
+                <a
+                  class="pickup-info-card__directions"
+                  href="https://maps.google.com/?q=42+Maple+Street+Portland+OR"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span>Get directions</span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </div>
+
+              <!-- Order Receipt Card ("The good stuff" — Figma node 6:592) -->
+              <div class="receipt-card">
+                <h2 class="receipt-card__title">The good stuff</h2>
+
+                <div id="receipt-items-list" class="receipt-items"></div>
+
+                <div class="receipt-card__paid-row">
+                  <span id="receipt-paid-method" class="receipt-card__paid-method"
+                    >Paid · Visa ending 4242</span
+                  >
+                  <span id="receipt-paid-total" class="receipt-card__paid-total">$10.60</span>
+                </div>
+
+                <div class="receipt-card__actions">
+                  <button id="view-receipt-btn" type="button">View receipt</button>
+                  <a href="mailto:hello@commonground.coffee">Need help?</a>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__top">
+          <div class="site-footer__brand">
+            <p class="site-footer__brand-title">COMMON GROUND</p>
+            <p class="site-footer__brand-subtitle">A good place to start.</p>
+          </div>
+
+          <div class="site-footer__col">
+            <h2 class="site-footer__col-title">VISIT THE CAFÉ</h2>
+            <p class="site-footer__col-text">
+              42 Maple Street, Portland, OR<br />
+              Mon–Fri&nbsp;&nbsp;7am–6pm&nbsp;&nbsp;/&nbsp;&nbsp;Sat–Sun&nbsp;&nbsp;8am–5pm
+            </p>
+          </div>
+
+          <div class="site-footer__col">
+            <h2 class="site-footer__col-title">GET IN TOUCH</h2>
+            <p class="site-footer__col-text">
+              <a class="site-footer__external-link" href="mailto:hello@commonground.coffee">
+                hello@commonground.coffee
+              </a>
+              <br />
+              <a
+                class="site-footer__external-link"
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>Instagram</span>
+                <span aria-hidden="true">↗</span>
+              </a>
+            </p>
+          </div>
+        </div>
+
+        <div class="site-footer__bottom">
+          <p>© 2026 Common Ground Coffee</p>
+          <ul class="site-footer__legal" aria-label="Legal">
+            <li><a href="#privacy">Privacy</a></li>
+            <li><a href="#terms">Terms</a></li>
+            <li><a href="#accessibility">Accessibility</a></li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+      <a class="mobile-bottom-nav__item" href="menu.html">
+        <img
+          class="mobile-bottom-nav__icon"
+          src="assets/icons/nav-menu.svg"
+          alt=""
+          width="24"
+          height="24"
+        />
+        <span>Menu</span>
+      </a>
+      <a class="mobile-bottom-nav__item" href="orders.html" aria-current="page">
+        <img
+          class="mobile-bottom-nav__icon"
+          src="assets/icons/nav-orders.svg"
+          alt=""
+          width="24"
+          height="24"
+        />
+        <span>Orders</span>
+      </a>
+      <a class="mobile-bottom-nav__item" href="signin.html">
+        <img
+          class="mobile-bottom-nav__icon"
+          src="assets/icons/nav-account.svg"
+          alt=""
+          width="24"
+          height="24"
+        />
+        <span>Account</span>
+      </a>
+    </nav>
+
+    <script type="module" src="js/pages/tracking.js"></script>
+  </body>
+</html>
