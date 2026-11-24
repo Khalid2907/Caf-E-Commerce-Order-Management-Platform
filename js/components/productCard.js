@@ -51,7 +51,7 @@ export function createProductCardElement(product) {
 
   const link = document.createElement("a");
   link.className = "product-card__link";
-  link.href = `#product-${product.id}`;
+  link.href = `product.html?id=${encodeURIComponent(product.id)}`;
   link.dataset.productLink = product.id;
   link.textContent = product.name;
   title.appendChild(link);

@@ -23,7 +23,7 @@ function ensureContainer() {
  * @param {string} [options.actionLabel]
  * @param {string} [options.actionHref]
  */
-export function showToast(message, { actionLabel = "View bag", actionHref = "#bestsellers" } = {}) {
+export function showToast(message, { actionLabel = "View bag", actionHref = "menu.html#your-bag" } = {}) {
   const container = ensureContainer();
 
   const toast = document.createElement("div");

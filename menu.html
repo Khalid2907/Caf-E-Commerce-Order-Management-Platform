@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order Menu — Common Ground</title>
+    <meta
+      name="description"
+      content="A little something, made for you. Order specialty coffee, matcha, and freshly baked pastries ahead."
+    />
+
+    <!-- Google Fonts: Instrument Serif & DM Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Modular CSS -->
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/pages/menu.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <!-- Top Announcement Strip -->
+    <div class="announcement-strip" role="region" aria-label="Store announcement">
+      <div class="announcement-strip__inner">
+        <p class="announcement-strip__text">
+          YOUR DAILY RITUAL, JUST A LITTLE EASIER.&nbsp;&nbsp;•&nbsp;&nbsp;ORDER AHEAD &amp; SKIP THE QUEUE
+        </p>
+      </div>
+    </div>
+
+    <!-- Primary Site Header -->
+    <header class="site-header">
+      <div class="site-header__bar">
+        <div class="site-header__inner">
+          <div class="site-brand">
+            <a class="site-brand__logo" href="index.html" aria-label="Common Ground home">
+              <span>COMMON</span>
+              <span>GROUND</span>
+            </a>
+            <span class="site-brand__tagline">Coffee, considered.</span>
+          </div>
+
+          <nav class="site-nav" aria-label="Primary">
+            <ul class="site-nav__list">
+              <li>
+                <a class="site-nav__link" href="menu.html" aria-current="page">Order online</a>
+              </li>
+              <li>
+                <a class="site-nav__link" href="menu.html?category=coffee">Our coffee</a>
+              </li>
+              <li>
+                <a class="site-nav__link" href="index.html#origin-story">Our story</a>
+              </li>
+            </ul>
+          </nav>
+
+          <div class="site-header__actions">
+            <a class="account-link" href="orders.html">
+              <img
+                class="account-link__icon"
+                src="assets/icons/account.svg"
+                alt=""
+                width="22"
+                height="22"
+              />
+              <span>My account</span>
+            </a>
+
+            <a
+              class="btn btn--primary bag-button"
+              href="#your-bag"
+              data-bag-button
+              aria-label="Shopping bag, 2 items"
+            >
+              Bag · 2
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <!-- 01 / Menu Header (Figma node 6:10) -->
+      <section class="menu-header" aria-labelledby="menu-page-title">
+        <div class="container">
+          <h1 id="menu-page-title" class="heading-serif menu-header__title">
+            A little something, made for you.
+          </h1>
+          <p class="menu-header__subtitle">Your neighborhood café, without the wait.</p>
+
+          <div class="menu-header__controls">
+            <button
+              id="fulfillment-toggle-btn"
+              type="button"
+              class="fulfillment-bar"
+              aria-label="Toggle pickup or delivery fulfillment"
+            >
+              <span id="fulfillment-mode-label" class="fulfillment-bar__mode"
+                >Pickup&nbsp;&nbsp;•&nbsp;&nbsp;Maple Street</span
+              >
+              <span id="fulfillment-eta-label" class="fulfillment-bar__eta"
+                >Ready in 10–15 min ⌄</span
+              >
+            </button>
+
+            <div class="menu-search" role="search">
+              <label for="menu-search-input" class="sr-only">Search coffee, food, and more</label>
+              <span class="menu-search__icon" aria-hidden="true">⌕</span>
+              <input
+                id="menu-search-input"
+                type="search"
+                class="menu-search__input"
+                placeholder="Search coffee, food, and more"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 / Menu Catalog & Persistent Bag Workspace (Figma node 6:11) -->
+      <section class="menu-workspace" aria-label="Menu catalog and shopping bag">
+        <div class="container">
+          <div class="menu-workspace__grid">
+            <!-- Left Sidebar: Categories & Care Note -->
+            <aside class="menu-sidebar" aria-label="Menu categories">
+              <p class="eyebrow menu-sidebar__eyebrow">THE MENU</p>
+              <ul id="menu-categories-list" class="menu-categories"></ul>
+
+              <div class="menu-sidebar__divider" role="separator"></div>
+
+              <div class="menu-sidebar__care">
+                <h2 class="menu-sidebar__care-title">MADE WITH CARE</h2>
+                <p class="menu-sidebar__care-text">
+                  Alternative milks.<br />
+                  Seasonal ingredients.<br />
+                  Always a good choice.
+                </p>
+              </div>
+            </aside>
+
+            <!-- Center Column: Product Cards Grid -->
+            <div class="menu-catalog">
+              <div class="menu-catalog__topbar">
+                <h2 id="menu-category-heading" class="menu-catalog__heading">All favorites</h2>
+
+                <div class="menu-catalog__meta">
+                  <span id="menu-item-count" class="menu-catalog__count" aria-live="polite"
+                    >4 of 18 items</span
+                  >
+                  <label for="menu-sort-select" class="sr-only">Sort items</label>
+                  <select id="menu-sort-select" class="menu-catalog__sort">
+                    <option value="featured">Sort: Featured</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                    <option value="name-asc">Name: A–Z</option>
+                  </select>
+                </div>
+              </div>
+
+              <div id="menu-catalog-grid" class="menu-catalog__grid" aria-live="polite"></div>
+
+              <!-- Mobile-only bottom note & sticky bag shortcut (Figma 12 · Mobile menu) -->
+              <div class="mobile-Menu-elements">
+                <p class="mobile-fresh-note">Small batches. Big care. Made fresh for you.</p>
+                <a id="mobile-view-bag-btn" class="btn btn--primary" href="#your-bag">
+                  View bag · 2 items · $10.60
+                </a>
+              </div>
+            </div>
+
+            <!-- Right Column: Persistent "Your bag" Summary (Figma node 6:351) -->
+            <aside id="your-bag" class="bag-panel" aria-labelledby="bag-panel-heading">
+              <div class="bag-panel__header">
+                <h2 id="bag-panel-heading" class="bag-panel__title">Your bag</h2>
+                <span id="bag-panel-count" class="bag-panel__count">2 items</span>
+              </div>
+
+              <div id="bag-items-list" class="bag-items" aria-live="polite"></div>
+
+              <div class="bag-panel__note-row">
+                <label for="bag-cafe-note" class="sr-only">Add a note for the café</label>
+                <input
+                  id="bag-cafe-note"
+                  type="text"
+                  class="bag-panel__note-input"
+                  placeholder="Add a note for the café"
+                />
+              </div>
+
+              <div class="bag-panel__summary">
+                <div class="bag-panel__subtotal-row">
+                  <span class="bag-panel__subtotal-label">Subtotal</span>
+                  <span id="bag-subtotal-value" class="bag-panel__subtotal-value">$10.60</span>
+                </div>
+                <p class="bag-panel__tax-note">Taxes and tip calculated at checkout</p>
+              </div>
+
+              <a
+                id="bag-checkout-btn"
+                class="btn btn--primary bag-panel__checkout-btn"
+                href="checkout.html"
+              >
+                <span>Continue to checkout</span>
+                <span aria-hidden="true">→</span>
+              </a>
+
+              <p id="bag-fulfillment-note" class="bag-panel__fulfillment-note">
+                Pickup at Maple Street · 10–15 min
+              </p>
+            </aside>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__top">
+          <div class="site-footer__brand">
+            <p class="site-footer__brand-title">COMMON GROUND</p>
+            <p class="site-footer__brand-subtitle">A good place to start.</p>
+          </div>
+
+          <div class="site-footer__col">
+            <h2 class="site-footer__col-title">VISIT THE CAFÉ</h2>
+            <p class="site-footer__col-text">
+              42 Maple Street, Portland, OR<br />
+              Mon–Fri&nbsp;&nbsp;7am–6pm&nbsp;&nbsp;/&nbsp;&nbsp;Sat–Sun&nbsp;&nbsp;8am–5pm
+            </p>
+          </div>
+
+          <div class="site-footer__col">
+            <h2 class="site-footer__col-title">GET IN TOUCH</h2>
+            <p class="site-footer__col-text">
+              <a class="site-footer__external-link" href="mailto:hello@commonground.coffee">
+                hello@commonground.coffee
+              </a>
+              <br />
+              <a
+                class="site-footer__external-link"
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>Instagram</span>
+                <span aria-hidden="true">↗</span>
+              </a>
+            </p>
+          </div>
+        </div>
+
+        <div class="site-footer__bottom">
+          <p>© 2026 Common Ground Coffee</p>
+          <ul class="site-footer__legal" aria-label="Legal">
+            <li><a href="#privacy">Privacy</a></li>
+            <li><a href="#terms">Terms</a></li>
+            <li><a href="#accessibility">Accessibility</a></li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+      <a class="mobile-bottom-nav__item" href="menu.html" aria-current="page">
+        <img
+          class="mobile-bottom-nav__icon"
+          src="assets/icons/nav-menu.svg"
+          alt=""
+          width="24"
+          height="24"
+        />
+        <span>Menu</span>
+      </a>
+      <a class="mobile-bottom-nav__item" href="orders.html">
+        <img
+          class="mobile-bottom-nav__icon"
+          src="assets/icons/nav-orders.svg"
+          alt=""
+          width="24"
+          height="24"
+        />
+        <span>Orders</span>
+      </a>
+      <a class="mobile-bottom-nav__item" href="signin.html">
+        <img
+          class="mobile-bottom-nav__icon"
+          src="assets/icons/nav-account.svg"
+          alt=""
+          width="24"
+          height="24"
+        />
+        <span>Account</span>
+      </a>
+    </nav>
+
+    <script type="module" src="js/pages/menu.js"></script>
+  </body>
+</html>
