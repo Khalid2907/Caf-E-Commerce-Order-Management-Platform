@@ -281,6 +281,14 @@ function renderBaristaWorkspace() {
 }
 
 async function fetchBaristaData() {
+  const storedToken = storageService.get(STORAGE_KEYS.AUTH_TOKEN);
+  const storedUser = storageService.get(STORAGE_KEYS.AUTH_USER);
+  if (!storedToken || !storedUser) {
+    const authOverlay = document.getElementById("barista-auth-overlay");
+    if (authOverlay) authOverlay.hidden = false;
+    return;
+  }
+
   try {
     const [orders, overview] = await Promise.all([
       apiRequest("/api/admin/orders"),

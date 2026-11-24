@@ -472,6 +472,10 @@
 }
 
 /* Staff Authentication Overlay Modal */
+.auth-overlay[hidden] {
+  display: none !important;
+}
+
 .auth-overlay {
   position: fixed;
   inset: 0;

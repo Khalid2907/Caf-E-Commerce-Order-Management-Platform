@@ -119,10 +119,19 @@ function renderPastOrdersTable() {
   });
 }
 
-function initOrdersPage() {
+async function initOrdersPage() {
   initHeader();
   renderActiveOrderCard();
   renderPastOrdersTable();
+  try {
+    const active = orderService.getActiveOrder();
+    if (active && active.orderNumber) {
+      await orderService.fetchOrderTracking(active.orderNumber);
+      renderActiveOrderCard();
+    }
+  } catch {
+    // Keep local active order snapshot
+  }
 }
 
 if (document.readyState === "loading") {
