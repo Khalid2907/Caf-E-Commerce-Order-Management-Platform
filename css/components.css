@@ -1,0 +1,430 @@
+/* ==========================================================================
+   COMMON GROUND — Reusable UI Components
+   Source of truth: Figma "16 · UI foundations" & "01 · Storefront"
+   ========================================================================== */
+
+/* ==========================================================================
+   01 / Buttons (Primary, Secondary, Ghost/Text, Destructive, Icon Circular)
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  block-size: var(--control-height); /* 48px matching Figma */
+  padding-inline: var(--space-20);
+  border-radius: var(--radius-md); /* 8px */
+  font-family: var(--font-sans);
+  font-size: var(--text-base); /* 14px */
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-normal);
+  white-space: nowrap;
+  user-select: none;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.btn--primary {
+  background-color: var(--color-pine);
+  color: var(--color-paper);
+  border: 1px solid transparent;
+}
+
+.btn--primary:hover:not(:disabled) {
+  background-color: var(--color-pine-hover);
+}
+
+.btn--primary:active:not(:disabled) {
+  background-color: var(--color-pine-pressed);
+}
+
+.btn--secondary {
+  background-color: var(--color-surface);
+  color: var(--color-pine);
+  border: 1px solid var(--color-line);
+}
+
+.btn--secondary:hover:not(:disabled) {
+  background-color: var(--color-sage);
+  border-color: var(--color-pine);
+}
+
+.btn--ghost {
+  background-color: transparent;
+  color: var(--color-pine);
+  border: 1px solid transparent;
+}
+
+.btn--ghost:hover:not(:disabled) {
+  background-color: var(--color-sage);
+}
+
+.btn--destructive {
+  background-color: var(--color-terracotta);
+  color: var(--color-surface);
+  border: 1px solid transparent;
+}
+
+.btn--destructive:hover:not(:disabled) {
+  filter: brightness(0.92);
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  background-color: var(--color-disabled);
+  color: var(--color-muted);
+  border-color: transparent;
+  cursor: not-allowed;
+}
+
+/* Circular Quick-Add Button (40x40px on cards, 44px touch target hit area) */
+.btn-quick-add {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 40px;
+  block-size: 40px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
+  color: var(--color-pine);
+  font-family: var(--font-sans);
+  font-size: 1.375rem; /* 22px '+' sign matching Figma node 6:239 */
+  font-weight: var(--weight-regular);
+  line-height: 1;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+/* Expand touch target to 44x44px minimum per UI Foundations accessibility rule */
+.btn-quick-add::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+}
+
+.btn-quick-add:hover {
+  background-color: var(--color-pine);
+  border-color: var(--color-pine);
+  color: var(--color-paper);
+}
+
+.btn-quick-add:active {
+  background-color: var(--color-pine-pressed);
+  transform: scale(0.96);
+}
+
+.btn-quick-add.is-added {
+  background-color: var(--color-sage);
+  border-color: var(--color-pine);
+  color: var(--color-pine);
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+}
+
+/* ==========================================================================
+   02 / Product Card (Matches Figma "01 · Storefront" Bestsellers cards)
+   Follows modern-web-guidance `card` pattern with semantic <article>
+   ========================================================================== */
+.product-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  min-inline-size: 0;
+}
+
+.product-card__media {
+  position: relative;
+  inline-size: 100%;
+  block-size: 224px;
+  border-radius: var(--radius-lg); /* 10px */
+  overflow: clip;
+  background-color: var(--color-sage);
+}
+
+.product-card__img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-base);
+}
+
+.product-card:hover .product-card__img {
+  transform: scale(1.03);
+}
+
+.product-card__badge {
+  position: absolute;
+  inset-block-start: var(--space-14);
+  inset-inline-start: var(--space-14);
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  block-size: 26px;
+  padding-inline: var(--space-10);
+  border-radius: var(--radius-xs); /* 4px */
+  background-color: var(--color-paper);
+  color: var(--color-pine);
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs); /* 10px */
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-normal);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.product-card__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-12);
+  min-block-size: 27px;
+}
+
+.product-card__title {
+  font-family: var(--font-sans);
+  font-size: var(--text-2xl); /* 19px */
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-normal);
+  color: var(--color-ink);
+}
+
+/* Stretched link pattern from modern-web-guidance `card` guide */
+.product-card__link {
+  color: inherit;
+}
+
+.product-card__link:focus-visible {
+  outline: none;
+}
+
+.product-card:has(.product-card__link:focus-visible) {
+  outline: 2px solid var(--color-pine);
+  outline-offset: 4px;
+  border-radius: var(--radius-lg);
+}
+
+.product-card__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.product-card__price {
+  font-family: var(--font-sans);
+  font-size: var(--text-md); /* 15px */
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-normal);
+  color: var(--color-pine);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.product-card__description {
+  font-family: var(--font-sans);
+  font-size: var(--text-md-sm); /* 13px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-normal);
+  color: var(--color-muted);
+}
+
+.product-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-block-size: 40px;
+  margin-block-start: auto;
+}
+
+/* ==========================================================================
+   03 / Order Status Badges (New, Preparing, Ready, Completed, Cancelled, Refunded)
+   Matches Figma node 6:169
+   ========================================================================== */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm); /* 6px */
+  font-family: var(--font-sans);
+  font-size: var(--text-sm); /* 12px */
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-normal);
+  white-space: nowrap;
+}
+
+.status-badge--new,
+.status-badge--completed {
+  background-color: var(--color-sage);
+  color: var(--color-pine);
+}
+
+.status-badge--preparing {
+  background-color: var(--color-amber);
+  color: var(--color-warning);
+}
+
+.status-badge--ready {
+  background-color: var(--color-pine);
+  color: var(--color-paper);
+}
+
+.status-badge--cancelled {
+  background-color: var(--color-rose);
+  color: var(--color-terracotta);
+}
+
+.status-badge--refunded {
+  background-color: var(--color-paper);
+  color: var(--color-muted);
+}
+
+/* ==========================================================================
+   04 / Form Controls & Feedback Banners (Matches Figma node 6:61)
+   ========================================================================== */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.form-field__label {
+  font-family: var(--font-sans);
+  font-size: var(--text-md-sm); /* 13px */
+  font-weight: var(--weight-medium);
+  color: var(--color-ink);
+}
+
+.form-field__input {
+  block-size: 48px;
+  padding-inline: var(--space-14);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
+  font-size: var(--text-base);
+  color: var(--color-ink);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-field__input::placeholder {
+  color: var(--color-muted);
+}
+
+.form-field__input:focus {
+  outline: none;
+  border: 2px solid var(--color-pine);
+  padding-inline: 13px; /* Compensate for 2px border so text never shifts */
+}
+
+.form-field__input[aria-invalid="true"],
+.form-field--error .form-field__input {
+  border-color: var(--color-terracotta);
+}
+
+.form-field__input:disabled {
+  background-color: var(--color-disabled);
+  color: var(--color-muted);
+  cursor: not-allowed;
+}
+
+.form-field__error {
+  font-size: var(--text-sm); /* 12px */
+  color: var(--color-terracotta);
+}
+
+.feedback-banner {
+  padding: var(--space-10) 18px;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.feedback-banner--success {
+  background-color: var(--color-sage);
+  color: var(--color-pine);
+}
+
+.feedback-banner--error {
+  background-color: var(--color-rose);
+  color: var(--color-terracotta);
+}
+
+.feedback-banner__title {
+  font-size: var(--text-base); /* 14px */
+  font-weight: var(--weight-semibold);
+}
+
+.feedback-banner__body {
+  font-size: var(--text-sm); /* 12px */
+}
+
+/* ==========================================================================
+   05 / Toast Feedback Banner (Non-blocking confirmation on Quick Add)
+   ========================================================================== */
+.toast-container {
+  position: fixed;
+  inset-block-end: var(--space-24);
+  inset-inline-end: var(--page-margin);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  min-inline-size: 280px;
+  max-inline-size: 380px;
+  background-color: var(--color-pine);
+  color: var(--color-paper);
+  padding: var(--space-12) var(--space-16);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-16);
+  font-size: var(--text-md-sm);
+  animation: toast-in 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.toast__action {
+  color: var(--color-amber);
+  font-weight: var(--weight-semibold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 767px) {
+  .toast-container {
+    inset-inline: var(--page-margin);
+    inset-block-end: 84px;
+  }
+
+  .toast {
+    max-inline-size: none;
+  }
+}

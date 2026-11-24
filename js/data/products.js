@@ -1,0 +1,358 @@
+/**
+ * COMMON GROUND — Single-Source Product & Category Catalog
+ *
+ * Architectural notes:
+ * 1. Every product is defined once in `PRODUCTS` with a unique `id`.
+ * 2. Products can belong to multiple categories/collections via `categoryIds` and `featuredOrder`.
+ * 3. Includes both the exact Figma Storefront prices (`price` in USD for 1:1 Figma visual match)
+ *    and the EGP catalog prices (`priceEgp`) from the specification, plus full customization groups.
+ */
+
+export const CATEGORIES = Object.freeze([
+  { id: "all", name: "All favorites", slug: "all" },
+  { id: "coffee", name: "Coffee", slug: "coffee" },
+  { id: "non-coffee", name: "Tea & matcha", labelAlt: "Non-Coffee", slug: "non-coffee" },
+  { id: "iced-drinks", name: "Iced Drinks", slug: "iced-drinks" },
+  { id: "bakery", name: "Bakery", labelAlt: "Desserts & Bakery", slug: "bakery" },
+  { id: "food", name: "Food & Sandwiches", slug: "food" },
+  { id: "coffee-at-home", name: "Coffee at home", slug: "coffee-at-home" },
+]);
+
+export const CUSTOMIZATION_OPTIONS = Object.freeze({
+  sizes: [
+    { id: "12oz", label: "12 oz", priceDelta: 0, isDefault: true },
+    { id: "16oz", label: "16 oz", priceDelta: 0.7, priceDeltaEgp: 15, isDefault: false },
+  ],
+  temperatures: [
+    { id: "hot", label: "Hot", priceDelta: 0 },
+    { id: "iced", label: "Iced", priceDelta: 0 },
+  ],
+  milks: [
+    { id: "whole", label: "Whole milk", priceDelta: 0, isDefault: false },
+    { id: "oat", label: "Oat milk", shortLabel: "Oat", priceDelta: 0.8, priceDeltaEgp: 20, isDefault: true },
+    { id: "almond", label: "Almond milk", shortLabel: "Almond", priceDelta: 0.8, priceDeltaEgp: 20, isDefault: false },
+  ],
+  addons: [
+    { id: "extra-shot", label: "Extra espresso shot", priceDelta: 1.0, priceDeltaEgp: 25 },
+    { id: "decaf", label: "Decaf espresso", priceDelta: 0, note: "No extra cost" },
+  ],
+});
+
+/**
+ * Primary product catalog (18 unique items total).
+ * The 4 Figma Storefront Bestsellers carry `featuredOrder` 1..4 so the Homepage
+ * renders the exact 4 cards shown in Figma Frame "01 · Storefront".
+ */
+export const PRODUCTS = Object.freeze([
+  // --- 4 Flagship Storefront Bestsellers (Figma 01 · Storefront) ---
+  {
+    id: "iced-oat-latte",
+    name: "Iced oat latte",
+    badge: "BESTSELLER",
+    shortDescription: "Smooth espresso, creamy oat milk",
+    menuDescription: "Smooth, balanced & refreshing",
+    detailDescription:
+      "Our signature double espresso over ice, finished with creamy oat milk. Smooth, balanced, and a little irresistible.",
+    originNote: "House blend • Brazil + Colombia • Chocolate, caramel",
+    allergenNote: "Contains oats. Prepared in a kitchen that handles nuts and dairy.",
+    price: 5.8,
+    baseSizePrice: 5.0,
+    priceEgp: 100,
+    image: "assets/images/product-iced-oat-latte.png",
+    categoryIds: ["coffee", "iced-drinks"],
+    featuredOrder: 1,
+    available: true,
+    customizable: true,
+    defaultCustomizations: {
+      size: "12oz",
+      temperature: "iced",
+      milk: "oat",
+      addons: [],
+    },
+  },
+  {
+    id: "flat-white",
+    name: "Flat white",
+    badge: "HOUSE FAVORITE",
+    shortDescription: "Velvety milk. A bold little classic.",
+    menuDescription: "Double espresso, velvety milk",
+    detailDescription:
+      "Ristretto shots of our house blend topped with glossy, micro-foamed milk for a rich, velvety texture.",
+    originNote: "House blend • Brazil + Colombia • Chocolate, caramel",
+    allergenNote: "Contains dairy unless substituted with plant-based milk.",
+    price: 4.5,
+    baseSizePrice: 4.5,
+    priceEgp: 90,
+    image: "assets/images/product-flat-white.png",
+    categoryIds: ["coffee"],
+    featuredOrder: 2,
+    available: true,
+    customizable: true,
+    defaultCustomizations: {
+      size: "12oz",
+      temperature: "hot",
+      milk: "whole",
+      addons: [],
+    },
+  },
+  {
+    id: "batch-brew",
+    name: "Batch brew",
+    badge: "SINGLE ORIGIN",
+    shortDescription: "Single origin. Beautifully simple.",
+    menuDescription: "Ethiopia · peach, bergamot",
+    detailDescription:
+      "Freshly brewed single-origin filter coffee highlighting floral bergamot aroma and sweet stone-fruit clarity.",
+    originNote: "Single origin • Yirgacheffe, Ethiopia • Peach, bergamot",
+    allergenNote: "Prepared in a kitchen that handles nuts and dairy.",
+    price: 3.8,
+    baseSizePrice: 3.8,
+    priceEgp: 70,
+    image: "assets/images/product-batch-brew.png",
+    categoryIds: ["coffee", "coffee-at-home"],
+    featuredOrder: 3,
+    available: true,
+    customizable: true,
+    defaultCustomizations: {
+      size: "12oz",
+      temperature: "hot",
+      milk: "whole",
+      addons: [],
+    },
+  },
+  {
+    id: "almond-croissant",
+    name: "Almond croissant",
+    badge: "FRESHLY BAKED",
+    shortDescription: "Baked daily. Gone by afternoon.",
+    menuDescription: "Buttery layers, toasted almonds",
+    detailDescription:
+      "Twice-baked laminated pastry filled with house almond frangipane, topped with toasted flaked almonds and powdered sugar.",
+    allergenNote: "Contains wheat, tree nuts (almonds), eggs, and dairy.",
+    price: 4.8,
+    baseSizePrice: 4.8,
+    priceEgp: 65,
+    image: "assets/images/product-almond-croissant.png",
+    categoryIds: ["bakery"],
+    featuredOrder: 4,
+    available: true,
+    customizable: false,
+    defaultCustomizations: {
+      note: "Freshly baked",
+    },
+  },
+
+  // --- Additional Full Catalog Products (18 items total across Coffee, Non-Coffee, Iced Drinks, Bakery, Food) ---
+  {
+    id: "spanish-latte",
+    name: "Spanish Latte",
+    badge: "POPULAR",
+    shortDescription: "Rich espresso with silky condensed milk",
+    menuDescription: "Double espresso, textured milk, sweet condensed touch",
+    detailDescription:
+      "A velvety balance of bold house espresso, steamed milk, and a gentle swirl of sweet condensed milk.",
+    price: 5.4,
+    priceEgp: 95,
+    image: "assets/images/product-flat-white.png",
+    categoryIds: ["coffee"],
+    available: true,
+    customizable: true,
+    defaultCustomizations: { size: "12oz", temperature: "hot", milk: "whole", addons: [] },
+  },
+  {
+    id: "caramel-latte",
+    name: "Caramel Latte",
+    shortDescription: "House-made burnt sugar caramel & espresso",
+    menuDescription: "Double espresso, house caramel, steamed milk",
+    detailDescription:
+      "Smooth espresso combined with small-batch caramel sauce and silky steamed milk.",
+    price: 5.9,
+    priceEgp: 105,
+    image: "assets/images/product-flat-white.png",
+    categoryIds: ["coffee"],
+    available: true,
+    customizable: true,
+    defaultCustomizations: { size: "12oz", temperature: "hot", milk: "whole", addons: [] },
+  },
+  {
+    id: "americano",
+    name: "Americano",
+    shortDescription: "Clean, aromatic double espresso over hot water",
+    menuDescription: "House blend · chocolate, toasted hazelnut",
+    detailDescription:
+      "Pulled with our Brazil + Colombia house blend over filtered hot water for a rich crema and clean finish.",
+    price: 4.0,
+    priceEgp: 70,
+    image: "assets/images/product-batch-brew.png",
+    categoryIds: ["coffee"],
+    available: true,
+    customizable: true,
+    defaultCustomizations: { size: "12oz", temperature: "hot", milk: "whole", addons: [] },
+  },
+  {
+    id: "cappuccino",
+    name: "Cappuccino",
+    shortDescription: "Classic airy foam with a bold espresso core",
+    menuDescription: "Equal parts espresso, steamed milk & foam",
+    detailDescription:
+      "Traditional neighborhood cappuccino with dense, sweet micro-foam and a cocoa-dusted option.",
+    price: 4.75,
+    priceEgp: 85,
+    image: "assets/images/product-flat-white.png",
+    categoryIds: ["coffee"],
+    available: true,
+    customizable: true,
+    defaultCustomizations: { size: "12oz", temperature: "hot", milk: "whole", addons: [] },
+  },
+  {
+    id: "iced-matcha",
+    name: "Iced Matcha",
+    badge: "CEREMONIAL",
+    shortDescription: "First-harvest Uji matcha whisked over ice",
+    menuDescription: "Ceremonial Uji matcha, creamy milk",
+    detailDescription:
+      "Vibrant stone-milled Uji green tea hand-whisked to order and poured over ice and your choice of milk.",
+    price: 6.2,
+    priceEgp: 110,
+    image: "assets/images/product-iced-oat-latte.png",
+    categoryIds: ["non-coffee", "iced-drinks"],
+    available: true,
+    customizable: true,
+    defaultCustomizations: { size: "12oz", temperature: "iced", milk: "oat", addons: [] },
+  },
+  {
+    id: "iced-chocolate",
+    name: "Iced Chocolate",
+    shortDescription: "70% single-origin dark ganache over cold milk",
+    menuDescription: "Rich dark cocoa, chilled milk, ice",
+    detailDescription:
+      "Melted 70% dark chocolate ganache blended with cold milk and served over crystal ice.",
+    price: 5.4,
+    priceEgp: 95,
+    image: "assets/images/product-iced-oat-latte.png",
+    categoryIds: ["non-coffee", "iced-drinks"],
+    available: true,
+    customizable: true,
+    defaultCustomizations: { size: "12oz", temperature: "iced", milk: "whole", addons: [] },
+  },
+  {
+    id: "hot-chocolate",
+    name: "Hot Chocolate",
+    shortDescription: "Steamed milk folded into dark chocolate ganache",
+    menuDescription: "70% cocoa ganache, velvety micro-foam",
+    detailDescription:
+      "Comforting, not overly sweet dark chocolate steamed with whole or oat milk.",
+    price: 4.8,
+    priceEgp: 85,
+    image: "assets/images/product-flat-white.png",
+    categoryIds: ["non-coffee"],
+    available: true,
+    customizable: true,
+    defaultCustomizations: { size: "12oz", temperature: "hot", milk: "whole", addons: [] },
+  },
+  {
+    id: "iced-spanish-latte",
+    name: "Iced Spanish Latte",
+    shortDescription: "Chilled espresso, milk & sweet condensed cream",
+    menuDescription: "Over ice · smooth, sweet & bold",
+    detailDescription:
+      "Our signature Spanish Latte served cold over ice for warm afternoons.",
+    price: 5.7,
+    priceEgp: 100,
+    image: "assets/images/product-iced-oat-latte.png",
+    categoryIds: ["coffee", "iced-drinks"],
+    available: true,
+    customizable: true,
+    defaultCustomizations: { size: "12oz", temperature: "iced", milk: "whole", addons: [] },
+  },
+  {
+    id: "iced-americano",
+    name: "Iced Americano",
+    shortDescription: "Crisp double espresso poured over filtered ice water",
+    menuDescription: "Refreshing, bright & zero dairy",
+    detailDescription:
+      "Double shot of house espresso pulled directly over chilled water and ice.",
+    price: 4.25,
+    priceEgp: 75,
+    image: "assets/images/product-iced-oat-latte.png",
+    categoryIds: ["coffee", "iced-drinks"],
+    available: true,
+    customizable: true,
+    defaultCustomizations: { size: "12oz", temperature: "iced", milk: "whole", addons: [] },
+  },
+  {
+    id: "iced-caramel-macchiato",
+    name: "Iced Caramel Macchiato",
+    shortDescription: "Layered cold milk, espresso & house caramel drizzle",
+    menuDescription: "Layered espresso, vanilla, burnt caramel",
+    detailDescription:
+      "Cold milk infused with vanilla bean, marked with freshly pulled espresso and finished with house caramel.",
+    price: 6.4,
+    priceEgp: 115,
+    image: "assets/images/product-iced-oat-latte.png",
+    categoryIds: ["coffee", "iced-drinks"],
+    available: true,
+    customizable: true,
+    defaultCustomizations: { size: "12oz", temperature: "iced", milk: "whole", addons: [] },
+  },
+  {
+    id: "chocolate-brownie",
+    name: "Chocolate Brownie",
+    shortDescription: "Fudgy dark chocolate square with flaky sea salt",
+    menuDescription: "70% dark chocolate, sea salt flake",
+    detailDescription:
+      "Crinkly top, dense fudgy center baked with dark couverture chocolate and Maldon sea salt.",
+    price: 4.3,
+    priceEgp: 75,
+    image: "assets/images/product-almond-croissant.png",
+    categoryIds: ["bakery"],
+    available: true,
+    customizable: false,
+    defaultCustomizations: { note: "Warmed on request" },
+  },
+  {
+    id: "cheesecake",
+    name: "Cheesecake",
+    shortDescription: "Creamy Basque-style slice with caramelized top",
+    menuDescription: "Baked daily · vanilla bean & cream",
+    detailDescription:
+      "Silky, crustless Basque cheesecake with a deeply caramelized exterior and custard-like center.",
+    price: 6.2,
+    priceEgp: 110,
+    image: "assets/images/product-almond-croissant.png",
+    categoryIds: ["bakery"],
+    available: true,
+    customizable: false,
+    defaultCustomizations: { note: "Chilled slice" },
+  },
+  {
+    id: "cinnamon-roll",
+    name: "Cinnamon Roll",
+    shortDescription: "Brioche swirl with Ceylon cinnamon & vanilla glaze",
+    menuDescription: "Soft brioche, brown butter glaze",
+    detailDescription:
+      "Warm, pillowy brioche rolled with Ceylon cinnamon and brown sugar, finished with vanilla bean glaze.",
+    price: 4.8,
+    priceEgp: 85,
+    image: "assets/images/product-almond-croissant.png",
+    categoryIds: ["bakery"],
+    available: true,
+    customizable: false,
+    defaultCustomizations: { note: "Served warm" },
+  },
+  {
+    id: "chicken-sandwich",
+    name: "Chicken Sandwich",
+    shortDescription: "Herb-roasted chicken, pesto aioli & arugula on sourdough",
+    menuDescription: "Toasted country sourdough, basil pesto",
+    detailDescription:
+      "Sliced herb-roasted chicken breast, house basil pesto aioli, pickled shallots, and wild arugula on toasted sourdough.",
+    price: 8.2,
+    priceEgp: 145,
+    image: "assets/images/product-almond-croissant.png",
+    categoryIds: ["food"],
+    available: true,
+    customizable: false,
+    defaultCustomizations: { note: "Toasted" },
+  },
+]);
