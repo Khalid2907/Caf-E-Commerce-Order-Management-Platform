@@ -1,0 +1,29 @@
+{
+  "name": "common-ground-cafe-platform",
+  "version": "1.0.0",
+  "description": "Full-Stack Café E-Commerce & Order Management Platform (Customer Storefront, Barista Live Workspace, Admin Dashboard, Express REST API, Socket.IO, PostgreSQL)",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "db:migrate": "node server/db/migrate.js",
+    "db:seed": "node server/db/seed.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.2.17",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "pg": "^8.13.3",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "supertest": "^7.0.0"
+  }
+}

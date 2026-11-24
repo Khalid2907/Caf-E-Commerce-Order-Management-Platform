@@ -2,3 +2,8 @@
 Thumbs.db
 *.log
 node_modules/
+.env
+.pgdata/
+.pgdata-test/
+UI:UX design/
+
