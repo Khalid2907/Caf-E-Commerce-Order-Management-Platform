@@ -45,7 +45,7 @@ async function getDbEngine() {
 
   if (!pgliteInstance) {
     const dataDir =
-      process.env.NODE_ENV === "test"
+      process.env.NODE_ENV === "test" || process.env.VERCEL
         ? "memory://"
         : path.resolve(process.cwd(), process.env.PGLITE_DATA_DIR || ".pgdata");
     pgliteInstance = new PGlite(dataDir);

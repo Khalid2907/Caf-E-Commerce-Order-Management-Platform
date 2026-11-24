@@ -52,7 +52,15 @@ app.use(
 app.use(express.json({ limit: "100kb" }));
 app.use(express.urlencoded({ extended: false }));
 
-// API Routes
+// API Routes (auto-initialize DB on first request for serverless environments like Vercel)
+app.use("/api", async (req, res, next) => {
+  try {
+    await ensureInitialized();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 app.use("/api", apiRouter);
 
 // Serve static frontend assets from project root
