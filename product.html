@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Iced oat latte — Common Ground</title>
+    <meta
+      name="description"
+      content="Customize your daily cup at Common Ground. Choose size, milk, espresso shots, and pairings."
+    />
+
+    <!-- Google Fonts: Instrument Serif & DM Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Modular CSS -->
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/pages/product.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <!-- Top Announcement Strip -->
+    <div class="announcement-strip" role="region" aria-label="Store announcement">
+      <div class="announcement-strip__inner">
+        <p class="announcement-strip__text">
+          YOUR DAILY RITUAL, JUST A LITTLE EASIER.&nbsp;&nbsp;•&nbsp;&nbsp;ORDER AHEAD &amp; SKIP THE QUEUE
+        </p>
+      </div>
+    </div>
+
+    <!-- Primary Site Header -->
+    <header class="site-header">
+      <div class="site-header__bar">
+        <div class="site-header__inner">
+          <div class="site-brand">
+            <a class="site-brand__logo" href="index.html" aria-label="Common Ground home">
+              <span>COMMON</span>
+              <span>GROUND</span>
+            </a>
+            <span class="site-brand__tagline">Coffee, considered.</span>
+          </div>
+
+          <nav class="site-nav" aria-label="Primary">
+            <ul class="site-nav__list">
+              <li>
+                <a class="site-nav__link" href="menu.html" aria-current="page">Order online</a>
+              </li>
+              <li>
+                <a class="site-nav__link" href="menu.html?category=coffee">Our coffee</a>
+              </li>
+              <li>
+                <a class="site-nav__link" href="index.html#origin-story">Our story</a>
+              </li>
+            </ul>
+          </nav>
+
+          <div class="site-header__actions">
+            <a class="account-link" href="orders.html">
+              <img
+                class="account-link__icon"
+                src="assets/icons/account.svg"
+                alt=""
+                width="22"
+                height="22"
+              />
+              <span>My account</span>
+            </a>
+
+            <a
+              class="btn btn--primary bag-button"
+              href="menu.html#your-bag"
+              data-bag-button
+              aria-label="Shopping bag, 2 items"
+            >
+              Bag · 2
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <!-- Breadcrumb (Figma node 6:383) -->
+      <nav class="product-breadcrumb" aria-label="Breadcrumb">
+        <div class="container">
+          <ol class="product-breadcrumb__list">
+            <li>
+              <a class="product-breadcrumb__link" href="menu.html">←&nbsp;&nbsp;Back to menu</a>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li>
+              <a
+                id="breadcrumb-category"
+                class="product-breadcrumb__link"
+                href="menu.html?category=coffee"
+                >Coffee</a
+              >
+            </li>
+            <li aria-hidden="true">/</li>
+            <li>
+              <span
+                id="breadcrumb-product-name"
+                class="product-breadcrumb__current"
+                aria-current="page"
+                >Iced oat latte</span
+              >
+            </li>
+          </ol>
+        </div>
+      </nav>
+
+      <!-- Product Detail & Customizer (Figma node 6:15) -->
+      <section class="product-detail" aria-labelledby="product-detail-title">
+        <div class="container">
+          <div class="product-detail__grid">
+            <!-- Left Column: Product Hero Image & Origin Callout -->
+            <div class="product-detail__media">
+              <img
+                id="product-detail-img"
+                class="product-detail__img"
+                src="assets/images/product-iced-oat-latte.png"
+                alt="Iced oat latte"
+                width="618"
+                height="570"
+                fetchpriority="high"
+              />
+              <div class="product-detail__origin-card">
+                <p class="product-detail__origin-label">THE ESPRESSO INSIDE</p>
+                <p id="product-origin-text" class="product-detail__origin-text">
+                  House blend&nbsp;&nbsp;•&nbsp;&nbsp;Brazil + Colombia&nbsp;&nbsp;•&nbsp;&nbsp;Chocolate, caramel
+                </p>
+              </div>
+            </div>
+
+            <!-- Right Column: Customization Form -->
+            <form id="product-customizer-form" class="product-customizer">
+              <p class="eyebrow product-customizer__eyebrow">THE DAILY FAVORITE</p>
+
+              <h1 id="product-detail-title" class="heading-serif product-customizer__title">
+                Iced oat latte
+              </h1>
+
+              <p
+                id="product-unit-price"
+                class="product-customizer__price"
+                aria-live="polite"
+              >
+                $5.80
+              </p>
+
+              <p id="product-detail-desc" class="product-customizer__desc">
+                Our signature double espresso over ice, finished with creamy oat milk. Smooth,
+                balanced, and a little irresistible.
+              </p>
+
+              <div class="product-customizer__divider" role="separator"></div>
+
+              <div id="drink-customization-options">
+                <!-- Size Selection (Figma nodes 6:393–6:398) -->
+                <fieldset class="option-group">
+                  <div class="option-group__header">
+                    <legend class="option-group__title">Size</legend>
+                    <span class="option-group__hint">Required · choose one</span>
+                  </div>
+
+                  <div class="choice-grid choice-grid--2col">
+                    <label class="choice-card">
+                      <input
+                        class="choice-card__input"
+                        type="radio"
+                        name="size"
+                        value="12oz"
+                        checked
+                      />
+                      <span class="choice-card__dot" aria-hidden="true"></span>
+                      <span id="size-12oz-label">12 oz&nbsp;&nbsp;·&nbsp;&nbsp;$5.00</span>
+                    </label>
+
+                    <label class="choice-card">
+                      <input class="choice-card__input" type="radio" name="size" value="16oz" />
+                      <span class="choice-card__dot" aria-hidden="true"></span>
+                      <span id="size-16oz-label">16 oz&nbsp;&nbsp;·&nbsp;&nbsp;$5.70</span>
+                    </label>
+                  </div>
+                </fieldset>
+
+                <!-- Milk Selection (Figma nodes 6:399–6:405) -->
+                <fieldset class="option-group">
+                  <div class="option-group__header">
+                    <legend class="option-group__title">Milk</legend>
+                  </div>
+
+                  <div class="choice-grid choice-grid--3col">
+                    <label class="choice-card">
+                      <input class="choice-card__input" type="radio" name="milk" value="whole" />
+                      <span class="choice-card__dot" aria-hidden="true"></span>
+                      <span>Whole milk</span>
+                    </label>
+
+                    <label class="choice-card">
+                      <input
+                        class="choice-card__input"
+                        type="radio"
+                        name="milk"
+                        value="oat"
+                        checked
+                      />
+                      <span class="choice-card__dot" aria-hidden="true"></span>
+                      <span>Oat&nbsp;&nbsp;+$0.80</span>
+                    </label>
+
+                    <label class="choice-card">
+                      <input class="choice-card__input" type="radio" name="milk" value="almond" />
+                      <span class="choice-card__dot" aria-hidden="true"></span>
+                      <span>Almond&nbsp;&nbsp;+$0.80</span>
+                    </label>
+                  </div>
+                </fieldset>
+
+                <!-- Add-ons ("Make it yours" — Figma nodes 6:406–6:410) -->
+                <fieldset class="option-group">
+                  <div class="option-group__header">
+                    <legend class="option-group__title">Make it yours</legend>
+                  </div>
+
+                  <div class="addon-list">
+                    <label class="addon-row">
+                      <span class="addon-row__left">
+                        <input
+                          class="addon-row__checkbox"
+                          type="checkbox"
+                          name="addon"
+                          value="extra-shot"
+                        />
+                        <span>Extra espresso shot</span>
+                      </span>
+                      <span class="addon-row__price">+$1.00</span>
+                    </label>
+
+                    <label class="addon-row">
+                      <span class="addon-row__left">
+                        <input
+                          class="addon-row__checkbox"
+                          type="checkbox"
+                          name="addon"
+                          value="decaf"
+                        />
+                        <span>Decaf espresso</span>
+                      </span>
+                      <span class="addon-row__price addon-row__price--note">No extra cost</span>
+                    </label>
+                  </div>
+                </fieldset>
+              </div>
+
+              <!-- Optional Special Instructions -->
+              <div class="special-instructions">
+                <label for="special-instructions-input" class="sr-only"
+                  >Special instructions (optional)</label
+                >
+                <input
+                  id="special-instructions-input"
+                  type="text"
+                  class="special-instructions__input"
+                  placeholder="Special instructions (e.g., light ice, extra hot)"
+                />
+              </div>
+
+              <!-- Allergen Note (Figma node 6:411) -->
+              <p id="product-allergen-note" class="product-customizer__allergen">
+                Contains oats. Prepared in a kitchen that handles nuts and dairy.
+              </p>
+
+              <!-- Quantity & Add to Bag CTA (Figma nodes 6:412 & 6:414) -->
+              <div class="purchase-row">
+                <div class="qty-box" role="group" aria-label="Quantity">
+                  <button
+                    id="product-qty-dec"
+                    type="button"
+                    class="qty-box__btn"
+                    aria-label="Decrease quantity"
+                  >
+                    −
+                  </button>
+                  <span id="product-qty-value" aria-live="polite">1</span>
+                  <button
+                    id="product-qty-inc"
+                    type="button"
+                    class="qty-box__btn"
+                    aria-label="Increase quantity"
+                  >
+                    +
+                  </button>
+                </div>
+
+                <button
+                  id="product-add-submit"
+                  type="submit"
+                  class="btn btn--primary purchase-row__submit"
+                >
+                  Add to bag&nbsp;&nbsp;·&nbsp;&nbsp;$5.80
+                </button>
+              </div>
+
+              <p class="product-customizer__reassurance">
+                Customize freely. We’ll take care of the rest.
+              </p>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Complementary Recommendations (Figma node 6:16) -->
+      <section class="pairings-section" aria-labelledby="pairings-heading">
+        <div class="container">
+          <div class="pairings-section__inner">
+            <h2 id="pairings-heading" class="heading-serif pairings-section__title">
+              A good cup deserves good company.
+            </h2>
+
+            <div id="pairings-grid" class="pairings-grid"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__top">
+          <div class="site-footer__brand">
+            <p class="site-footer__brand-title">COMMON GROUND</p>
+            <p class="site-footer__brand-subtitle">A good place to start.</p>
+          </div>
+
+          <div class="site-footer__col">
+            <h2 class="site-footer__col-title">VISIT THE CAFÉ</h2>
+            <p class="site-footer__col-text">
+              42 Maple Street, Portland, OR<br />
+              Mon–Fri&nbsp;&nbsp;7am–6pm&nbsp;&nbsp;/&nbsp;&nbsp;Sat–Sun&nbsp;&nbsp;8am–5pm
+            </p>
+          </div>
+
+          <div class="site-footer__col">
+            <h2 class="site-footer__col-title">GET IN TOUCH</h2>
+            <p class="site-footer__col-text">
+              <a class="site-footer__external-link" href="mailto:hello@commonground.coffee">
+                hello@commonground.coffee
+              </a>
+              <br />
+              <a
+                class="site-footer__external-link"
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>Instagram</span>
+                <span aria-hidden="true">↗</span>
+              </a>
+            </p>
+          </div>
+        </div>
+
+        <div class="site-footer__bottom">
+          <p>© 2026 Common Ground Coffee</p>
+          <ul class="site-footer__legal" aria-label="Legal">
+            <li><a href="#privacy">Privacy</a></li>
+            <li><a href="#terms">Terms</a></li>
+            <li><a href="#accessibility">Accessibility</a></li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+      <a class="mobile-bottom-nav__item" href="menu.html" aria-current="page">
+        <img
+          class="mobile-bottom-nav__icon"
+          src="assets/icons/nav-menu.svg"
+          alt=""
+          width="24"
+          height="24"
+        />
+        <span>Menu</span>
+      </a>
+      <a class="mobile-bottom-nav__item" href="orders.html">
+        <img
+          class="mobile-bottom-nav__icon"
+          src="assets/icons/nav-orders.svg"
+          alt=""
+          width="24"
+          height="24"
+        />
+        <span>Orders</span>
+      </a>
+      <a class="mobile-bottom-nav__item" href="signin.html">
+        <img
+          class="mobile-bottom-nav__icon"
+          src="assets/icons/nav-account.svg"
+          alt=""
+          width="24"
+          height="24"
+        />
+        <span>Account</span>
+      </a>
+    </nav>
+
+    <script type="module" src="js/pages/product.js"></script>
+  </body>
+</html>

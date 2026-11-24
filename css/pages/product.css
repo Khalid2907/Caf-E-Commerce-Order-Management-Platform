@@ -1,0 +1,489 @@
+/* ==========================================================================
+   COMMON GROUND — Product Customization ("03 · Product customization" & "13 · Mobile product")
+   Matches Figma Frame 6:13 (Desktop 1440px) & Frame 6:45 (Mobile 390px)
+   ========================================================================== */
+
+/* ==========================================================================
+   Breadcrumb Navigation (Figma node 6:383)
+   ========================================================================== */
+.product-breadcrumb {
+  padding-block: 26px 24px;
+}
+
+.product-breadcrumb__list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-10);
+  font-family: var(--font-sans);
+  font-size: var(--text-md-sm); /* 13px */
+  color: var(--color-muted);
+}
+
+.product-breadcrumb__link:hover {
+  color: var(--color-pine);
+  text-decoration: underline;
+}
+
+.product-breadcrumb__current {
+  color: var(--color-ink);
+  font-weight: var(--weight-medium);
+}
+
+/* ==========================================================================
+   Product Detail Two-Column Grid (Figma node 6:15)
+   Left: 618px Image + Origin Overlay | Right: 630px Customizer Form
+   ========================================================================== */
+.product-detail {
+  padding-block-end: 56px;
+}
+
+.product-detail__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 618px) minmax(0, 630px);
+  justify-content: space-between;
+  align-items: start;
+  gap: var(--space-40);
+}
+
+/* Left Column: Product Hero Photo + "THE ESPRESSO INSIDE" Card */
+.product-detail__media {
+  position: relative;
+  inline-size: 100%;
+  block-size: 570px;
+  border-radius: var(--radius-xl); /* 12px */
+  overflow: clip;
+  background-color: var(--color-sage);
+}
+
+.product-detail__img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.product-detail__origin-card {
+  position: absolute;
+  inset-inline: var(--space-24);
+  inset-block-end: 22px;
+  min-block-size: 66px;
+  padding: 12px 18px;
+  border-radius: var(--radius-md); /* 8px */
+  background-color: var(--color-paper);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  box-shadow: var(--shadow-sm);
+}
+
+.product-detail__origin-label {
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs); /* 10px Bold Muted */
+  font-weight: var(--weight-bold);
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.product-detail__origin-text {
+  font-family: var(--font-sans);
+  font-size: var(--text-md-sm); /* 13px Medium Pine */
+  font-weight: var(--weight-medium);
+  color: var(--color-pine);
+}
+
+/* Right Column: Customizer Details & Options */
+.product-customizer {
+  display: flex;
+  flex-direction: column;
+}
+
+.product-customizer__eyebrow {
+  font-size: var(--text-xs); /* 11px Bold Pine */
+  color: var(--color-pine);
+  margin-block-end: 6px;
+}
+
+.product-customizer__title {
+  font-size: clamp(2.375rem, 3.6vw + 0.5rem, 3.375rem); /* 54px Instrument Serif */
+  line-height: 1.15;
+  margin-block-end: 8px;
+}
+
+.product-customizer__price {
+  font-family: var(--font-sans);
+  font-size: var(--text-4xl); /* 24px SemiBold Pine */
+  font-weight: var(--weight-semibold);
+  color: var(--color-pine);
+  margin-block-end: 14px;
+}
+
+.product-customizer__desc {
+  font-family: var(--font-sans);
+  font-size: var(--text-body); /* 16px Regular Muted */
+  color: var(--color-muted);
+  line-height: 1.45;
+  max-inline-size: 56ch;
+  margin-block-end: 22px;
+}
+
+.product-customizer__divider {
+  block-size: 1px;
+  background-color: var(--color-line);
+  margin-block-end: 20px;
+}
+
+/* Option Groups (Size, Temperature, Milk, Add-ons) */
+.option-group {
+  border: none;
+  margin-block-end: 22px;
+}
+
+.option-group__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-12);
+  margin-block-end: 12px;
+}
+
+.option-group__title {
+  font-family: var(--font-sans);
+  font-size: var(--text-md); /* 15px SemiBold Ink */
+  font-weight: var(--weight-semibold);
+  color: var(--color-ink);
+}
+
+.option-group__hint {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs); /* 11px Regular Muted */
+  color: var(--color-muted);
+}
+
+/* Choice Cards Grid (Follows modern-web-guidance `card` Choice cards pattern) */
+.choice-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.choice-grid--2col {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.choice-grid--3col {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.choice-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  block-size: var(--control-height); /* 48px */
+  padding-inline: 15px;
+  border-radius: var(--radius-md); /* 8px */
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
+  font-family: var(--font-sans);
+  font-size: var(--text-md-sm); /* 13px–14px Medium */
+  font-weight: var(--weight-medium);
+  color: var(--color-muted);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.choice-card:hover {
+  border-color: var(--color-pine);
+  color: var(--color-pine);
+}
+
+.choice-card__input {
+  position: absolute;
+  opacity: 0;
+  inline-size: 1px;
+  block-size: 1px;
+  pointer-events: none;
+}
+
+.choice-card__dot {
+  inline-size: 10px;
+  block-size: 10px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid currentColor;
+  flex-shrink: 0;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+/* Selected state via :has(:checked) — no border-width jump */
+.choice-card:has(.choice-card__input:checked) {
+  background-color: var(--color-sage);
+  border-color: var(--color-pine);
+  color: var(--color-pine);
+}
+
+.choice-card:has(.choice-card__input:checked) .choice-card__dot {
+  background-color: var(--color-pine);
+  border-color: var(--color-pine);
+}
+
+.choice-card:has(.choice-card__input:focus-visible) {
+  outline: 2px solid var(--color-pine);
+  outline-offset: 2px;
+}
+
+/* Add-on Checkboxes ("Make it yours" — Figma node 6:406) */
+.addon-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.addon-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-16);
+  cursor: pointer;
+  user-select: none;
+  font-family: var(--font-sans);
+  font-size: var(--text-base); /* 14px */
+  color: var(--color-ink);
+}
+
+.addon-row__left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.addon-row__checkbox {
+  inline-size: 16px;
+  block-size: 16px;
+  accent-color: var(--color-pine);
+  cursor: pointer;
+}
+
+.addon-row__price {
+  font-size: var(--text-base);
+  color: var(--color-muted);
+}
+
+.addon-row__price--note {
+  font-size: var(--text-sm); /* 12px for "No extra cost" */
+}
+
+/* Special Instructions Field */
+.special-instructions {
+  margin-block-end: 16px;
+}
+
+.special-instructions__input {
+  inline-size: 100%;
+  block-size: 42px;
+  padding-inline: 12px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
+  font-size: var(--text-md-sm);
+  color: var(--color-ink);
+}
+
+.special-instructions__input:focus {
+  outline: none;
+  border: 2px solid var(--color-pine);
+  padding-inline: 11px;
+}
+
+/* Allergen & Kitchen Note (Figma node 6:411) */
+.product-customizer__allergen {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm); /* 12px Regular Muted */
+  color: var(--color-muted);
+  margin-block-end: 24px;
+}
+
+/* Quantity Stepper & "Add to bag · $5.80" Row (Figma nodes 6:412 & 6:414) */
+.purchase-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  margin-block-end: 18px;
+}
+
+.qty-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  inline-size: 132px;
+  block-size: 52px;
+  padding-inline: 14px;
+  border-radius: var(--radius-md); /* 8px */
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
+  font-family: var(--font-sans);
+  font-size: var(--text-body); /* 16px SemiBold Pine */
+  font-weight: var(--weight-semibold);
+  color: var(--color-pine);
+  flex-shrink: 0;
+}
+
+.qty-box__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 32px;
+  block-size: 32px;
+  border-radius: var(--radius-xs);
+  color: var(--color-pine);
+  font-size: 1.125rem;
+  transition: background-color var(--transition-fast);
+}
+
+.qty-box__btn:hover {
+  background-color: var(--color-sage);
+}
+
+.purchase-row__submit {
+  flex: 1 1 auto;
+  block-size: 48px;
+}
+
+.product-customizer__reassurance {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm); /* 12px Regular Muted */
+  color: var(--color-muted);
+}
+
+/* ==========================================================================
+   Recommendations Section ("A good cup deserves good company." — Figma node 6:16)
+   ========================================================================== */
+.pairings-section {
+  padding-block-end: 64px;
+}
+
+.pairings-section__inner {
+  border-block-start: 1px solid var(--color-line);
+  padding-block-start: 25px;
+}
+
+.pairings-section__title {
+  font-size: 1.875rem; /* 30px Instrument Serif matching Figma node 6:418 */
+  line-height: 1.25;
+  margin-block-end: 20px;
+}
+
+.pairings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-24);
+}
+
+.pairing-card {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 18px 10px 10px;
+  border-radius: var(--radius-md); /* 8px */
+  background-color: var(--color-surface);
+  min-block-size: 108px;
+}
+
+.pairing-card__img {
+  inline-size: 96px;
+  block-size: 88px;
+  border-radius: var(--radius-sm); /* 6px */
+  object-fit: cover;
+  background-color: var(--color-sage);
+}
+
+.pairing-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pairing-card__name {
+  font-family: var(--font-sans);
+  font-size: var(--text-lg); /* 17px SemiBold Ink */
+  font-weight: var(--weight-semibold);
+  color: var(--color-ink);
+}
+
+.pairing-card__link {
+  color: inherit;
+}
+
+.pairing-card__link:hover {
+  color: var(--color-pine);
+  text-decoration: underline;
+}
+
+.pairing-card__desc {
+  font-family: var(--font-sans);
+  font-size: var(--text-md-sm); /* 13px Regular Muted */
+  color: var(--color-muted);
+}
+
+.pairing-card__price {
+  font-family: var(--font-sans);
+  font-size: var(--text-md-sm); /* 13px SemiBold Pine */
+  font-weight: var(--weight-semibold);
+  color: var(--color-pine);
+  margin-block-start: 4px;
+}
+
+.pairing-card__add {
+  font-family: var(--font-sans);
+  font-size: var(--text-base); /* 14px SemiBold Pine */
+  font-weight: var(--weight-semibold);
+  color: var(--color-pine);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  min-block-size: var(--target-min-size);
+  transition: background-color var(--transition-fast);
+}
+
+.pairing-card__add:hover {
+  background-color: var(--color-sage);
+}
+
+/* ==========================================================================
+   Responsive Adaptations (Tablet 768–1199px & Mobile < 768px)
+   ========================================================================== */
+@media (max-width: 1199px) {
+  .product-detail__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-32);
+  }
+
+  .product-detail__media {
+    block-size: 440px;
+  }
+
+  .pairings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .product-detail__media {
+    block-size: 340px;
+  }
+
+  /* Mobile Product stacks Milk choices vertically per Figma "13 · Mobile product" */
+  .choice-grid--3col {
+    grid-template-columns: 1fr;
+    gap: var(--space-10);
+  }
+
+  .qty-box {
+    inline-size: 110px;
+    block-size: 48px;
+  }
+}
