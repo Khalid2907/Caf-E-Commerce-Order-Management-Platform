@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /menu.html
+Allow: /product.html
+Disallow: /barista.html
+Disallow: /admin.html
+Disallow: /checkout.html
+Disallow: /tracking.html
+Disallow: /orders.html
+Disallow: /api/
+
+Sitemap: https://commonground.coffee/sitemap.xml
