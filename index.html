@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Common Ground — Coffee, considered.</title>
+    <meta
+      name="description"
+      content="Thoughtfully sourced. Carefully brewed. Your neighborhood ritual, ready when you are."
+    />
+
+    <!-- Google Fonts: Instrument Serif (400) & DM Sans (400, 500, 600, 700) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Modular CSS Architecture -->
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/pages/home.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <!-- Top Announcement Strip (Figma node 6:204 / 6:205) -->
+    <div class="announcement-strip" role="region" aria-label="Store announcement">
+      <div class="announcement-strip__inner">
+        <p class="announcement-strip__text">
+          YOUR DAILY RITUAL, JUST A LITTLE EASIER.&nbsp;&nbsp;•&nbsp;&nbsp;ORDER AHEAD &amp; SKIP THE QUEUE
+        </p>
+      </div>
+    </div>
+
+    <!-- Primary Site Header (Figma node 6:3) -->
+    <header class="site-header">
+      <div class="site-header__bar">
+        <div class="site-header__inner">
+          <div class="site-brand">
+            <a class="site-brand__logo" href="index.html" aria-label="Common Ground home">
+              <span>COMMON</span>
+              <span>GROUND</span>
+            </a>
+            <span class="site-brand__tagline">Coffee, considered.</span>
+          </div>
+
+          <nav class="site-nav" aria-label="Primary">
+            <ul class="site-nav__list">
+              <li>
+                <a class="site-nav__link" href="#bestsellers" aria-current="page">Order online</a>
+              </li>
+              <li>
+                <a class="site-nav__link" href="#origin-story">Our coffee</a>
+              </li>
+              <li>
+                <a class="site-nav__link" href="#origin-story">Our story</a>
+              </li>
+            </ul>
+          </nav>
+
+          <div class="site-header__actions">
+            <a class="account-link" href="#account">
+              <img
+                class="account-link__icon"
+                src="assets/icons/account.svg"
+                alt=""
+                width="22"
+                height="22"
+              />
+              <span>My account</span>
+            </a>
+
+            <a
+              class="btn btn--primary bag-button"
+              href="#bestsellers"
+              data-bag-button
+              aria-label="Shopping bag, 2 items"
+            >
+              Bag · 2
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Storefront Content -->
+    <main id="main-content">
+      <!-- 01 / Hero Section (Figma node 6:4) -->
+      <section class="hero" aria-labelledby="hero-heading">
+        <div class="container">
+          <div class="hero__grid">
+            <div class="hero__content">
+              <p class="eyebrow eyebrow--pine hero__eyebrow">
+                SPECIALTY COFFEE. EVERYDAY CONNECTION.
+              </p>
+
+              <h1 id="hero-heading" class="heading-serif hero__title">
+                Good days start<br />on common ground.
+              </h1>
+
+              <p class="hero__subtitle">
+                Thoughtfully sourced. Carefully brewed.<br />
+                Your neighborhood ritual, ready when you are.
+              </p>
+
+              <a class="btn btn--primary hero__cta" href="#bestsellers">
+                <span>Find your daily cup</span>
+                <span aria-hidden="true">↗</span>
+              </a>
+
+              <p class="hero__caption">Roasted with intention. Served with a smile.</p>
+            </div>
+
+            <div class="hero__media">
+              <img
+                class="hero__img"
+                src="assets/images/hero-coffee-ritual.png"
+                alt="Barista hand holding a ceramic cup of latte art on a sunlit wooden table beside an iced coffee and coffee bean bag"
+                width="632"
+                height="500"
+                fetchpriority="high"
+              />
+              <div class="hero__floating-card">
+                <p class="hero__floating-eyebrow">GOOD COFFEE. GOOD COMPANY.</p>
+                <p class="hero__floating-text">Made for your everyday.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 / Neighborhood Favorites / Bestsellers (Figma node 6:5) -->
+      <section id="bestsellers" class="bestsellers" aria-labelledby="bestsellers-heading">
+        <div class="container">
+          <div class="bestsellers__header">
+            <div class="bestsellers__heading-group">
+              <p class="eyebrow">THE NEIGHBORHOOD FAVORITES</p>
+              <h2 id="bestsellers-heading" class="heading-serif bestsellers__title">
+                Find your usual. Or your next.
+              </h2>
+            </div>
+
+            <a class="action-link bestsellers__explore" href="#bestsellers">
+              <span>Explore the menu</span>
+              <span class="action-link__arrow" aria-hidden="true">↗</span>
+            </a>
+          </div>
+
+          <!-- Dynamically populated by js/pages/home.js from js/data/products.js -->
+          <div id="featured-products-grid" class="bestsellers__grid" aria-live="polite">
+            <noscript>
+              <p>Please enable JavaScript to browse and add neighborhood favorites to your bag.</p>
+            </noscript>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 / Origin Story Editorial Callout (Figma node 6:6) -->
+      <section id="origin-story" class="origin-story" aria-labelledby="origin-story-heading">
+        <div class="container">
+          <div class="origin-story__banner">
+            <div class="origin-story__left">
+              <p class="eyebrow origin-story__eyebrow">ROOTED IN SOMETHING REAL</p>
+              <h2 id="origin-story-heading" class="heading-serif origin-story__title">
+                Better coffee.<br />Closer connections.
+              </h2>
+            </div>
+
+            <div class="origin-story__right">
+              <p class="origin-story__copy">
+                We work with independent growers, roast in small batches, and put care into every
+                cup. Because the little things make the everyday feel different.
+              </p>
+
+              <a class="action-link" href="#origin-story">
+                <span>Meet the people behind your coffee</span>
+                <span class="action-link__arrow" aria-hidden="true">↗</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Site Footer (Figma node 6:7) -->
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__top">
+          <div class="site-footer__brand">
+            <p class="site-footer__brand-title">COMMON GROUND</p>
+            <p class="site-footer__brand-subtitle">A good place to start.</p>
+          </div>
+
+          <div class="site-footer__col">
+            <h2 class="site-footer__col-title">VISIT THE CAFÉ</h2>
+            <p class="site-footer__col-text">
+              42 Maple Street, Portland, OR<br />
+              Mon–Fri&nbsp;&nbsp;7am–6pm&nbsp;&nbsp;/&nbsp;&nbsp;Sat–Sun&nbsp;&nbsp;8am–5pm
+            </p>
+          </div>
+
+          <div class="site-footer__col">
+            <h2 class="site-footer__col-title">GET IN TOUCH</h2>
+            <p class="site-footer__col-text">
+              <a class="site-footer__external-link" href="mailto:hello@commonground.coffee">
+                hello@commonground.coffee
+              </a>
+              <br />
+              <a
+                class="site-footer__external-link"
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>Instagram</span>
+                <span aria-hidden="true">↗</span>
+              </a>
+            </p>
+          </div>
+        </div>
+
+        <div class="site-footer__bottom">
+          <p>© 2026 Common Ground Coffee</p>
+          <ul class="site-footer__legal" aria-label="Legal">
+            <li><a href="#privacy">Privacy</a></li>
+            <li><a href="#terms">Terms</a></li>
+            <li><a href="#accessibility">Accessibility</a></li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation Bar (Figma 12 · Mobile menu node 6:44) -->
+    <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+      <a class="mobile-bottom-nav__item" href="index.html" aria-current="page">
+        <img
+          class="mobile-bottom-nav__icon"
+          src="assets/icons/nav-menu.svg"
+          alt=""
+          width="24"
+          height="24"
+        />
+        <span>Menu</span>
+      </a>
+      <a class="mobile-bottom-nav__item" href="#orders">
+        <img
+          class="mobile-bottom-nav__icon"
+          src="assets/icons/nav-orders.svg"
+          alt=""
+          width="24"
+          height="24"
+        />
+        <span>Orders</span>
+      </a>
+      <a class="mobile-bottom-nav__item" href="#account">
+        <img
+          class="mobile-bottom-nav__icon"
+          src="assets/icons/nav-account.svg"
+          alt=""
+          width="24"
+          height="24"
+        />
+        <span>Account</span>
+      </a>
+    </nav>
+
+    <!-- ES6 Module Entry Point -->
+    <script type="module" src="js/pages/home.js"></script>
+  </body>
+</html>

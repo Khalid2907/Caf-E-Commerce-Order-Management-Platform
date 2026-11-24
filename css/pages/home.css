@@ -1,0 +1,306 @@
+/* ==========================================================================
+   COMMON GROUND — Homepage ("01 · Storefront") Styles
+   Matches Figma Frame 6:2 (Hero 6:4, Bestsellers 6:5, Origin Story 6:6)
+   ========================================================================== */
+
+/* ==========================================================================
+   Hero Section (Figma node 6:4 — 555px height on 1440px desktop)
+   ========================================================================== */
+.hero {
+  padding-block: var(--space-32) 23px;
+}
+
+.hero__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 640px) minmax(0, 632px);
+  justify-content: space-between;
+  align-items: start;
+  gap: var(--space-40);
+}
+
+.hero__content {
+  padding-block-start: 26px; /* Aligns eyebrow to y:58 inside Hero frame (32+26=58) */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.hero__eyebrow {
+  margin-block-end: 26px; /* y:58 + 17px height + 26px = y:101 */
+}
+
+.hero__title {
+  font-size: clamp(2.75rem, 4.8vw + 0.5rem, var(--text-display-xl)); /* 76px on 1440px */
+  line-height: var(--leading-display);
+  letter-spacing: -0.01em;
+  margin-block-end: 30px; /* y:101 + 156px height + 30px = y:287 */
+  max-inline-size: 640px;
+}
+
+.hero__subtitle {
+  font-family: var(--font-sans);
+  font-size: var(--text-xl); /* 18px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-normal);
+  color: var(--color-muted);
+  margin-block-end: 37px; /* y:287 + 50px height + 37px = y:374 */
+  max-inline-size: 46ch;
+}
+
+.hero__cta {
+  min-inline-size: 230px;
+  margin-block-end: var(--space-32); /* y:374 + 48px height + 32px = y:454 */
+}
+
+.hero__caption {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm); /* 12px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-normal);
+  color: var(--color-muted);
+}
+
+/* Hero Visual Card (632x500px on desktop, 12px radius, floating badge at bottom-left) */
+.hero__media {
+  position: relative;
+  inline-size: 100%;
+  block-size: 500px;
+  border-radius: var(--radius-xl); /* 12px */
+  overflow: clip;
+  background-color: var(--color-sage);
+}
+
+.hero__img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.hero__floating-card {
+  position: absolute;
+  inset-inline-start: var(--space-24);
+  inset-block-end: 25px; /* y:400 + 75px = 475 inside 500px photo */
+  inline-size: 231px;
+  min-block-size: 75px;
+  padding: 13px var(--space-16);
+  border-radius: var(--radius-md); /* 8px */
+  background-color: var(--color-paper);
+  color: var(--color-pine);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: var(--shadow-sm);
+}
+
+.hero__floating-eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs); /* 11px */
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-normal);
+  color: var(--color-pine);
+  text-transform: uppercase;
+}
+
+.hero__floating-text {
+  font-family: var(--font-sans);
+  font-size: var(--text-base); /* 14px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-normal);
+  color: var(--color-pine);
+}
+
+/* ==========================================================================
+   Bestsellers Section ("The Neighborhood Favorites" — Figma node 6:5)
+   ========================================================================== */
+.bestsellers {
+  padding-block: 28px 42px;
+}
+
+.bestsellers__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-24);
+  margin-block-end: 24px;
+}
+
+.bestsellers__heading-group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bestsellers__title {
+  font-size: clamp(2.125rem, 3vw + 0.5rem, var(--text-display-sm)); /* 44px */
+  line-height: 1.15;
+}
+
+.bestsellers__explore {
+  margin-block-end: 4px;
+  flex-shrink: 0;
+}
+
+/* 4-column card grid on Desktop (310px each with 24px gutter = 1312px total) */
+.bestsellers__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--grid-gutter); /* 24px on desktop/tablet, 16px on mobile */
+}
+
+/* ==========================================================================
+   Origin Story Banner (Figma node 6:6 — 1312x265px sage container)
+   ========================================================================== */
+.origin-story {
+  padding-block: 12px 28px;
+}
+
+.origin-story__banner {
+  background-color: var(--color-sage);
+  color: var(--color-pine);
+  border-radius: var(--radius-xl); /* 12px */
+  min-block-size: 265px;
+  padding: 36px 40px;
+  display: grid;
+  grid-template-columns: minmax(0, 580px) minmax(0, 550px);
+  justify-content: space-between;
+  align-items: start;
+  gap: var(--space-40);
+}
+
+.origin-story__left {
+  display: flex;
+  flex-direction: column;
+  gap: 23px;
+}
+
+.origin-story__eyebrow {
+  color: var(--color-pine);
+  letter-spacing: 0.02em;
+}
+
+.origin-story__title {
+  font-size: clamp(2.125rem, 3.2vw + 0.5rem, var(--text-display-md)); /* 46px */
+  line-height: var(--leading-heading);
+}
+
+.origin-story__right {
+  padding-block-start: 15px; /* y:51 inside banner relative to y:36 top padding */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 47px; /* y:51 + 72px text + 47px = y:170 link */
+}
+
+.origin-story__copy {
+  font-family: var(--font-sans);
+  font-size: var(--text-lg); /* 17px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-normal);
+  color: var(--color-pine);
+  max-inline-size: 48ch;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints (Tablet 768–1199px & Mobile < 768px)
+   ========================================================================== */
+@media (max-width: 1199px) {
+  .hero__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-24);
+  }
+
+  .hero__media {
+    block-size: 420px;
+  }
+
+  /* Tablet: two-column product grid per "04 / Built to adapt" */
+  .bestsellers__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .origin-story__banner {
+    grid-template-columns: 1fr;
+    gap: var(--space-24);
+    padding: var(--space-32);
+  }
+
+  .origin-story__right {
+    padding-block-start: 0;
+    gap: var(--space-24);
+  }
+}
+
+@media (max-width: 767px) {
+  .hero {
+    padding-block: var(--space-20) var(--space-24);
+  }
+
+  .hero__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-24);
+  }
+
+  .hero__content {
+    padding-block-start: 0;
+  }
+
+  .hero__eyebrow {
+    margin-block-end: var(--space-12);
+  }
+
+  .hero__title {
+    margin-block-end: var(--space-16);
+  }
+
+  .hero__subtitle {
+    font-size: var(--text-base);
+    margin-block-end: var(--space-24);
+  }
+
+  .hero__cta {
+    inline-size: 100%;
+    margin-block-end: var(--space-16);
+  }
+
+  .hero__media {
+    block-size: 320px;
+  }
+
+  .hero__floating-card {
+    inset-inline-start: var(--space-16);
+    inset-block-end: var(--space-16);
+  }
+
+  .bestsellers__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-12);
+  }
+
+  /* Mobile 2-column compact cards or 1-column readable cards */
+  .bestsellers__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-16);
+  }
+
+  .bestsellers__grid .product-card__media {
+    block-size: 148px;
+  }
+
+  .bestsellers__grid .product-card__title {
+    font-size: var(--text-base);
+  }
+
+  .bestsellers__grid .product-card__price {
+    font-size: var(--text-base);
+  }
+
+  .bestsellers__grid .product-card__description {
+    font-size: var(--text-xs);
+  }
+
+  .origin-story__banner {
+    padding: var(--space-24) var(--space-20);
+  }
+}
