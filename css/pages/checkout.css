@@ -1,0 +1,615 @@
+/* ==========================================================================
+   COMMON GROUND — Checkout ("04 · Checkout", "18 · Delivery checkout", "14 · Mobile checkout")
+   Matches Figma Frames 6:17 (Pickup), 6:1650 (Delivery), and 6:49 (Mobile)
+   ========================================================================== */
+
+.checkout-workspace {
+  padding-block: 23px 64px;
+}
+
+.checkout-back-link {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-sans);
+  font-size: var(--text-md-sm); /* 13px Regular Muted */
+  color: var(--color-muted);
+  margin-block-end: 18px;
+}
+
+.checkout-back-link:hover {
+  color: var(--color-pine);
+  text-decoration: underline;
+}
+
+.checkout-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-24);
+  flex-wrap: wrap;
+  margin-block-end: 18px;
+}
+
+.checkout-header__title {
+  font-size: clamp(2.25rem, 3.2vw + 0.5rem, 3rem); /* 48px Instrument Serif */
+  line-height: 1.15;
+}
+
+.checkout-header__signin {
+  font-family: var(--font-sans);
+  font-size: var(--text-base); /* 14px SemiBold Pine */
+  font-weight: var(--weight-semibold);
+  color: var(--color-pine);
+}
+
+.checkout-header__signin a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* 3-Step Checkout Progress Bar (1 Your details ───── 2 Payment ───── 3 Enjoy) */
+.checkout-steps {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  font-family: var(--font-sans);
+  font-size: var(--text-md-sm); /* 13px Medium Pine */
+  font-weight: var(--weight-medium);
+  color: var(--color-pine);
+  margin-block-end: 36px;
+}
+
+.checkout-steps__line {
+  inline-size: 44px;
+  block-size: 1px;
+  background-color: var(--color-line);
+}
+
+/* Two-Column Workspace: 790px Form | 490px Order Review (on 1440px desktop) */
+.checkout-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 790px) minmax(0, 490px);
+  justify-content: space-between;
+  align-items: start;
+  gap: var(--space-32);
+}
+
+/* Left Column: Checkout Form Card (Figma node 6:449 / 6:1712) */
+.checkout-form-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-xl); /* 12px */
+  padding: 24px 27px 32px;
+  display: flex;
+  flex-direction: column;
+}
+
+.checkout-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.checkout-section__divider {
+  block-size: 1px;
+  background-color: var(--color-line);
+  margin-block: 26px 24px;
+}
+
+.checkout-section__title {
+  font-family: var(--font-sans);
+  font-size: var(--text-3xl); /* 22px SemiBold Ink */
+  font-weight: var(--weight-semibold);
+  color: var(--color-ink);
+  margin-block-end: 18px;
+}
+
+/* Fulfillment Choice Cards (Pickup vs Delivery — 64px height) */
+.fulfillment-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-block-end: 20px;
+}
+
+.fulfillment-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-block-size: 64px;
+  padding: 10px 17px;
+  border-radius: var(--radius-md); /* 8px */
+  background-color: var(--color-paper);
+  border: 1px solid var(--color-line);
+  color: var(--color-muted);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.fulfillment-card__input {
+  position: absolute;
+  opacity: 0;
+  inline-size: 1px;
+  block-size: 1px;
+  pointer-events: none;
+}
+
+.fulfillment-card__top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-sans);
+  font-size: var(--text-md); /* 15px */
+  font-weight: var(--weight-medium);
+}
+
+.fulfillment-card__dot {
+  inline-size: 10px;
+  block-size: 10px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid currentColor;
+  flex-shrink: 0;
+}
+
+.fulfillment-card__sub {
+  padding-inline-start: 20px;
+  font-size: var(--text-sm); /* 12px */
+}
+
+.fulfillment-card:has(.fulfillment-card__input:checked) {
+  background-color: var(--color-sage);
+  border-color: var(--color-pine);
+  color: var(--color-pine);
+}
+
+.fulfillment-card:has(.fulfillment-card__input:checked) .fulfillment-card__top {
+  font-weight: var(--weight-semibold);
+}
+
+.fulfillment-card:has(.fulfillment-card__input:checked) .fulfillment-card__dot {
+  background-color: var(--color-pine);
+  border-color: var(--color-pine);
+}
+
+.fulfillment-card:has(.fulfillment-card__input:focus-visible) {
+  outline: 2px solid var(--color-pine);
+  outline-offset: 2px;
+}
+
+/* Form Rows & Inputs */
+.checkout-field-row {
+  display: grid;
+  gap: 18px;
+  margin-block-end: 18px;
+}
+
+.checkout-field-row--2col {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.checkout-field-row--address {
+  grid-template-columns: minmax(0, 315px) minmax(0, 120px) minmax(0, 1fr);
+}
+
+.checkout-field-row--card {
+  grid-template-columns: minmax(0, 355px) minmax(0, 170px) minmax(0, 170px);
+}
+
+.checkout-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checkout-field__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-8);
+}
+
+.checkout-field__label {
+  font-family: var(--font-sans);
+  font-size: var(--text-md-sm); /* 13px Medium Ink */
+  font-weight: var(--weight-medium);
+  color: var(--color-ink);
+}
+
+.checkout-field__hint {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs); /* 11px format hint placed ABOVE input per autofill-payment-form */
+  color: var(--color-muted);
+}
+
+.checkout-field__input,
+.checkout-field__select {
+  inline-size: 100%;
+  block-size: var(--control-height); /* 48px */
+  padding-inline: 13px;
+  border-radius: var(--radius-md); /* 8px */
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
+  font-family: var(--font-sans);
+  font-size: var(--text-base); /* 14px */
+  color: var(--color-ink);
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.checkout-field__input:focus,
+.checkout-field__select:focus {
+  outline: none;
+  border: 2px solid var(--color-pine);
+  padding-inline: 12px;
+}
+
+/* Validate Input After Interaction (:user-invalid + fallback) */
+.checkout-field__input:is(:user-invalid, .user-invalid-fallback) {
+  border-color: var(--color-terracotta);
+  background-color: var(--color-rose);
+}
+
+.checkout-field__error {
+  display: none;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm); /* 12px */
+  color: var(--color-terracotta);
+}
+
+.checkout-field__input:is(:user-invalid, .user-invalid-fallback) + .checkout-field__error {
+  display: block;
+}
+
+.checkout-helper-note {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm); /* 12px Regular Muted */
+  color: var(--color-muted);
+  margin-block-top: -4px;
+}
+
+.checkout-delivery-status {
+  font-family: var(--font-sans);
+  font-size: var(--text-md-sm); /* 13px Medium Pine */
+  font-weight: var(--weight-medium);
+  color: var(--color-pine);
+  margin-block-top: 4px;
+}
+
+/* Payment Method Selector Banner (Figma node 6:475) */
+.payment-method-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  block-size: 48px;
+  padding-inline: 16px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-sage);
+  border: 1px solid var(--color-pine);
+  color: var(--color-pine);
+  margin-block-end: 24px;
+}
+
+.payment-method-banner__left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+}
+
+.payment-method-banner__brands {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.03em;
+}
+
+/* ==========================================================================
+   Right Column: Order Review & Tip Calculator (Figma node 6:487 / 6:1750)
+   ========================================================================== */
+.checkout-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+}
+
+.order-review-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-xl); /* 12px */
+  padding: 24px 27px 28px;
+  display: flex;
+  flex-direction: column;
+}
+
+.order-review__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-block-end: 16px;
+  border-block-end: 1px solid var(--color-line);
+}
+
+.order-review__title {
+  font-family: var(--font-sans);
+  font-size: var(--text-4xl); /* 24px SemiBold Pine */
+  font-weight: var(--weight-semibold);
+  color: var(--color-pine);
+}
+
+.order-review__edit {
+  font-family: var(--font-sans);
+  font-size: var(--text-md-sm); /* 13px Medium Pine */
+  font-weight: var(--weight-medium);
+  color: var(--color-pine);
+}
+
+.order-review__edit:hover {
+  text-decoration: underline;
+}
+
+.order-review__items {
+  display: flex;
+  flex-direction: column;
+}
+
+.review-item {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 18px;
+  padding-block: 22px;
+  border-block-end: 1px solid var(--color-line);
+}
+
+.review-item__img {
+  inline-size: 72px;
+  block-size: 72px;
+  border-radius: var(--radius-md); /* 8px */
+  object-fit: cover;
+  background-color: var(--color-sage);
+}
+
+.review-item__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.review-item__name {
+  font-family: var(--font-sans);
+  font-size: var(--text-body); /* 16px SemiBold Ink */
+  font-weight: var(--weight-semibold);
+  color: var(--color-ink);
+}
+
+.review-item__meta {
+  font-family: var(--font-sans);
+  font-size: var(--text-md-sm); /* 13px Regular Muted */
+  color: var(--color-muted);
+}
+
+.review-item__price {
+  font-family: var(--font-sans);
+  font-size: var(--text-base); /* 14px SemiBold Pine */
+  font-weight: var(--weight-semibold);
+  color: var(--color-pine);
+  align-self: flex-end;
+  margin-block-start: auto;
+}
+
+/* Tip Selector ("Add a little thanks" — Figma nodes 6:501–6:509) */
+.tip-section {
+  padding-block: 22px 20px;
+  border-block-end: 1px solid var(--color-line);
+}
+
+.tip-section__title {
+  font-family: var(--font-sans);
+  font-size: var(--text-md); /* 15px SemiBold Ink */
+  font-weight: var(--weight-semibold);
+  color: var(--color-ink);
+  margin-block-end: 14px;
+}
+
+.tip-pills {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-block-end: 18px;
+}
+
+.tip-pill {
+  block-size: 42px;
+  border-radius: var(--radius-sm); /* 6px */
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
+  font-family: var(--font-sans);
+  font-size: var(--text-md-sm); /* 13px Medium */
+  font-weight: var(--weight-medium);
+  color: var(--color-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.tip-pill:hover {
+  border-color: var(--color-pine);
+  color: var(--color-pine);
+}
+
+.tip-pill.is-active {
+  background-color: var(--color-sage);
+  border-color: var(--color-pine);
+  color: var(--color-pine);
+}
+
+/* Promo Code Disclosure (Figma node 6:510) */
+.promo-toggle-btn {
+  font-family: var(--font-sans);
+  font-size: var(--text-md-sm); /* 13px Medium Pine */
+  font-weight: var(--weight-medium);
+  color: var(--color-pine);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.promo-toggle-btn:hover {
+  text-decoration: underline;
+}
+
+.promo-box {
+  margin-block-start: 10px;
+  display: flex;
+  gap: 8px;
+}
+
+.promo-box[hidden] {
+  display: none;
+}
+
+.promo-box__input {
+  flex: 1;
+  block-size: 40px;
+  padding-inline: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-line);
+  font-size: var(--text-md-sm);
+  text-transform: uppercase;
+}
+
+.promo-box__apply {
+  block-size: 40px;
+  padding-inline: 14px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-sage);
+  color: var(--color-pine);
+  font-size: var(--text-md-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.promo-feedback {
+  margin-block-start: 6px;
+  font-size: var(--text-sm);
+  color: var(--color-pine);
+}
+
+/* Totals Breakdown */
+.order-totals {
+  padding-block: 20px;
+  border-block-end: 1px solid var(--color-line);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.order-totals__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-family: var(--font-sans);
+  font-size: var(--text-base); /* 14px */
+}
+
+.order-totals__row[hidden] {
+  display: none;
+}
+
+.order-totals__label {
+  color: var(--color-muted);
+}
+
+.order-totals__val {
+  color: var(--color-ink);
+  font-weight: var(--weight-medium);
+}
+
+.order-grand-total {
+  padding-block: 20px 24px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.order-grand-total__label {
+  font-family: var(--font-sans);
+  font-size: var(--text-3xl); /* 22px SemiBold Pine */
+  font-weight: var(--weight-semibold);
+  color: var(--color-pine);
+}
+
+.order-grand-total__val {
+  font-family: var(--font-sans);
+  font-size: var(--text-4xl); /* 24px Bold Pine */
+  font-weight: var(--weight-bold);
+  color: var(--color-pine);
+}
+
+.checkout-submit-btn {
+  inline-size: 100%;
+  margin-block-end: 18px;
+}
+
+.checkout-terms-note {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs); /* 11px Regular Muted */
+  line-height: 1.45;
+  color: var(--color-muted);
+}
+
+/* Delivery Guidance Callout ("A smooth handoff." — Figma 18 · Delivery checkout node 6:1803) */
+.delivery-handoff-card {
+  background-color: var(--color-sage);
+  color: var(--color-pine);
+  border-radius: var(--radius-xl); /* 12px */
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.delivery-handoff-card[hidden] {
+  display: none;
+}
+
+.delivery-handoff-card__title {
+  font-family: var(--font-sans);
+  font-size: 1.125rem; /* 18px SemiBold Pine */
+  font-weight: var(--weight-semibold);
+}
+
+.delivery-handoff-card__text {
+  font-family: var(--font-sans);
+  font-size: var(--text-md-sm); /* 13px Regular Pine */
+  line-height: 1.45;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints (Tablet 768–1199px & Mobile < 768px)
+   ========================================================================== */
+@media (max-width: 1199px) {
+  .checkout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .checkout-form-card,
+  .order-review-card {
+    padding: 20px;
+  }
+
+  .fulfillment-choices,
+  .checkout-field-row--2col,
+  .checkout-field-row--address,
+  .checkout-field-row--card {
+    grid-template-columns: 1fr;
+  }
+}

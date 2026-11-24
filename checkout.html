@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout — Common Ground</title>
+    <meta
+      name="description"
+      content="Complete your Common Ground coffee order for pickup at Maple Street or local delivery."
+    />
+
+    <!-- Google Fonts: Instrument Serif & DM Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Modular CSS -->
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/pages/checkout.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <!-- Top Announcement Strip -->
+    <div class="announcement-strip" role="region" aria-label="Store announcement">
+      <div class="announcement-strip__inner">
+        <p class="announcement-strip__text">
+          YOUR DAILY RITUAL, JUST A LITTLE EASIER.&nbsp;&nbsp;•&nbsp;&nbsp;ORDER AHEAD &amp; SKIP THE QUEUE
+        </p>
+      </div>
+    </div>
+
+    <!-- Primary Site Header -->
+    <header class="site-header">
+      <div class="site-header__bar">
+        <div class="site-header__inner">
+          <div class="site-brand">
+            <a class="site-brand__logo" href="index.html" aria-label="Common Ground home">
+              <span>COMMON</span>
+              <span>GROUND</span>
+            </a>
+            <span class="site-brand__tagline">Coffee, considered.</span>
+          </div>
+
+          <nav class="site-nav" aria-label="Primary">
+            <ul class="site-nav__list">
+              <li>
+                <a class="site-nav__link" href="menu.html" aria-current="page">Order online</a>
+              </li>
+              <li>
+                <a class="site-nav__link" href="menu.html?category=coffee">Our coffee</a>
+              </li>
+              <li>
+                <a class="site-nav__link" href="index.html#origin-story">Our story</a>
+              </li>
+            </ul>
+          </nav>
+
+          <div class="site-header__actions">
+            <a class="account-link" href="orders.html">
+              <img
+                class="account-link__icon"
+                src="assets/icons/account.svg"
+                alt=""
+                width="22"
+                height="22"
+              />
+              <span>My account</span>
+            </a>
+
+            <a
+              class="btn btn--primary bag-button"
+              href="menu.html#your-bag"
+              data-bag-button
+              aria-label="Shopping bag, 2 items"
+            >
+              Bag · 2
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <section class="checkout-workspace" aria-labelledby="checkout-page-title">
+        <div class="container">
+          <a class="checkout-back-link" href="menu.html#your-bag">←&nbsp;&nbsp;Back to your bag</a>
+
+          <div class="checkout-header">
+            <h1 id="checkout-page-title" class="heading-serif checkout-header__title">
+              Your next good moment.
+            </h1>
+            <p class="checkout-header__signin">
+              Already a regular? <a href="signin.html">Sign in</a>
+            </p>
+          </div>
+
+          <!-- 3-Step Checkout Progress Indicator (Figma node 6:447) -->
+          <div class="checkout-steps" aria-label="Checkout progress">
+            <span>1&nbsp;&nbsp;Your details</span>
+            <span class="checkout-steps__line" aria-hidden="true"></span>
+            <span>2&nbsp;&nbsp;Payment</span>
+            <span class="checkout-steps__line" aria-hidden="true"></span>
+            <span>3&nbsp;&nbsp;Enjoy</span>
+          </div>
+
+          <form id="checkout-form" class="checkout-grid" novalidate>
+            <!-- Left Column: Customer, Fulfillment & Payment Details -->
+            <div class="checkout-form-card">
+              <!-- 01 / Fulfillment Mode (Figma nodes 6:450–6:460) -->
+              <div class="checkout-section">
+                <h2 class="checkout-section__title">01&nbsp;&nbsp;/&nbsp;&nbsp;How would you like your order?</h2>
+
+                <div class="fulfillment-choices" role="radiogroup" aria-label="Fulfillment method">
+                  <label class="fulfillment-card">
+                    <input
+                      class="fulfillment-card__input"
+                      type="radio"
+                      name="fulfillment"
+                      value="pickup"
+                      checked
+                    />
+                    <span class="fulfillment-card__top">
+                      <span class="fulfillment-card__dot" aria-hidden="true"></span>
+                      <span>Pickup</span>
+                    </span>
+                    <span class="fulfillment-card__sub">Maple Street café</span>
+                  </label>
+
+                  <label class="fulfillment-card">
+                    <input
+                      class="fulfillment-card__input"
+                      type="radio"
+                      name="fulfillment"
+                      value="delivery"
+                    />
+                    <span class="fulfillment-card__top">
+                      <span class="fulfillment-card__dot" aria-hidden="true"></span>
+                      <span>Delivery</span>
+                    </span>
+                    <span id="delivery-card-subtext" class="fulfillment-card__sub"
+                      >Enter an address to check availability</span
+                    >
+                  </label>
+                </div>
+
+                <div class="checkout-field-row">
+                  <div class="checkout-field">
+                    <label
+                      id="fulfillment-time-label"
+                      for="fulfillment-time-select"
+                      class="checkout-field__label"
+                      >Pickup time</label
+                    >
+                    <select id="fulfillment-time-select" class="checkout-field__select">
+                      <option value="asap">ASAP · Ready in 10–15 minutes</option>
+                      <option value="30min">In 30 minutes</option>
+                      <option value="1hr">In 1 hour</option>
+                    </select>
+                  </div>
+                </div>
+
+                <p id="fulfillment-location-note" class="checkout-helper-note">
+                  42 Maple Street, Portland, OR · Open until 6:00 pm
+                </p>
+              </div>
+
+              <!-- Conditional 02 / Delivery Address Section (Figma 18 · Delivery checkout nodes 6:1786–6:1799) -->
+              <div id="delivery-address-section" class="checkout-section" hidden>
+                <div class="checkout-section__divider" role="separator"></div>
+                <h2 class="checkout-section__title">02&nbsp;&nbsp;/&nbsp;&nbsp;Delivery address</h2>
+
+                <div class="checkout-field-row">
+                  <div class="checkout-field">
+                    <label for="shipping-address" class="checkout-field__label"
+                      >Street address</label
+                    >
+                    <input
+                      id="shipping-address"
+                      name="shipping-address"
+                      type="text"
+                      class="checkout-field__input"
+                      autocomplete="shipping street-address"
+                      value="128 Oak Avenue, Apt 4B"
+                      data-error="shipping-address-error"
+                    />
+                    <div id="shipping-address-error" class="checkout-field__error">
+                      <span role="img" aria-label="Error">❌</span> Please enter a street address for
+                      delivery.
+                    </div>
+                  </div>
+                </div>
+
+                <div class="checkout-field-row checkout-field-row--address">
+                  <div class="checkout-field">
+                    <label for="shipping-city" class="checkout-field__label">City</label>
+                    <input
+                      id="shipping-city"
+                      name="shipping-city"
+                      type="text"
+                      class="checkout-field__input"
+                      autocomplete="shipping address-level2"
+                      value="Portland"
+                      data-error="shipping-city-error"
+                    />
+                    <div id="shipping-city-error" class="checkout-field__error">
+                      <span role="img" aria-label="Error">❌</span> Enter your city.
+                    </div>
+                  </div>
+
+                  <div class="checkout-field">
+                    <label for="shipping-state" class="checkout-field__label">State</label>
+                    <input
+                      id="shipping-state"
+                      name="shipping-state"
+                      type="text"
+                      class="checkout-field__input"
+                      autocomplete="shipping address-level1"
+                      value="OR"
+                      data-error="shipping-state-error"
+                    />
+                    <div id="shipping-state-error" class="checkout-field__error">
+                      <span role="img" aria-label="Error">❌</span> Enter state.
+                    </div>
+                  </div>
+
+                  <div class="checkout-field">
+                    <label for="shipping-zip" class="checkout-field__label">ZIP code</label>
+                    <input
+                      id="shipping-zip"
+                      name="shipping-zip"
+                      type="text"
+                      inputmode="numeric"
+                      pattern="[0-9]{5}(-[0-9]{4})?"
+                      class="checkout-field__input"
+                      autocomplete="shipping postal-code"
+                      value="97205"
+                      data-error="shipping-zip-error"
+                    />
+                    <div id="shipping-zip-error" class="checkout-field__error">
+                      <span role="img" aria-label="Error">❌</span> Enter a valid 5-digit ZIP code.
+                    </div>
+                  </div>
+                </div>
+
+                <p class="checkout-delivery-status">
+                  ✓&nbsp;&nbsp;Within our delivery area · Leave at the door
+                </p>
+              </div>
+
+              <div class="checkout-section__divider" role="separator"></div>
+
+              <!-- 02 (or 03) / Customer Details (Figma nodes 6:462–6:472) -->
+              <div class="checkout-section">
+                <h2 id="details-section-heading" class="checkout-section__title">
+                  02&nbsp;&nbsp;/&nbsp;&nbsp;Your details
+                </h2>
+
+                <div class="checkout-field-row checkout-field-row--2col">
+                  <div class="checkout-field">
+                    <label for="customer-name" class="checkout-field__label">Full name</label>
+                    <input
+                      id="customer-name"
+                      name="fullname"
+                      type="text"
+                      class="checkout-field__input"
+                      autocomplete="name"
+                      value="Alex Johnson"
+                      required
+                      data-error="customer-name-error"
+                    />
+                    <div id="customer-name-error" class="checkout-field__error">
+                      <span role="img" aria-label="Error">❌</span> Please enter your full name.
+                    </div>
+                  </div>
+
+                  <div class="checkout-field">
+                    <div class="checkout-field__header">
+                      <label for="customer-phone" class="checkout-field__label"
+                        >Mobile number</label
+                      >
+                      <span id="phone-format-hint" class="checkout-field__hint"
+                        >10+ digits</span
+                      >
+                    </div>
+                    <input
+                      id="customer-phone"
+                      name="phone"
+                      type="tel"
+                      class="checkout-field__input"
+                      autocomplete="tel"
+                      pattern="[\d\s\(\)\-\+]{10,20}"
+                      value="(503) 555-0142"
+                      aria-describedby="phone-format-hint"
+                      required
+                      data-error="customer-phone-error"
+                    />
+                    <div id="customer-phone-error" class="checkout-field__error">
+                      <span role="img" aria-label="Error">❌</span> Enter a valid mobile number
+                      (e.g., (503) 555-0142).
+                    </div>
+                  </div>
+                </div>
+
+                <div class="checkout-field-row">
+                  <div class="checkout-field">
+                    <label for="customer-email" class="checkout-field__label">Email address</label>
+                    <input
+                      id="customer-email"
+                      name="email"
+                      type="email"
+                      class="checkout-field__input"
+                      autocomplete="email"
+                      value="alex.johnson@example.com"
+                      required
+                      data-error="customer-email-error"
+                    />
+                    <div id="customer-email-error" class="checkout-field__error">
+                      <span role="img" aria-label="Error">❌</span> Enter an email address in the
+                      format you@example.com.
+                    </div>
+                  </div>
+                </div>
+
+                <p class="checkout-helper-note">
+                  Your receipt and order updates will be sent here.
+                </p>
+              </div>
+
+              <div class="checkout-section__divider" role="separator"></div>
+
+              <!-- 03 (or 04) / Payment (Figma nodes 6:474–6:486) -->
+              <div class="checkout-section">
+                <h2 id="payment-section-heading" class="checkout-section__title">
+                  03&nbsp;&nbsp;/&nbsp;&nbsp;Payment
+                </h2>
+
+                <div class="payment-method-banner">
+                  <span class="payment-method-banner__left">
+                    <span aria-hidden="true">●</span>
+                    <span>Credit or debit card</span>
+                  </span>
+                  <span class="payment-method-banner__brands">VISA&nbsp;&nbsp;&nbsp;&nbsp;Mastercard</span>
+                </div>
+
+                <div class="checkout-field-row checkout-field-row--card">
+                  <div class="checkout-field">
+                    <label for="cc-number" class="checkout-field__label">Card number</label>
+                    <input
+                      id="cc-number"
+                      name="cc-number"
+                      type="text"
+                      inputmode="numeric"
+                      autocomplete="cc-number"
+                      maxlength="19"
+                      pattern="[\d ]{13,19}"
+                      class="checkout-field__input"
+                      value="4242 4242 4242 4242"
+                      required
+                      data-error="cc-number-error"
+                    />
+                    <div id="cc-number-error" class="checkout-field__error">
+                      <span role="img" aria-label="Error">❌</span> Enter a valid 13–19 digit card
+                      number.
+                    </div>
+                  </div>
+
+                  <div class="checkout-field">
+                    <div class="checkout-field__header">
+                      <label for="cc-exp" class="checkout-field__label">Expiry</label>
+                      <span id="cc-exp-hint" class="checkout-field__hint">MM / YY</span>
+                    </div>
+                    <input
+                      id="cc-exp"
+                      name="cc-exp"
+                      type="text"
+                      inputmode="numeric"
+                      autocomplete="cc-exp"
+                      maxlength="7"
+                      pattern="(0[1-9]|1[0-2])\s*\/\s*[0-9]{2}"
+                      class="checkout-field__input"
+                      value="08 / 28"
+                      aria-describedby="cc-exp-hint"
+                      required
+                      data-error="cc-exp-error"
+                    />
+                    <div id="cc-exp-error" class="checkout-field__error">
+                      <span role="img" aria-label="Error">❌</span> Use format MM / YY.
+                    </div>
+                  </div>
+
+                  <div class="checkout-field">
+                    <div class="checkout-field__header">
+                      <label for="cc-csc" class="checkout-field__label">Security code</label>
+                      <span id="cc-csc-hint" class="checkout-field__hint">3–4 digits</span>
+                    </div>
+                    <input
+                      id="cc-csc"
+                      name="cc-csc"
+                      type="text"
+                      inputmode="numeric"
+                      autocomplete="cc-csc"
+                      maxlength="4"
+                      pattern="[0-9]{3,4}"
+                      class="checkout-field__input"
+                      value="248"
+                      aria-describedby="cc-csc-hint"
+                      required
+                      data-error="cc-csc-error"
+                    />
+                    <div id="cc-csc-error" class="checkout-field__error">
+                      <span role="img" aria-label="Error">❌</span> Enter 3 or 4 digit code.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Order Review, Tip Calculator & Submit -->
+            <aside class="checkout-sidebar" aria-labelledby="order-review-heading">
+              <div class="order-review-card">
+                <div class="order-review__header">
+                  <h2 id="order-review-heading" class="order-review__title">Your order</h2>
+                  <a class="order-review__edit" href="menu.html#your-bag">Edit bag</a>
+                </div>
+
+                <div id="checkout-review-items" class="order-review__items"></div>
+
+                <!-- Tip Calculator ("Add a little thanks" — Figma nodes 6:501–6:509) -->
+                <div class="tip-section">
+                  <h3 class="tip-section__title">Add a little thanks</h3>
+
+                  <div
+                    id="checkout-tip-pills"
+                    class="tip-pills"
+                    role="group"
+                    aria-label="Tip percentage"
+                  >
+                    <button
+                      type="button"
+                      class="tip-pill is-active"
+                      data-tip-rate="0"
+                      aria-pressed="true"
+                    >
+                      No tip
+                    </button>
+                    <button
+                      type="button"
+                      class="tip-pill"
+                      data-tip-rate="0.1"
+                      aria-pressed="false"
+                    >
+                      10%
+                    </button>
+                    <button
+                      type="button"
+                      class="tip-pill"
+                      data-tip-rate="0.15"
+                      aria-pressed="false"
+                    >
+                      15%
+                    </button>
+                    <button
+                      type="button"
+                      class="tip-pill"
+                      data-tip-rate="0.2"
+                      aria-pressed="false"
+                    >
+                      20%
+                    </button>
+                  </div>
+
+                  <button
+                    id="promo-toggle-btn"
+                    type="button"
+                    class="promo-toggle-btn"
+                    aria-expanded="false"
+                    aria-controls="promo-input-box"
+                  >
+                    <span>Have a promo code?</span>
+                    <span aria-hidden="true">+</span>
+                  </button>
+
+                  <div id="promo-input-box" class="promo-box" hidden>
+                    <label for="promo-code-input" class="sr-only">Promo code</label>
+                    <input
+                      id="promo-code-input"
+                      type="text"
+                      class="promo-box__input"
+                      placeholder="e.g. WELCOME10"
+                    />
+                    <button id="promo-apply-btn" type="button" class="promo-box__apply">
+                      Apply
+                    </button>
+                  </div>
+                  <p id="promo-feedback-msg" class="promo-feedback" aria-live="polite"></p>
+                </div>
+
+                <!-- Subtotal, Tax, Tip & Conditional Delivery Fee -->
+                <div class="order-totals">
+                  <div class="order-totals__row">
+                    <span class="order-totals__label">Subtotal</span>
+                    <span id="checkout-subtotal" class="order-totals__val">$10.60</span>
+                  </div>
+                  <div class="order-totals__row">
+                    <span class="order-totals__label">Tax (Oregon)</span>
+                    <span id="checkout-tax" class="order-totals__val">$0.00</span>
+                  </div>
+                  <div class="order-totals__row">
+                    <span class="order-totals__label">Tip</span>
+                    <span id="checkout-tip" class="order-totals__val">$0.00</span>
+                  </div>
+                  <div id="checkout-delivery-row" class="order-totals__row" hidden>
+                    <span class="order-totals__label">Delivery fee</span>
+                    <span id="checkout-delivery-fee" class="order-totals__val">$2.50</span>
+                  </div>
+                  <div id="checkout-discount-row" class="order-totals__row" hidden>
+                    <span class="order-totals__label">Promo discount</span>
+                    <span id="checkout-discount-val" class="order-totals__val">−$0.00</span>
+                  </div>
+                </div>
+
+                <!-- Grand Total -->
+                <div class="order-grand-total">
+                  <span class="order-grand-total__label">Total</span>
+                  <span id="checkout-total" class="order-grand-total__val" aria-live="polite"
+                    >$10.60</span
+                  >
+                </div>
+
+                <button
+                  id="checkout-submit-btn"
+                  type="submit"
+                  class="btn btn--primary checkout-submit-btn"
+                >
+                  Place pickup order&nbsp;&nbsp;·&nbsp;&nbsp;$10.60
+                </button>
+
+                <p class="checkout-terms-note">
+                  By ordering, you agree to our Terms of Service.<br />
+                  Payments are encrypted and securely processed.
+                </p>
+              </div>
+
+              <!-- Delivery Handoff Card (Figma 18 · Delivery checkout node 6:1803) -->
+              <div id="delivery-handoff-card" class="delivery-handoff-card" hidden>
+                <h3 class="delivery-handoff-card__title">A smooth handoff.</h3>
+                <p class="delivery-handoff-card__text">
+                  You’ll receive tracking updates by text.<br />
+                  Keep your phone nearby so your courier can reach you if needed.
+                </p>
+              </div>
+            </aside>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__top">
+          <div class="site-footer__brand">
+            <p class="site-footer__brand-title">COMMON GROUND</p>
+            <p class="site-footer__brand-subtitle">A good place to start.</p>
+          </div>
+
+          <div class="site-footer__col">
+            <h2 class="site-footer__col-title">VISIT THE CAFÉ</h2>
+            <p class="site-footer__col-text">
+              42 Maple Street, Portland, OR<br />
+              Mon–Fri&nbsp;&nbsp;7am–6pm&nbsp;&nbsp;/&nbsp;&nbsp;Sat–Sun&nbsp;&nbsp;8am–5pm
+            </p>
+          </div>
+
+          <div class="site-footer__col">
+            <h2 class="site-footer__col-title">GET IN TOUCH</h2>
+            <p class="site-footer__col-text">
+              <a class="site-footer__external-link" href="mailto:hello@commonground.coffee">
+                hello@commonground.coffee
+              </a>
+              <br />
+              <a
+                class="site-footer__external-link"
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>Instagram</span>
+                <span aria-hidden="true">↗</span>
+              </a>
+            </p>
+          </div>
+        </div>
+
+        <div class="site-footer__bottom">
+          <p>© 2026 Common Ground Coffee</p>
+          <ul class="site-footer__legal" aria-label="Legal">
+            <li><a href="#privacy">Privacy</a></li>
+            <li><a href="#terms">Terms</a></li>
+            <li><a href="#accessibility">Accessibility</a></li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+      <a class="mobile-bottom-nav__item" href="menu.html">
+        <img
+          class="mobile-bottom-nav__icon"
+          src="assets/icons/nav-menu.svg"
+          alt=""
+          width="24"
+          height="24"
+        />
+        <span>Menu</span>
+      </a>
+      <a class="mobile-bottom-nav__item" href="orders.html">
+        <img
+          class="mobile-bottom-nav__icon"
+          src="assets/icons/nav-orders.svg"
+          alt=""
+          width="24"
+          height="24"
+        />
+        <span>Orders</span>
+      </a>
+      <a class="mobile-bottom-nav__item" href="signin.html">
+        <img
+          class="mobile-bottom-nav__icon"
+          src="assets/icons/nav-account.svg"
+          alt=""
+          width="24"
+          height="24"
+        />
+        <span>Account</span>
+      </a>
+    </nav>
+
+    <script type="module" src="js/pages/checkout.js"></script>
+  </body>
+</html>
