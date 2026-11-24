@@ -1,14 +1,9 @@
 /**
  * COMMON GROUND — Product Customization Controller ("03 · Product customization" & "13 · Mobile product")
  *
- * Implements:
- * - Dynamic product lookup via `?id=<productId>` URL parameter (defaults to "iced-oat-latte" matching Figma 03).
- * - Size selection (`12 oz · $5.00`, `16 oz · $5.70`).
- * - Milk selection (`Whole milk`, `Oat +$0.80`, `Almond +$0.80`).
- * - Hot / Iced selection & Add-ons (`Extra espresso shot +$1.00`, `Decaf espresso`).
- * - Quantity selection & Special instructions.
- * - Live dynamic price calculation updating both the main price display and "Add to bag · $X.XX".
- * - Complementary pairings ("A good cup deserves good company.") with instant "+ Add".
+ * Retrieves product and customization groups from `GET /api/products/:id` (with local fallback),
+ * supports Size, Temperature, Milk, Sugar level, Add-ons/Syrups/Toppings, Quantity, and Special Instructions,
+ * and computes dynamic EGP pricing.
  */
 
 import { initHeader } from "../components/header.js";
@@ -20,16 +15,14 @@ import { productService } from "../services/productService.js";
 const state = {
   product: null,
   size: "12oz",
-  temperature: "iced",
-  milk: "oat",
+  temperature: "hot",
+  milk: "whole",
+  sugar: "regular-sugar",
   addons: new Set(),
   quantity: 1,
   specialInstructions: "",
 };
 
-/**
- * Calculates single unit price and total price based on selected customizations.
- */
 function calculateCurrentPrices() {
   const product = state.product;
   if (!product) return { unitPrice: 0, totalPrice: 0 };
@@ -64,9 +57,6 @@ function calculateCurrentPrices() {
   return { unitPrice, totalPrice };
 }
 
-/**
- * Updates all live price displays on the page.
- */
 function updatePriceDisplays() {
   const { unitPrice, totalPrice } = calculateCurrentPrices();
 
@@ -81,13 +71,16 @@ function updatePriceDisplays() {
     qtyValueEl.textContent = String(state.quantity);
   }
   if (submitBtnEl) {
-    submitBtnEl.textContent = `Add to bag  ·  ${formatPrice(totalPrice)}`;
+    if (state.product && !state.product.available) {
+      submitBtnEl.disabled = true;
+      submitBtnEl.textContent = "Currently Sold Out";
+    } else {
+      submitBtnEl.disabled = false;
+      submitBtnEl.textContent = `Add to bag  ·  ${formatPrice(totalPrice)}`;
+    }
   }
 }
 
-/**
- * Populates product details and customization controls.
- */
 function renderProductDetail() {
   const product = state.product;
   if (!product) return;
@@ -103,11 +96,11 @@ function renderProductDetail() {
   const allergenEl = document.getElementById("product-allergen-note");
   const drinkOptionsContainer = document.getElementById("drink-customization-options");
 
-  const primaryCat = product.categoryIds?.[0] || "coffee";
+  const primaryCat = product.categoryId || product.categoryIds?.[0] || "coffee";
   const categoryNameMap = {
     coffee: "Coffee",
-    "non-coffee": "Tea & matcha",
-    bakery: "Bakery",
+    "non-coffee": "Non-Coffee",
+    bakery: "Desserts & Bakery",
     "iced-drinks": "Iced Drinks",
     food: "Food & Sandwiches",
   };
@@ -135,7 +128,6 @@ function renderProductDetail() {
       product.allergenNote || "Prepared in a kitchen that handles nuts, wheat, and dairy.";
   }
 
-  // Update Size Option price labels dynamically based on product's baseSizePrice
   const baseSizePrice =
     typeof product.baseSizePrice === "number" ? product.baseSizePrice : product.price;
   const size12Label = document.getElementById("size-12oz-label");
@@ -144,47 +136,40 @@ function renderProductDetail() {
     size12Label.textContent = `12 oz  ·  ${formatPrice(baseSizePrice)}`;
   }
   if (size16Label) {
-    size16Label.textContent = `16 oz  ·  ${formatPrice(baseSizePrice + 0.7)}`;
+    size16Label.textContent = `16 oz  ·  ${formatPrice(baseSizePrice + 15)}`;
   }
 
-  // Hide drink-only options if product is bakery/food
   if (drinkOptionsContainer) {
     drinkOptionsContainer.hidden = !product.customizable;
   }
 
-  // Sync radio inputs with initial state
-  const sizeInputs = document.querySelectorAll('input[name="size"]');
-  sizeInputs.forEach((input) => {
+  document.querySelectorAll('input[name="size"]').forEach((input) => {
     input.checked = input.value === state.size;
   });
-
-  const milkInputs = document.querySelectorAll('input[name="milk"]');
-  milkInputs.forEach((input) => {
+  document.querySelectorAll('input[name="milk"]').forEach((input) => {
     input.checked = input.value === state.milk;
   });
-
-  const tempInputs = document.querySelectorAll('input[name="temperature"]');
-  tempInputs.forEach((input) => {
+  document.querySelectorAll('input[name="temperature"]').forEach((input) => {
     input.checked = input.value === state.temperature;
+  });
+  document.querySelectorAll('input[name="sugar"]').forEach((input) => {
+    input.checked = input.value === state.sugar;
   });
 
   updatePriceDisplays();
 }
 
-/**
- * Renders the 2 pairing cards in "A good cup deserves good company." (Figma node 6:16)
- */
 function renderPairings() {
   const container = document.getElementById("pairings-grid");
   if (!container) return;
 
   const pairingConfigs = [
     {
-      id: "almond-croissant",
+      id: "butter-croissant",
       tagline: "Buttery, flaky, baked today.",
     },
     {
-      id: "batch-brew",
+      id: "americano",
       tagline: "A second cup, for a friend.",
     },
   ];
@@ -243,37 +228,52 @@ function renderPairings() {
     container.appendChild(card);
   });
 
-  container.addEventListener("click", (event) => {
-    const btn = event.target.closest("[data-pairing-add]");
-    if (!btn) return;
-    const added = cartService.addItem(btn.dataset.pairingAdd, 1);
-    if (added) {
-      showToast(`Added ${added.name} (${formatPrice(added.price)}) to your bag`, {
-        actionLabel: "View bag",
-        actionHref: "menu.html#your-bag",
-      });
-    }
-  });
+  if (!container.dataset.bound) {
+    container.addEventListener("click", (event) => {
+      const btn = event.target.closest("[data-pairing-add]");
+      if (!btn) return;
+      const added = cartService.addItem(btn.dataset.pairingAdd, 1);
+      if (added) {
+        showToast(`Added ${added.name} (${formatPrice(added.price)}) to your bag`, {
+          actionLabel: "View bag",
+          actionHref: "menu.html#your-bag",
+        });
+      }
+    });
+    container.dataset.bound = "true";
+  }
 }
 
-function initProductPage() {
+async function initProductPage() {
   initHeader();
 
   const params = new URLSearchParams(window.location.search);
-  const requestedId = params.get("id") || "iced-oat-latte";
-  const product =
+  const requestedId = params.get("id") || "spanish-latte";
+
+  // Initial synchronous render from cache
+  let product =
     productService.getProductById(requestedId) ||
-    productService.getProductById("iced-oat-latte");
+    productService.getProductById("spanish-latte");
 
   state.product = product;
-  if (product.defaultCustomizations) {
+  if (product?.defaultCustomizations) {
     state.size = product.defaultCustomizations.size || "12oz";
-    state.temperature = product.defaultCustomizations.temperature || "iced";
-    state.milk = product.defaultCustomizations.milk || "oat";
+    state.temperature = product.defaultCustomizations.temperature || "hot";
+    state.milk = product.defaultCustomizations.milk || "whole";
+    state.sugar = product.defaultCustomizations.sugar || "regular-sugar";
   }
 
   renderProductDetail();
   renderPairings();
+
+  // Hydrate live product from PostgreSQL backend
+  await productService.syncFromBackend();
+  const remoteDetail = await productService.fetchProductDetail(requestedId);
+  if (remoteDetail) {
+    state.product = remoteDetail;
+    renderProductDetail();
+    renderPairings();
+  }
 
   const form = document.getElementById("product-customizer-form");
   if (form) {
@@ -285,6 +285,8 @@ function initProductPage() {
         state.milk = target.value;
       } else if (target.name === "temperature") {
         state.temperature = target.value;
+      } else if (target.name === "sugar") {
+        state.sugar = target.value;
       } else if (target.name === "addon") {
         if (target.checked) {
           state.addons.add(target.value);
@@ -297,6 +299,8 @@ function initProductPage() {
 
     form.addEventListener("submit", (event) => {
       event.preventDefault();
+      if (!state.product || !state.product.available) return;
+
       const { unitPrice, totalPrice } = calculateCurrentPrices();
 
       const customOverrides = state.product.customizable
@@ -304,6 +308,7 @@ function initProductPage() {
             size: state.size,
             temperature: state.temperature,
             milk: state.milk,
+            sugar: state.sugar,
             addons: Array.from(state.addons),
             specialInstructions: state.specialInstructions,
           }
@@ -334,7 +339,6 @@ function initProductPage() {
     });
   }
 
-  // Quantity stepper buttons
   const decBtn = document.getElementById("product-qty-dec");
   const incBtn = document.getElementById("product-qty-inc");
 

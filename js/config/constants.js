@@ -1,33 +1,37 @@
 /**
  * COMMON GROUND — Application Constants & Configuration
- * Centralizes storage keys, routes, and formatting utilities for future API readiness.
+ * Target Market: Egypt · Default Currency: Egyptian Pound (EGP)
  */
 
 export const STORAGE_KEYS = Object.freeze({
-  CART: "common_ground_cart_v1",
-  ACTIVE_ORDER: "common_ground_active_order_v1",
-  FULFILLMENT: "common_ground_fulfillment_v1",
+  CART: "common_ground_cart_egp_v2",
+  ACTIVE_ORDER: "common_ground_active_order_egp_v2",
+  FULFILLMENT: "common_ground_fulfillment_v2",
+  AUTH_TOKEN: "common_ground_staff_token_v1",
+  AUTH_USER: "common_ground_staff_user_v1",
 });
 
 export const APP_CONFIG = Object.freeze({
   BRAND_NAME: "Common Ground",
-  DEFAULT_LOCATION: "42 Maple Street, Portland, OR",
+  DEFAULT_LOCATION: "42 Maple Street, Zamalek, Cairo",
   PICKUP_ESTIMATE: "10–15 min",
   DELIVERY_ESTIMATE: "25–35 min",
-  DELIVERY_FEE: 2.5,
-  TAX_RATE: 0.0, // Oregon 0% sales tax as shown in Figma 04 · Checkout
+  DELIVERY_FEE: 25, // 25 EGP delivery fee
+  TAX_RATE: 0.0,
+  CURRENCY: "EGP",
 });
 
 /**
- * Formats a numeric price to match Figma's USD display ($5.80) or EGP display.
- * @param {number} amount - Numeric price value
- * @param {string} [currency='USD'] - 'USD' ($5.80) or 'EGP' (95 EGP)
+ * Formats a numeric price in EGP (default: "95 EGP") or USD ("$5.80").
+ * @param {number} amount
+ * @param {string} [currency=APP_CONFIG.CURRENCY]
  * @returns {string}
  */
-export function formatPrice(amount, currency = "USD") {
+export function formatPrice(amount, currency = APP_CONFIG.CURRENCY) {
   const numeric = Number(amount) || 0;
-  if (currency === "EGP") {
-    return `${Math.round(numeric)} EGP`;
+  if (currency === "USD") {
+    return `$${numeric.toFixed(2)}`;
   }
-  return `$${numeric.toFixed(2)}`;
+  const hasFraction = Math.abs(numeric - Math.round(numeric)) > 0.005;
+  return `${hasFraction ? numeric.toFixed(2) : Math.round(numeric)} EGP`;
 }

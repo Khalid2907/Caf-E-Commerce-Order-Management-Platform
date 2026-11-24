@@ -1,9 +1,8 @@
 /**
  * COMMON GROUND — Order Confirmation & Live Tracking Controller ("05 · Order tracking" & "15 · Mobile tracking")
  *
- * Renders the active order from `orderService.getActiveOrder()` and lets the user
- * interactively click any step in the 4-stage progress stepper (or "Advance status →")
- * to simulate real-time barista order progression.
+ * Retrieves live order status from `GET /api/orders/track/:reference` and polls/listens
+ * for real-time barista updates.
  */
 
 import { initHeader } from "../components/header.js";
@@ -29,22 +28,31 @@ function renderTrackingOrder(order) {
   const paidTotalEl = document.getElementById("receipt-paid-total");
 
   if (eyebrowEl) {
-    eyebrowEl.textContent = `ORDER #${order.orderNumber}   /   ${order.dateLabel}`;
+    eyebrowEl.textContent = `ORDER #${order.orderNumber}   /   ${
+      order.dateLabel || "TUESDAY, NOVEMBER 24"
+    }`;
   }
 
   if (subtitleEl) {
-    subtitleEl.textContent = `Thanks, ${
-      order.customer?.firstName || "Alex"
-    }. We’ll let you know the moment it’s ready.`;
+    if (order.rawStatus === "Cancelled" || order.rawStatus === "Rejected") {
+      subtitleEl.textContent = `Order #${order.orderNumber} was ${order.rawStatus.toLowerCase()}. Please contact the café if you need assistance.`;
+    } else {
+      subtitleEl.textContent = `Thanks, ${
+        order.customer?.firstName || "Alex"
+      }. We’ll let you know the moment it’s ready.`;
+    }
   }
 
-  // Update status pill class & text
   if (statusBadgeEl) {
     const statusClassMap = {
       New: "status-badge--new",
+      Pending: "status-badge--new",
+      Accepted: "status-badge--preparing",
       Preparing: "status-badge--preparing",
       Ready: "status-badge--ready",
       Completed: "status-badge--completed",
+      Cancelled: "status-badge--cancelled",
+      Rejected: "status-badge--cancelled",
     };
     statusBadgeEl.className = `status-badge ${
       statusClassMap[order.status] || "status-badge--preparing"
@@ -58,17 +66,15 @@ function renderTrackingOrder(order) {
   }
 
   if (etaWindowEl) {
-    etaWindowEl.textContent = order.estimatedWindow;
+    etaWindowEl.textContent = order.estimatedWindow || "10:25–10:30 am";
   }
 
-  // Update 4-step progress track width (0% / 33% / 66% / 100%)
   const stepIndex = Number.isInteger(order.stepIndex) ? order.stepIndex : 1;
   if (trackFillEl) {
     const pct = Math.round((stepIndex / 3) * 100);
     trackFillEl.style.inlineSize = `${pct}%`;
   }
 
-  // Update step nodes
   document.querySelectorAll("[data-step-index]").forEach((node) => {
     const idx = parseInt(node.dataset.stepIndex, 10);
     const circle = node.querySelector(".stepper-node__circle");
@@ -82,7 +88,7 @@ function renderTrackingOrder(order) {
 
   if (smsBodyEl) {
     smsBodyEl.textContent = `We’ll text ${
-      order.customer?.phone || "(503) 555-0142"
+      order.customer?.phone || "+20 100 555 0142"
     } when your order is ready. No refreshing needed.`;
   }
 
@@ -91,11 +97,10 @@ function renderTrackingOrder(order) {
     if (pickupTitleEl) pickupTitleEl.textContent = "On its way soon.";
     if (pickupAddressEl) {
       pickupAddressEl.textContent =
-        order.customer?.address || "128 Oak Avenue, Apt 4B, Portland, OR";
+        order.customer?.address || "128 Oak Avenue, Apt 4B, Zamalek, Cairo";
     }
   }
 
-  // Render receipt items
   if (receiptItemsEl) {
     receiptItemsEl.replaceChildren();
     (order.items || []).forEach((item) => {
@@ -127,8 +132,10 @@ function renderTrackingOrder(order) {
   }
 
   if (paidMethodEl) {
-    paidMethodEl.textContent = `Paid · ${order.payment?.brand || "Visa"} ending ${
-      order.payment?.last4 || "4242"
+    const payStatus = order.payment?.status || "Paid";
+    const methodLabel = order.payment?.method || "Cash";
+    paidMethodEl.textContent = `${payStatus} · ${methodLabel}${
+      order.payment?.last4 ? ` ending ${order.payment.last4}` : ""
     }`;
   }
 
@@ -137,13 +144,43 @@ function renderTrackingOrder(order) {
   }
 }
 
-function initTrackingPage() {
+async function initTrackingPage() {
   initHeader();
+
+  const params = new URLSearchParams(window.location.search);
+  const requestedRef = params.get("ref");
 
   let currentOrder = orderService.getActiveOrder();
   renderTrackingOrder(currentOrder);
 
-  // Allow clicking any step node or the "Advance stage" button to test live status transitions
+  // Fetch authoritative order state from PostgreSQL backend
+  try {
+    currentOrder = await orderService.fetchOrderTracking(
+      requestedRef || currentOrder.orderNumber
+    );
+    renderTrackingOrder(currentOrder);
+  } catch (err) {
+    if (requestedRef) {
+      showToast(`Order #${requestedRef} not found. Showing latest active order.`);
+    }
+  }
+
+  // Periodic polling fallback for live status updates
+  window.setInterval(async () => {
+    try {
+      const refreshed = await orderService.fetchOrderTracking(currentOrder.orderNumber);
+      if (refreshed && refreshed.status !== currentOrder.status) {
+        currentOrder = refreshed;
+        renderTrackingOrder(currentOrder);
+        showToast(
+          `Order #${currentOrder.orderNumber} status updated to: ${currentOrder.status}`
+        );
+      }
+    } catch {
+      // Keep current display
+    }
+  }, 6000);
+
   const stepper = document.getElementById("tracking-stepper");
   if (stepper) {
     stepper.addEventListener("click", (event) => {

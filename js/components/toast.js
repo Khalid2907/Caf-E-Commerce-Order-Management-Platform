@@ -23,7 +23,13 @@ function ensureContainer() {
  * @param {string} [options.actionLabel]
  * @param {string} [options.actionHref]
  */
-export function showToast(message, { actionLabel = "View bag", actionHref = "menu.html#your-bag" } = {}) {
+export function showToast(message, options = {}) {
+  const isStaffPortal =
+    typeof window !== "undefined" &&
+    /barista|admin/i.test(window.location.pathname || "");
+  const defaultLabel = isStaffPortal ? "" : "View bag";
+  const defaultHref = isStaffPortal ? "" : "menu.html#your-bag";
+  const { actionLabel = defaultLabel, actionHref = defaultHref } = options;
   const container = ensureContainer();
 
   const toast = document.createElement("div");

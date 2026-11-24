@@ -34,10 +34,9 @@ function renderCategories() {
   const categories = [
     { id: "favorites", name: "All favorites" },
     { id: "coffee", name: "Coffee" },
-    { id: "non-coffee", name: "Tea & matcha" },
-    { id: "bakery", name: "Bakery" },
-    { id: "coffee-at-home", name: "Coffee at home" },
+    { id: "non-coffee", name: "Non-Coffee" },
     { id: "iced-drinks", name: "Iced Drinks" },
+    { id: "bakery", name: "Desserts & Bakery" },
     { id: "food", name: "Food & Sandwiches" },
     { id: "all", name: "Full catalog (18)" },
   ];
@@ -152,9 +151,8 @@ function renderCatalog() {
   const categoryLabels = {
     favorites: "All favorites",
     coffee: "Coffee",
-    "non-coffee": "Tea & matcha",
-    bakery: "Bakery",
-    "coffee-at-home": "Coffee at home",
+    "non-coffee": "Non-Coffee",
+    bakery: "Desserts & Bakery",
     "iced-drinks": "Iced Drinks",
     food: "Food & Sandwiches",
     all: "Full menu catalog",
@@ -343,7 +341,7 @@ function updateFulfillmentUI() {
   }
 }
 
-function initMenuPage() {
+async function initMenuPage() {
   initHeader();
 
   // Check URL query params for pre-selected category
@@ -356,6 +354,11 @@ function initMenuPage() {
   renderCategories();
   renderCatalog();
   updateFulfillmentUI();
+
+  // Sync live products & stock availability from PostgreSQL backend
+  productService.syncFromBackend().then(() => {
+    renderCatalog();
+  });
 
   // Subscribe persistent bag panel to cartService
   cartService.subscribe(renderBagPanel);

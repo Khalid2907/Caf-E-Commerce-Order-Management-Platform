@@ -335,21 +335,44 @@
 
               <div class="checkout-section__divider" role="separator"></div>
 
-              <!-- 03 (or 04) / Payment (Figma nodes 6:474–6:486) -->
+              <!-- 03 (or 04) / Payment (Figma nodes 6:474–6:486 + Stage 12F Cash support) -->
               <div class="checkout-section">
                 <h2 id="payment-section-heading" class="checkout-section__title">
                   03&nbsp;&nbsp;/&nbsp;&nbsp;Payment
                 </h2>
 
-                <div class="payment-method-banner">
-                  <span class="payment-method-banner__left">
-                    <span aria-hidden="true">●</span>
-                    <span>Credit or debit card</span>
-                  </span>
-                  <span class="payment-method-banner__brands">VISA&nbsp;&nbsp;&nbsp;&nbsp;Mastercard</span>
+                <div class="fulfillment-choices" role="radiogroup" aria-label="Payment method">
+                  <label class="fulfillment-card">
+                    <input
+                      class="fulfillment-card__input"
+                      type="radio"
+                      name="paymentMethod"
+                      value="cash"
+                      checked
+                    />
+                    <span class="fulfillment-card__top">
+                      <span class="fulfillment-card__dot" aria-hidden="true"></span>
+                      <span>Cash on pickup / delivery</span>
+                    </span>
+                    <span class="fulfillment-card__sub">Pay in EGP when you receive your order</span>
+                  </label>
+
+                  <label class="fulfillment-card">
+                    <input
+                      class="fulfillment-card__input"
+                      type="radio"
+                      name="paymentMethod"
+                      value="card_on_pickup"
+                    />
+                    <span class="fulfillment-card__top">
+                      <span class="fulfillment-card__dot" aria-hidden="true"></span>
+                      <span>Credit or debit card</span>
+                    </span>
+                    <span class="fulfillment-card__sub">VISA · Mastercard</span>
+                  </label>
                 </div>
 
-                <div class="checkout-field-row checkout-field-row--card">
+                <div id="card-details-fields" class="checkout-field-row checkout-field-row--card is-hidden" hidden>
                   <div class="checkout-field">
                     <label for="cc-number" class="checkout-field__label">Card number</label>
                     <input
@@ -362,7 +385,6 @@
                       pattern="[\d ]{13,19}"
                       class="checkout-field__input"
                       value="4242 4242 4242 4242"
-                      required
                       data-error="cc-number-error"
                     />
                     <div id="cc-number-error" class="checkout-field__error">
@@ -387,7 +409,6 @@
                       class="checkout-field__input"
                       value="08 / 28"
                       aria-describedby="cc-exp-hint"
-                      required
                       data-error="cc-exp-error"
                     />
                     <div id="cc-exp-error" class="checkout-field__error">
@@ -411,7 +432,6 @@
                       class="checkout-field__input"
                       value="248"
                       aria-describedby="cc-csc-hint"
-                      required
                       data-error="cc-csc-error"
                     />
                     <div id="cc-csc-error" class="checkout-field__error">

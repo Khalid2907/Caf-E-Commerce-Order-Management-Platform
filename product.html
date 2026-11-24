@@ -181,13 +181,45 @@
                         checked
                       />
                       <span class="choice-card__dot" aria-hidden="true"></span>
-                      <span id="size-12oz-label">12 oz&nbsp;&nbsp;·&nbsp;&nbsp;$5.00</span>
+                      <span id="size-12oz-label">12 oz&nbsp;&nbsp;·&nbsp;&nbsp;95 EGP</span>
                     </label>
 
                     <label class="choice-card">
                       <input class="choice-card__input" type="radio" name="size" value="16oz" />
                       <span class="choice-card__dot" aria-hidden="true"></span>
-                      <span id="size-16oz-label">16 oz&nbsp;&nbsp;·&nbsp;&nbsp;$5.70</span>
+                      <span id="size-16oz-label">16 oz&nbsp;&nbsp;·&nbsp;&nbsp;110 EGP</span>
+                    </label>
+                  </div>
+                </fieldset>
+
+                <!-- Temperature Selection (Hot / Iced) -->
+                <fieldset class="option-group">
+                  <div class="option-group__header">
+                    <legend class="option-group__title">Temperature</legend>
+                  </div>
+
+                  <div class="choice-grid choice-grid--2col">
+                    <label class="choice-card">
+                      <input
+                        class="choice-card__input"
+                        type="radio"
+                        name="temperature"
+                        value="hot"
+                        checked
+                      />
+                      <span class="choice-card__dot" aria-hidden="true"></span>
+                      <span>Hot</span>
+                    </label>
+
+                    <label class="choice-card">
+                      <input
+                        class="choice-card__input"
+                        type="radio"
+                        name="temperature"
+                        value="iced"
+                      />
+                      <span class="choice-card__dot" aria-hidden="true"></span>
+                      <span>Iced</span>
                     </label>
                   </div>
                 </fieldset>
@@ -200,7 +232,13 @@
 
                   <div class="choice-grid choice-grid--3col">
                     <label class="choice-card">
-                      <input class="choice-card__input" type="radio" name="milk" value="whole" />
+                      <input
+                        class="choice-card__input"
+                        type="radio"
+                        name="milk"
+                        value="whole"
+                        checked
+                      />
                       <span class="choice-card__dot" aria-hidden="true"></span>
                       <span>Whole milk</span>
                     </label>
@@ -211,16 +249,58 @@
                         type="radio"
                         name="milk"
                         value="oat"
-                        checked
                       />
                       <span class="choice-card__dot" aria-hidden="true"></span>
-                      <span>Oat&nbsp;&nbsp;+$0.80</span>
+                      <span>Oat&nbsp;&nbsp;+20 EGP</span>
                     </label>
 
                     <label class="choice-card">
                       <input class="choice-card__input" type="radio" name="milk" value="almond" />
                       <span class="choice-card__dot" aria-hidden="true"></span>
-                      <span>Almond&nbsp;&nbsp;+$0.80</span>
+                      <span>Almond&nbsp;&nbsp;+20 EGP</span>
+                    </label>
+                  </div>
+                </fieldset>
+
+                <!-- Sugar Level Selection -->
+                <fieldset class="option-group">
+                  <div class="option-group__header">
+                    <legend class="option-group__title">Sugar level</legend>
+                  </div>
+
+                  <div class="choice-grid choice-grid--3col">
+                    <label class="choice-card">
+                      <input
+                        class="choice-card__input"
+                        type="radio"
+                        name="sugar"
+                        value="regular-sugar"
+                        checked
+                      />
+                      <span class="choice-card__dot" aria-hidden="true"></span>
+                      <span>Regular</span>
+                    </label>
+
+                    <label class="choice-card">
+                      <input
+                        class="choice-card__input"
+                        type="radio"
+                        name="sugar"
+                        value="less-sugar"
+                      />
+                      <span class="choice-card__dot" aria-hidden="true"></span>
+                      <span>50% Less</span>
+                    </label>
+
+                    <label class="choice-card">
+                      <input
+                        class="choice-card__input"
+                        type="radio"
+                        name="sugar"
+                        value="no-sugar"
+                      />
+                      <span class="choice-card__dot" aria-hidden="true"></span>
+                      <span>Unsweetened</span>
                     </label>
                   </div>
                 </fieldset>
@@ -242,7 +322,46 @@
                         />
                         <span>Extra espresso shot</span>
                       </span>
-                      <span class="addon-row__price">+$1.00</span>
+                      <span class="addon-row__price">+25 EGP</span>
+                    </label>
+
+                    <label class="addon-row">
+                      <span class="addon-row__left">
+                        <input
+                          class="addon-row__checkbox"
+                          type="checkbox"
+                          name="addon"
+                          value="vanilla-syrup"
+                        />
+                        <span>Vanilla bean syrup</span>
+                      </span>
+                      <span class="addon-row__price">+15 EGP</span>
+                    </label>
+
+                    <label class="addon-row">
+                      <span class="addon-row__left">
+                        <input
+                          class="addon-row__checkbox"
+                          type="checkbox"
+                          name="addon"
+                          value="caramel-syrup"
+                        />
+                        <span>House caramel syrup</span>
+                      </span>
+                      <span class="addon-row__price">+15 EGP</span>
+                    </label>
+
+                    <label class="addon-row">
+                      <span class="addon-row__left">
+                        <input
+                          class="addon-row__checkbox"
+                          type="checkbox"
+                          name="addon"
+                          value="whipped-cream"
+                        />
+                        <span>Whipped cream topping</span>
+                      </span>
+                      <span class="addon-row__price">+15 EGP</span>
                     </label>
 
                     <label class="addon-row">

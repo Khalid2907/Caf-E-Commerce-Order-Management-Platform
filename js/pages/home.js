@@ -1,8 +1,8 @@
 /**
  * COMMON GROUND — Homepage Controller ("01 · Storefront")
  *
- * Bootstraps the shared header state, renders the 4 featured "Neighborhood Favorites"
- * from `productService`, and wires quick-add buttons to `cartService` with visual feedback.
+ * Hydrates featured products from `GET /api/products` via `productService.syncFromBackend()`
+ * while rendering immediately from cache for zero layout shift.
  */
 
 import { initHeader } from "../components/header.js";
@@ -16,7 +16,6 @@ function handleQuickAdd(productId, buttonEl) {
   const addedProduct = cartService.addItem(productId, 1);
   if (!addedProduct) return;
 
-  // Tactile button feedback
   buttonEl.classList.add("is-added");
   buttonEl.textContent = "✓";
 
@@ -33,13 +32,14 @@ function handleQuickAdd(productId, buttonEl) {
   );
 }
 
-function initHomePage() {
+async function initHomePage() {
   initHeader();
 
   const featuredGrid = document.getElementById("featured-products-grid");
-  const featuredProducts = productService.getFeaturedProducts();
+  renderProductGrid(featuredGrid, productService.getFeaturedProducts(), handleQuickAdd);
 
-  renderProductGrid(featuredGrid, featuredProducts, handleQuickAdd);
+  await productService.syncFromBackend();
+  renderProductGrid(featuredGrid, productService.getFeaturedProducts(), handleQuickAdd);
 }
 
 if (document.readyState === "loading") {

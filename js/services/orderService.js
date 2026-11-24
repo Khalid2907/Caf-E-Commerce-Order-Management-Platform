@@ -1,20 +1,21 @@
 /**
- * COMMON GROUND — Order Management & Simulation Service
+ * COMMON GROUND — Order Management Service (Backend REST API + Local Persistence)
  *
- * Manages active order creation, temporary frontend order numbers, live tracking step
- * simulation (Confirmed -> Preparing -> Ready for pickup -> Picked up), and order history
- * matching Figma Frames "05 · Order tracking" and "06 · My orders".
+ * Submits orders to `POST /api/orders` and fetches real-time order tracking status
+ * from `GET /api/orders/track/:reference`.
  */
 
 import { STORAGE_KEYS } from "../config/constants.js";
+import { apiRequest } from "./apiClient.js";
 import { storageService } from "./storageService.js";
 
 const DEFAULT_ACTIVE_ORDER = {
   orderNumber: "1048",
+  orderReference: "1048",
   dateLabel: "TUESDAY, NOVEMBER 24",
   createdAtLabel: "Today · 10:14 am",
-  status: "Preparing", // 'Confirmed' | 'Preparing' | 'Ready' | 'Completed'
-  stepIndex: 1, // 0: Confirmed, 1: Preparing, 2: Ready for pickup, 3: Picked up
+  status: "Preparing",
+  stepIndex: 1,
   estimatedWindow: "10:25–10:30 am",
   confirmedTime: "10:14 am",
   preparingTime: "Started at 10:16 am",
@@ -22,70 +23,111 @@ const DEFAULT_ACTIVE_ORDER = {
   customer: {
     fullName: "Alex Johnson",
     firstName: "Alex",
-    phone: "(503) 555-0142",
+    phone: "+20 100 555 0142",
     email: "alex.johnson@example.com",
     address: "",
   },
   payment: {
-    method: "Credit or debit card",
-    brand: "Visa",
-    last4: "4242",
+    method: "Cash on pickup",
+    brand: "Cash",
+    last4: "",
+    status: "Paid",
   },
   items: [
     {
-      productId: "iced-oat-latte",
-      name: "Iced oat latte",
+      productId: "iced-spanish-latte",
+      name: "Iced Spanish Latte",
       quantity: 1,
-      unitPrice: 5.8,
+      unitPrice: 100,
       customizationSummary: "12 oz · Oat milk",
     },
     {
-      productId: "almond-croissant",
-      name: "Almond croissant",
+      productId: "butter-croissant",
+      name: "Butter Croissant",
       quantity: 1,
-      unitPrice: 4.8,
+      unitPrice: 65,
       customizationSummary: "Freshly baked",
     },
   ],
-  subtotal: 10.6,
-  tax: 0.0,
-  tip: 0.0,
-  deliveryFee: 0.0,
-  discount: 0.0,
-  total: 10.6,
+  subtotal: 165,
+  tax: 0,
+  tip: 0,
+  deliveryFee: 0,
+  discount: 0,
+  total: 165,
 };
 
 const DEFAULT_PAST_ORDERS = [
   {
     orderNumber: "1021",
     date: "Nov 21, 2026",
-    itemsSummary: "Flat white × 2",
-    total: 9.0,
+    itemsSummary: "Flat White × 2",
+    total: 180,
     reorderItems: [{ productId: "flat-white", quantity: 2 }],
   },
   {
     orderNumber: "0986",
     date: "Nov 18, 2026",
-    itemsSummary: "Iced oat latte, croissant",
-    total: 10.6,
+    itemsSummary: "Spanish Latte, Butter Croissant",
+    total: 160,
     reorderItems: [
-      { productId: "iced-oat-latte", quantity: 1 },
-      { productId: "almond-croissant", quantity: 1 },
+      { productId: "spanish-latte", quantity: 1 },
+      { productId: "butter-croissant", quantity: 1 },
     ],
   },
   {
     orderNumber: "0942",
     date: "Nov 14, 2026",
-    itemsSummary: "Batch brew × 2",
-    total: 7.6,
-    reorderItems: [{ productId: "batch-brew", quantity: 2 }],
+    itemsSummary: "Americano × 2",
+    total: 140,
+    reorderItems: [{ productId: "americano", quantity: 2 }],
   },
 ];
 
+function normalizeServerOrder(apiOrder) {
+  const firstName =
+    (apiOrder.customerName || "Alex").trim().split(/\s+/)[0] || "Alex";
+  return {
+    id: apiOrder.id,
+    orderNumber: apiOrder.orderReference,
+    orderReference: apiOrder.orderReference,
+    dateLabel: "TUESDAY, NOVEMBER 24",
+    createdAtLabel: `Today · ${apiOrder.ageLabel || "Just now"}`,
+    status: apiOrder.uiStatus || apiOrder.status,
+    rawStatus: apiOrder.status,
+    stepIndex: apiOrder.stepIndex ?? 1,
+    estimatedWindow: apiOrder.estimatedWindow || "10:25–10:30 am",
+    fulfillment: apiOrder.fulfillmentType || "pickup",
+    customer: {
+      fullName: apiOrder.customerName,
+      firstName,
+      phone: apiOrder.customerPhone,
+      email: apiOrder.customerEmail || "",
+      address: apiOrder.deliveryAddress || "",
+    },
+    payment: {
+      method: apiOrder.paymentMethod === "cash" ? "Cash" : "Card on pickup",
+      brand: apiOrder.paymentMethod === "cash" ? "Cash" : "Visa",
+      last4: apiOrder.paymentMethod === "cash" ? "" : "4242",
+      status: apiOrder.paymentStatus || "Pending",
+    },
+    items: (apiOrder.items || []).map((it) => ({
+      productId: it.productId,
+      name: it.name,
+      quantity: it.quantity,
+      unitPrice: it.unitPrice,
+      customizationSummary: it.customizationSummary,
+    })),
+    subtotal: apiOrder.subtotalEgp,
+    tax: apiOrder.taxEgp || 0,
+    tip: apiOrder.tipEgp || 0,
+    deliveryFee: apiOrder.deliveryFeeEgp || 0,
+    discount: apiOrder.discountEgp || 0,
+    total: apiOrder.totalEgp,
+  };
+}
+
 export const orderService = {
-  /**
-   * Retrieves the current active order (or seeds the default Figma #1048 order).
-   */
   getActiveOrder() {
     const saved = storageService.get(STORAGE_KEYS.ACTIVE_ORDER, null);
     if (saved && saved.orderNumber) {
@@ -96,68 +138,60 @@ export const orderService = {
   },
 
   /**
-   * Creates and persists a new temporary frontend order from Checkout submission.
+   * Submits a new order to the PostgreSQL backend API (`POST /api/orders`).
    */
-  createOrder({
+  async submitOrderToBackend({
     fulfillment,
     customer,
+    deliveryAddress,
     payment,
+    couponCode,
+    tipRate,
+    specialInstructions,
     items,
-    subtotal,
-    tax,
-    tip,
-    deliveryFee,
-    discount = 0,
-    total,
   }) {
-    const previous = this.getActiveOrder();
-    const prevNum = parseInt(previous?.orderNumber, 10);
-    const nextOrderNumber = Number.isFinite(prevNum) && prevNum >= 1048 ? String(prevNum + 1) : "1048";
-
-    const firstName = (customer.fullName || "Alex").trim().split(/\s+/)[0] || "Alex";
-
-    const newOrder = {
-      orderNumber: nextOrderNumber,
-      dateLabel: "TUESDAY, NOVEMBER 24",
-      createdAtLabel: "Today · Just now",
-      status: "Preparing",
-      stepIndex: 1,
-      estimatedWindow: fulfillment === "delivery" ? "10:40–10:50 am" : "10:25–10:30 am",
-      confirmedTime: "10:14 am",
-      preparingTime: "Started at 10:16 am",
-      fulfillment,
-      customer: {
-        ...customer,
-        firstName,
-      },
-      payment: {
-        method: payment.method || "Credit or debit card",
-        brand: "Visa",
-        last4: (payment.cardNumber || "4242").replace(/\D/g, "").slice(-4) || "4242",
-      },
+    const payload = {
+      customerName: customer.fullName,
+      customerPhone: customer.phone,
+      customerEmail: customer.email,
+      fulfillmentType: fulfillment,
+      deliveryAddress,
+      paymentMethod: payment.method || "cash",
+      couponCode: couponCode || "",
+      tipRate: tipRate || 0,
+      specialInstructions: specialInstructions || "",
       items: items.map((item) => ({
         productId: item.productId,
-        name: item.name,
         quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        customizationSummary: item.customizationSummary,
+        customizations: item.customizations || {},
+        customizationSummary: item.customizationSummary || "",
+        specialInstructions: item.customizations?.specialInstructions || "",
       })),
-      subtotal,
-      tax,
-      tip,
-      deliveryFee,
-      discount,
-      total,
     };
 
-    storageService.set(STORAGE_KEYS.ACTIVE_ORDER, newOrder);
-    return newOrder;
+    const apiOrder = await apiRequest("/api/orders", {
+      method: "POST",
+      body: payload,
+    });
+
+    const normalized = normalizeServerOrder(apiOrder);
+    storageService.set(STORAGE_KEYS.ACTIVE_ORDER, normalized);
+    return normalized;
   },
 
   /**
-   * Updates the simulated step index (0..3) of the active order for interactive testing.
-   * @param {number} stepIndex
+   * Fetches live tracking status for an order reference from `GET /api/orders/track/:reference`.
    */
+  async fetchOrderTracking(reference) {
+    const ref = String(reference || this.getActiveOrder().orderNumber)
+      .replace(/^#/, "")
+      .trim();
+    const apiOrder = await apiRequest(`/api/orders/track/${encodeURIComponent(ref)}`);
+    const normalized = normalizeServerOrder(apiOrder);
+    storageService.set(STORAGE_KEYS.ACTIVE_ORDER, normalized);
+    return normalized;
+  },
+
   updateOrderStep(stepIndex) {
     const order = this.getActiveOrder();
     const clamped = Math.max(0, Math.min(3, stepIndex));
@@ -171,9 +205,6 @@ export const orderService = {
     return updated;
   },
 
-  /**
-   * Returns past order history for "06 · My orders".
-   */
   getPastOrders() {
     return DEFAULT_PAST_ORDERS;
   },

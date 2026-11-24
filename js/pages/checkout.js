@@ -1,18 +1,13 @@
 /**
- * COMMON GROUND — Checkout Controller ("04 · Checkout", "18 · Delivery checkout", "14 · Mobile checkout")
+ * COMMON GROUND — Checkout Controller (Full-Stack API Submission)
  *
- * Implements:
- * - Pickup vs. Delivery toggle with dynamic section numbering (01..03 for Pickup, 01..04 for Delivery)
- *   and conditional Delivery Address validation + $2.50 delivery fee + "A smooth handoff." banner.
- * - Tip selector (No tip, 10%, 15%, 20%).
- * - Promo code support (e.g., WELCOME10 for 10% off, MORNING15 for 15% off, COFFEEONUS for $3 off)
- *   matching Figma "20 · Discounts".
- * - Accessible form validation after interaction (:user-invalid + aria-invalid / aria-describedby sync).
- * - Order creation via `orderService.createOrder()` and redirection to `tracking.html`.
+ * Submits validated orders to `POST /api/orders`, persists the created database order,
+ * supports Cash payment (Stage 12F) and Card on pickup, and redirects to `tracking.html?ref=<orderReference>`.
  */
 
 import { initHeader } from "../components/header.js";
-import { APP_CONFIG, STORAGE_KEYS, formatPrice } from "../config/constants.js";
+import { showToast } from "../components/toast.js";
+import { STORAGE_KEYS, formatPrice } from "../config/constants.js";
 import { cartService } from "../services/cartService.js";
 import { orderService } from "../services/orderService.js";
 import { storageService } from "../services/storageService.js";
@@ -20,20 +15,18 @@ import { storageService } from "../services/storageService.js";
 const PROMO_CODES = {
   WELCOME10: { type: "percent", value: 0.1, label: "10% off first order" },
   MORNING15: { type: "percent", value: 0.15, label: "15% off morning ritual" },
-  COFFEEONUS: { type: "fixed", value: 3.0, label: "$3.00 off your order" },
+  COFFEEONUS: { type: "fixed", value: 30, label: "30 EGP off your order" },
 };
 
 const state = {
   fulfillment: storageService.get(STORAGE_KEYS.FULFILLMENT, "pickup"),
+  paymentMethod: "cash",
   tipRate: 0,
   promoCode: "",
   discountAmount: 0,
+  submitting: false,
 };
 
-/**
- * Synchronizes `aria-invalid` and `aria-describedby` with `:user-invalid`
- * per modern-web-guidance `validate-input-after-interaction`.
- */
 function setupValidationSync(form) {
   if (!form) return;
 
@@ -86,9 +79,6 @@ function setupValidationSync(form) {
   );
 }
 
-/**
- * Toggles Pickup vs. Delivery UI sections, headings, and required attributes.
- */
 function updateFulfillmentLayout() {
   const isDelivery = state.fulfillment === "delivery";
 
@@ -140,13 +130,13 @@ function updateFulfillmentLayout() {
 
   if (locationSubnote) {
     locationSubnote.textContent = isDelivery
-      ? "Delivered from Maple Street · $2.50 delivery fee"
-      : "42 Maple Street, Portland, OR · Open until 6:00 pm";
+      ? "Delivered from Maple Street · 25 EGP delivery fee"
+      : "42 Maple Street, Zamalek, Cairo · Open until 6:00 pm";
   }
 
   if (deliverySubtext) {
     deliverySubtext.textContent = isDelivery
-      ? "Available within 3 miles"
+      ? "Available within 5 km"
       : "Enter an address to check availability";
   }
 
@@ -154,7 +144,6 @@ function updateFulfillmentLayout() {
     handoffCard.hidden = !isDelivery;
   }
 
-  // Sync radio inputs
   document.querySelectorAll('input[name="fulfillment"]').forEach((radio) => {
     radio.checked = radio.value === state.fulfillment;
   });
@@ -162,29 +151,40 @@ function updateFulfillmentLayout() {
   renderOrderReview();
 }
 
-/**
- * Calculates and renders the right-hand "Your order" summary and totals.
- */
+function updatePaymentMethodLayout() {
+  const isCard = state.paymentMethod === "card_on_pickup";
+  const cardFields = document.getElementById("card-details-fields");
+  if (cardFields) {
+    cardFields.hidden = !isCard;
+    cardFields.classList.toggle("is-hidden", !isCard);
+    cardFields.querySelectorAll("input").forEach((input) => {
+      input.required = isCard;
+      if (!isCard) {
+        input.setAttribute("aria-invalid", "false");
+        input.classList.remove("user-invalid-fallback");
+      }
+    });
+  }
+}
+
 function renderOrderReview() {
   const summary = cartService.getSummary({
     fulfillment: state.fulfillment,
     tipRate: state.tipRate,
   });
 
-  // Calculate promo discount if active
   let discount = 0;
   if (state.promoCode && PROMO_CODES[state.promoCode]) {
     const promo = PROMO_CODES[state.promoCode];
     discount =
       promo.type === "percent"
-        ? Number((summary.subtotal * promo.value).toFixed(2))
+        ? Math.round(summary.subtotal * promo.value)
         : Math.min(summary.subtotal, promo.value);
   }
   state.discountAmount = discount;
 
   const finalTotal = Math.max(0, Number((summary.total - discount).toFixed(2)));
 
-  // Render items
   const itemsContainer = document.getElementById("checkout-review-items");
   if (itemsContainer) {
     itemsContainer.replaceChildren();
@@ -224,7 +224,6 @@ function renderOrderReview() {
     });
   }
 
-  // Update totals
   const subtotalEl = document.getElementById("checkout-subtotal");
   const taxEl = document.getElementById("checkout-tax");
   const tipEl = document.getElementById("checkout-tip");
@@ -251,7 +250,7 @@ function renderOrderReview() {
 
   if (totalEl) totalEl.textContent = formatPrice(finalTotal);
 
-  if (submitBtn) {
+  if (submitBtn && !state.submitting) {
     const actionVerb =
       state.fulfillment === "delivery" ? "Place delivery order" : "Place pickup order";
     submitBtn.textContent = `${actionVerb}  ·  ${formatPrice(finalTotal)}`;
@@ -262,7 +261,6 @@ function renderOrderReview() {
 function initCheckoutPage() {
   initHeader();
 
-  // Check URL query param `?mode=delivery` or `?mode=pickup`
   const params = new URLSearchParams(window.location.search);
   const modeParam = params.get("mode");
   if (modeParam === "delivery" || modeParam === "pickup") {
@@ -273,8 +271,8 @@ function initCheckoutPage() {
   const form = document.getElementById("checkout-form");
   setupValidationSync(form);
   updateFulfillmentLayout();
+  updatePaymentMethodLayout();
 
-  // Fulfillment radio change
   document.querySelectorAll('input[name="fulfillment"]').forEach((radio) => {
     radio.addEventListener("change", (event) => {
       state.fulfillment = event.target.value;
@@ -283,7 +281,13 @@ function initCheckoutPage() {
     });
   });
 
-  // Tip pills
+  document.querySelectorAll('input[name="paymentMethod"]').forEach((radio) => {
+    radio.addEventListener("change", (event) => {
+      state.paymentMethod = event.target.value;
+      updatePaymentMethodLayout();
+    });
+  });
+
   const tipContainer = document.getElementById("checkout-tip-pills");
   if (tipContainer) {
     tipContainer.addEventListener("click", (event) => {
@@ -299,7 +303,6 @@ function initCheckoutPage() {
     });
   }
 
-  // Promo code toggle & apply
   const promoToggle = document.getElementById("promo-toggle-btn");
   const promoBox = document.getElementById("promo-input-box");
   const promoInput = document.getElementById("promo-code-input");
@@ -327,16 +330,15 @@ function initCheckoutPage() {
         state.promoCode = "";
         if (promoFeedback) {
           promoFeedback.textContent =
-            "Try WELCOME10 (10% off), MORNING15 (15% off), or COFFEEONUS ($3 off).";
+            "Try WELCOME10 (10% off), MORNING15 (15% off), or COFFEEONUS (30 EGP off).";
         }
       }
       renderOrderReview();
     });
   }
 
-  // Form submit -> validate, create order, redirect to tracking.html
   if (form) {
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
       if (!form.checkValidity()) {
         const firstInvalid = form.querySelector(":invalid");
@@ -348,45 +350,63 @@ function initCheckoutPage() {
         fulfillment: state.fulfillment,
         tipRate: state.tipRate,
       });
+      if (summary.totalCount === 0) return;
 
-      const finalTotal = Math.max(
-        0,
-        Number((summary.total - state.discountAmount).toFixed(2))
-      );
+      const submitBtn = document.getElementById("checkout-submit-btn");
+      state.submitting = true;
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting order...";
+      }
 
       const fullName = document.getElementById("customer-name")?.value || "Alex Johnson";
-      const phone = document.getElementById("customer-phone")?.value || "(503) 555-0142";
+      const phone = document.getElementById("customer-phone")?.value || "+20 100 555 0142";
       const email =
         document.getElementById("customer-email")?.value || "alex.johnson@example.com";
       const street = document.getElementById("shipping-address")?.value || "";
-      const city = document.getElementById("shipping-city")?.value || "Portland";
-      const region = document.getElementById("shipping-state")?.value || "OR";
-      const zip = document.getElementById("shipping-zip")?.value || "97205";
-      const cardNumber = document.getElementById("cc-number")?.value || "4242 4242 4242 4242";
+      const city = document.getElementById("shipping-city")?.value || "Cairo";
+      const region = document.getElementById("shipping-state")?.value || "Zamalek";
+      const zip = document.getElementById("shipping-zip")?.value || "11511";
+      const cafeNote = storageService.get("common_ground_cafe_note_v1", "");
 
-      orderService.createOrder({
-        fulfillment: state.fulfillment,
-        customer: {
-          fullName,
-          phone,
-          email,
-          address:
-            state.fulfillment === "delivery" ? `${street}, ${city}, ${region} ${zip}` : "",
-        },
-        payment: {
-          method: "Credit or debit card",
-          cardNumber,
-        },
-        items: summary.items,
-        subtotal: summary.subtotal,
-        tax: summary.tax,
-        tip: summary.tip,
-        deliveryFee: summary.deliveryFee,
-        discount: state.discountAmount,
-        total: finalTotal,
-      });
+      try {
+        const createdOrder = await orderService.submitOrderToBackend({
+          fulfillment: state.fulfillment,
+          customer: {
+            fullName,
+            phone,
+            email,
+          },
+          deliveryAddress:
+            state.fulfillment === "delivery"
+              ? {
+                  streetAddress: street,
+                  city,
+                  stateRegion: region,
+                  postalCode: zip,
+                }
+              : null,
+          payment: {
+            method: state.paymentMethod,
+          },
+          couponCode: state.promoCode,
+          tipRate: state.tipRate,
+          specialInstructions: cafeNote,
+          items: summary.items,
+        });
 
-      window.location.href = "tracking.html";
+        storageService.remove("common_ground_cafe_note_v1");
+        window.location.href = `tracking.html?ref=${encodeURIComponent(
+          createdOrder.orderReference
+        )}`;
+      } catch (err) {
+        state.submitting = false;
+        renderOrderReview();
+        showToast(`Order error: ${err.message}`, {
+          actionLabel: "Review bag",
+          actionHref: "menu.html#your-bag",
+        });
+      }
     });
   }
 }
