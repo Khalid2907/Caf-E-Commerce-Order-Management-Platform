@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Store Management — Common Ground</title>
+
+    <!-- Google Fonts: Instrument Serif & DM Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Modular CSS -->
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/pages/admin.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to admin workspace</a>
+
+    <!-- Admin Authentication Modal -->
+    <div
+      id="admin-auth-overlay"
+      class="auth-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="admin-auth-title"
+      hidden
+    >
+      <div class="auth-modal">
+        <p class="eyebrow eyebrow--pine">STORE MANAGEMENT</p>
+        <h2 id="admin-auth-title" class="heading-serif auth-modal__title">
+          Manager sign in.
+        </h2>
+        <p class="auth-modal__desc">
+          Sign in with your Common Ground store manager credentials to access menu CRUD, orders,
+          customers, and store settings.
+        </p>
+
+        <div class="auth-modal__quick">
+          <button id="admin-quick-fill-btn" type="button" class="auth-modal__quick-btn">
+            Fill Store Manager (Sam Rivera)
+          </button>
+        </div>
+
+        <form id="admin-login-form" class="form-field">
+          <div class="form-field">
+            <label for="admin-login-email" class="form-field__label">Manager email</label>
+            <input
+              id="admin-login-email"
+              type="email"
+              class="form-field__input"
+              value="sam.rivera@commonground.coffee"
+              required
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="admin-login-password" class="form-field__label">Password</label>
+            <input
+              id="admin-login-password"
+              type="password"
+              class="form-field__input"
+              value="CommonGroundAdmin2026!"
+              required
+            />
+          </div>
+
+          <p id="admin-login-error" class="form-field__error" aria-live="polite"></p>
+
+          <button type="submit" class="btn btn--primary">Open Admin Dashboard →</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="admin-shell">
+      <!-- Left Pine Navigation Sidebar (Figma node 6:746) -->
+      <aside class="admin-sidebar" aria-label="Store management navigation">
+        <div class="admin-sidebar__brand">
+          <a class="admin-sidebar__logo" href="index.html">
+            <span>COMMON</span>
+            <span>GROUND</span>
+          </a>
+          <span class="admin-sidebar__eyebrow">STORE MANAGEMENT</span>
+          <div class="admin-location-box">
+            <span>Maple Street</span>
+            <span aria-hidden="true">⌄</span>
+          </div>
+        </div>
+
+        <nav class="admin-nav" aria-label="Admin sections">
+          <button type="button" class="admin-nav__btn is-active" data-admin-nav="overview">
+            <span>Overview</span>
+          </button>
+          <button type="button" class="admin-nav__btn" data-admin-nav="orders">
+            <span>Orders</span>
+            <span id="sidebar-active-orders-badge" class="admin-nav__badge">6</span>
+          </button>
+          <button type="button" class="admin-nav__btn" data-admin-nav="menu">
+            <span>Menu &amp; inventory</span>
+          </button>
+          <button type="button" class="admin-nav__btn" data-admin-nav="customers">
+            <span>Customers</span>
+          </button>
+          <button type="button" class="admin-nav__btn" data-admin-nav="discounts">
+            <span>Discounts</span>
+          </button>
+          <button type="button" class="admin-nav__btn" data-admin-nav="analytics">
+            <span>Analytics</span>
+          </button>
+          <button type="button" class="admin-nav__btn" data-admin-nav="settings">
+            <span>Store settings</span>
+          </button>
+        </nav>
+
+        <div class="admin-sidebar__links">
+          <a class="admin-sidebar__ext" href="index.html">
+            <span>Open storefront</span>
+            <span aria-hidden="true">↗</span>
+          </a>
+          <a class="admin-sidebar__ext" href="barista.html">
+            <span>Barista workspace</span>
+            <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+
+        <div class="admin-profile-box">
+          <span class="admin-profile-box__name">Sam Rivera</span>
+          <span class="admin-profile-box__role">
+            <span>Manager · Account</span>
+            <span aria-hidden="true">⌄</span>
+          </span>
+        </div>
+      </aside>
+
+      <!-- Right Main Workspace -->
+      <div class="admin-workspace">
+        <header class="admin-topbar">
+          <p class="admin-topbar__crumb">
+            Workspace&nbsp;&nbsp;/&nbsp;&nbsp;<strong id="admin-crumb-current">Overview</strong>
+          </p>
+
+          <div class="admin-topbar__right">
+            <span id="admin-topbar-store-status" class="admin-store-pill">●&nbsp;&nbsp;Store open</span>
+            <a href="mailto:hello@commonground.coffee">Help&nbsp;&nbsp;↗</a>
+          </div>
+        </header>
+
+        <main id="main-content">
+          <!-- =================================================================
+               PANEL 1: OVERVIEW (08 · Admin overview)
+               ================================================================= -->
+          <section class="admin-panel" data-admin-section="overview">
+            <div class="admin-panel__header">
+              <div>
+                <h1 class="admin-panel__title">A good day, at a glance.</h1>
+                <p class="admin-panel__subtitle">
+                  Tuesday, November 24, 2026 · Updated just now
+                </p>
+              </div>
+              <div class="admin-panel__actions">
+                <button type="button" class="btn btn--secondary">Today&nbsp;&nbsp;⌄</button>
+              </div>
+            </div>
+
+            <div class="admin-kpi-grid">
+              <div class="admin-kpi-card">
+                <span class="admin-kpi-card__label">Net sales</span>
+                <strong id="ov-net-sales" class="admin-kpi-card__val">1,490 EGP</strong>
+                <span class="admin-kpi-card__delta">↑ 12.4% vs last Tuesday</span>
+              </div>
+              <div class="admin-kpi-card">
+                <span class="admin-kpi-card__label">Orders</span>
+                <strong id="ov-total-orders" class="admin-kpi-card__val">8</strong>
+                <span id="ov-orders-sub" class="admin-kpi-card__delta">6 active · 2 completed</span>
+              </div>
+              <div class="admin-kpi-card">
+                <span class="admin-kpi-card__label">Average order</span>
+                <strong id="ov-avg-order" class="admin-kpi-card__val">186 EGP</strong>
+                <span class="admin-kpi-card__delta">↑ 4.1% vs last Tuesday</span>
+              </div>
+              <div class="admin-kpi-card">
+                <span class="admin-kpi-card__label">Average prep time</span>
+                <strong class="admin-kpi-card__val">6 min</strong>
+                <span class="admin-kpi-card__delta">↓ 2 min vs last Tuesday</span>
+              </div>
+            </div>
+
+            <div class="admin-split-grid">
+              <div class="admin-card">
+                <div class="admin-card__header">
+                  <h2 class="admin-card__title">Sales this week</h2>
+                  <span class="admin-kpi-card__label">Nov 18–24</span>
+                </div>
+                <strong class="admin-kpi-card__val">58,530 EGP</strong>
+                <p class="admin-kpi-card__label">Net sales · Tips excluded · Today so far</p>
+                <div id="ov-weekly-chart" class="weekly-chart"></div>
+              </div>
+
+              <div class="admin-card">
+                <h2 class="admin-card__title">The crowd favorites</h2>
+                <span class="eyebrow">BY UNITS SOLD TODAY</span>
+                <div id="ov-crowd-favorites" class="progress-list"></div>
+              </div>
+            </div>
+
+            <div class="admin-split-grid">
+              <div class="admin-card">
+                <div class="admin-card__header">
+                  <h2 class="admin-card__title">Latest orders</h2>
+                  <button
+                    type="button"
+                    class="action-link"
+                    onclick="document.querySelector('[data-admin-nav=orders]').click()"
+                  >
+                    View all ↗
+                  </button>
+                </div>
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>ORDER</th>
+                      <th>CUSTOMER</th>
+                      <th>STATUS</th>
+                      <th>TOTAL</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ov-latest-orders-tbody"></tbody>
+                </table>
+              </div>
+
+              <div class="admin-card admin-card--sage">
+                <h2 class="admin-card__title">Running smoothly</h2>
+                <p><strong>●&nbsp;&nbsp;Online ordering is active</strong></p>
+                <div class="order-totals">
+                  <div class="order-totals__row">
+                    <span>Pickup estimate</span>
+                    <strong>10–15 min</strong>
+                  </div>
+                  <div class="order-totals__row">
+                    <span>Butter Croissant</span>
+                    <strong>6 left</strong>
+                  </div>
+                  <div class="order-totals__row">
+                    <span>Team on shift</span>
+                    <strong>3 people</strong>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="action-link"
+                  onclick="document.querySelector('[data-admin-nav=settings]').click()"
+                >
+                  Manage store settings ↗
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- =================================================================
+               PANEL 2: ORDERS (09 · Admin orders)
+               ================================================================= -->
+          <section class="admin-panel" data-admin-section="orders" hidden>
+            <div class="admin-panel__header">
+              <div>
+                <h1 class="admin-panel__title">Every order, in order.</h1>
+                <p class="admin-panel__subtitle">
+                  Review, manage, and keep the good things moving.
+                </p>
+              </div>
+            </div>
+
+            <div class="admin-toolbar">
+              <label for="admin-order-search" class="sr-only">Search orders</label>
+              <input
+                id="admin-order-search"
+                type="search"
+                class="admin-search-input"
+                placeholder="Search by order #, customer name, or phone number"
+              />
+            </div>
+
+            <div class="admin-filter-tabs" role="tablist">
+              <button type="button" class="admin-filter-tab is-active" data-order-tab="all">
+                All orders
+              </button>
+              <button type="button" class="admin-filter-tab" data-order-tab="New">New</button>
+              <button type="button" class="admin-filter-tab" data-order-tab="Preparing">
+                Preparing
+              </button>
+              <button type="button" class="admin-filter-tab" data-order-tab="Ready">Ready</button>
+              <button type="button" class="admin-filter-tab" data-order-tab="Completed">
+                Completed
+              </button>
+            </div>
+
+            <div class="admin-split-grid">
+              <div class="admin-table-wrap">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>ORDER</th>
+                      <th>CUSTOMER</th>
+                      <th>TYPE</th>
+                      <th>STATUS</th>
+                      <th>TOTAL</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-orders-tbody"></tbody>
+                </table>
+              </div>
+
+              <!-- Right Order Inspector (Figma node 6:967) -->
+              <aside class="inspector-card" aria-labelledby="insp-order-title">
+                <div class="inspector-card__header">
+                  <h2 id="insp-order-title" class="inspector-card__title">Order #1048</h2>
+                  <span id="insp-order-status" class="status-badge status-badge--preparing"
+                    >Preparing</span
+                  >
+                </div>
+                <p id="insp-order-meta" class="admin-kpi-card__label">
+                  Pickup · Today at 10:14 am
+                </p>
+
+                <div>
+                  <strong id="insp-order-customer">Alex Johnson</strong>
+                  <p id="insp-order-phone" class="admin-kpi-card__label">+20 100 555 0142</p>
+                </div>
+
+                <span class="eyebrow">ITEMS</span>
+                <div id="insp-order-items" class="receipt-items"></div>
+
+                <div
+                  id="insp-order-note"
+                  class="ticket-note ticket-note--standard"
+                  hidden
+                ></div>
+
+                <div class="order-grand-total">
+                  <span>Total</span>
+                  <strong id="insp-order-total" class="order-grand-total__val">165 EGP</strong>
+                </div>
+
+                <button
+                  id="insp-order-advance-btn"
+                  type="button"
+                  class="btn btn--primary"
+                  data-target-status="Ready"
+                >
+                  Mark ready for pickup
+                </button>
+
+                <button
+                  id="insp-order-cancel-btn"
+                  type="button"
+                  class="btn btn--secondary"
+                >
+                  Cancel &amp; issue refund
+                </button>
+              </aside>
+            </div>
+          </section>
+
+          <!-- =================================================================
+               PANEL 3: MENU & INVENTORY CRUD (10 · Menu management)
+               ================================================================= -->
+          <section class="admin-panel" data-admin-section="menu" hidden>
+            <div class="admin-panel__header">
+              <div>
+                <h1 class="admin-panel__title">A menu worth coming back for.</h1>
+                <p class="admin-panel__subtitle">
+                  Keep your offerings fresh, accurate, and available.
+                </p>
+              </div>
+              <div class="admin-panel__actions">
+                <input
+                  id="new-category-name-input"
+                  type="text"
+                  class="form-field__input"
+                  placeholder="New category name..."
+                  hidden
+                />
+                <button id="admin-add-category-btn" type="button" class="btn btn--secondary">
+                  Manage categories +
+                </button>
+                <button id="admin-add-product-btn" type="button" class="btn btn--primary">
+                  + Add product
+                </button>
+              </div>
+            </div>
+
+            <div class="admin-kpi-grid">
+              <div class="admin-kpi-card">
+                <span class="admin-kpi-card__label">Total products</span>
+                <strong id="menu-kpi-total" class="admin-kpi-card__val">18</strong>
+              </div>
+              <div class="admin-kpi-card">
+                <span class="admin-kpi-card__label">Available now</span>
+                <strong id="menu-kpi-available" class="admin-kpi-card__val">18</strong>
+              </div>
+              <div class="admin-kpi-card">
+                <span class="admin-kpi-card__label">Low stock</span>
+                <strong
+                  id="menu-kpi-low"
+                  class="admin-kpi-card__val admin-kpi-card__val--terracotta"
+                  >1</strong
+                >
+              </div>
+              <div class="admin-kpi-card">
+                <span class="admin-kpi-card__label">Sold out</span>
+                <strong
+                  id="menu-kpi-soldout"
+                  class="admin-kpi-card__val admin-kpi-card__val--terracotta"
+                  >0</strong
+                >
+              </div>
+            </div>
+
+            <div class="admin-toolbar">
+              <label for="admin-product-search" class="sr-only">Search products or SKU</label>
+              <input
+                id="admin-product-search"
+                type="search"
+                class="admin-search-input"
+                placeholder="Search products or SKU"
+              />
+
+              <label for="admin-product-cat-filter" class="sr-only">Filter by category</label>
+              <select id="admin-product-cat-filter" class="form-field__input">
+                <option value="all">All categories</option>
+              </select>
+            </div>
+
+            <div class="admin-split-grid">
+              <div class="admin-table-wrap">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>PRODUCT</th>
+                      <th>CATEGORY</th>
+                      <th>PRICE</th>
+                      <th>STATUS</th>
+                      <th>STOCK</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-products-tbody"></tbody>
+                </table>
+              </div>
+
+              <!-- Right Product CRUD Inspector (Figma node 6:1138) -->
+              <aside class="inspector-card" aria-labelledby="prod-editor-heading">
+                <div class="inspector-card__header">
+                  <h2 id="prod-editor-heading" class="inspector-card__title">Edit product</h2>
+                </div>
+
+                <img
+                  id="edit-prod-preview"
+                  class="inspector-card__preview"
+                  src="assets/images/product-almond-croissant.png"
+                  alt="Product preview"
+                />
+
+                <form id="admin-product-editor-form" class="form-field">
+                  <div class="form-field">
+                    <label for="edit-prod-name" class="form-field__label">Product name</label>
+                    <input
+                      id="edit-prod-name"
+                      type="text"
+                      class="form-field__input"
+                      required
+                    />
+                  </div>
+
+                  <div class="inspector-row-2col">
+                    <div class="form-field">
+                      <label for="edit-prod-category" class="form-field__label">Category</label>
+                      <select id="edit-prod-category" class="form-field__input"></select>
+                    </div>
+
+                    <div class="form-field">
+                      <label for="edit-prod-price" class="form-field__label">Price (EGP)</label>
+                      <input
+                        id="edit-prod-price"
+                        type="number"
+                        min="0"
+                        step="1"
+                        class="form-field__input"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div class="inspector-row-2col">
+                    <div class="form-field">
+                      <label for="edit-prod-stock" class="form-field__label"
+                        >Available quantity</label
+                      >
+                      <input
+                        id="edit-prod-stock"
+                        type="number"
+                        min="0"
+                        class="form-field__input"
+                        required
+                      />
+                    </div>
+
+                    <div class="form-field">
+                      <label for="edit-prod-availability" class="form-field__label"
+                        >Availability</label
+                      >
+                      <select id="edit-prod-availability" class="form-field__input">
+                        <option value="true">In stock</option>
+                        <option value="false">Sold out / Hidden</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-field">
+                    <label for="edit-prod-desc" class="form-field__label">Description</label>
+                    <input id="edit-prod-desc" type="text" class="form-field__input" />
+                  </div>
+
+                  <div class="form-field">
+                    <label for="edit-prod-allergens" class="form-field__label">ALLERGENS</label>
+                    <input id="edit-prod-allergens" type="text" class="form-field__input" />
+                  </div>
+
+                  <div class="inspector-actions">
+                    <button type="submit" class="btn btn--primary">Save changes</button>
+                    <button
+                      id="edit-prod-delete-btn"
+                      type="button"
+                      class="btn btn--destructive"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </form>
+              </aside>
+            </div>
+          </section>
+
+          <!-- =================================================================
+               PANEL 4: CUSTOMERS & LOYALTY (19 · Customers & loyalty)
+               ================================================================= -->
+          <section class="admin-panel" data-admin-section="customers" hidden>
+            <div class="admin-panel__header">
+              <div>
+                <h1 class="admin-panel__title">Know your regulars.</h1>
+                <p class="admin-panel__subtitle">A little recognition goes a long way.</p>
+              </div>
+            </div>
+
+            <div class="admin-kpi-grid">
+              <div class="admin-kpi-card">
+                <span class="admin-kpi-card__label">Customers</span>
+                <strong class="admin-kpi-card__val">1,248</strong>
+              </div>
+              <div class="admin-kpi-card">
+                <span class="admin-kpi-card__label">Returning customers</span>
+                <strong class="admin-kpi-card__val">64.2%</strong>
+              </div>
+              <div class="admin-kpi-card">
+                <span class="admin-kpi-card__label">Loyalty members</span>
+                <strong class="admin-kpi-card__val">830</strong>
+              </div>
+              <div class="admin-kpi-card">
+                <span class="admin-kpi-card__label">Active in 30 days</span>
+                <strong class="admin-kpi-card__val">426</strong>
+              </div>
+            </div>
+
+            <div class="admin-split-grid">
+              <div class="admin-table-wrap">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>CUSTOMER</th>
+                      <th>ORDERS</th>
+                      <th>SPENT</th>
+                      <th>LAST VISIT</th>
+                      <th>POINTS</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-customers-tbody"></tbody>
+                </table>
+              </div>
+
+              <aside class="inspector-card" aria-labelledby="insp-cust-name">
+                <h2 id="insp-cust-name" class="inspector-card__title">Alex Johnson</h2>
+                <p class="admin-kpi-card__label">Regular since January 9, 2026</p>
+
+                <div class="pickup-info-card" style="min-block-size: auto; padding: 18px">
+                  <p class="pickup-info-card__eyebrow">REGULARS CLUB</p>
+                  <strong id="insp-cust-points" class="pickup-info-card__title"
+                    >120 points</strong
+                  >
+                  <p class="pickup-info-card__instructions" style="margin: 0">
+                    80 more to a coffee on us
+                  </p>
+                </div>
+
+                <div class="inspector-row-2col">
+                  <strong id="insp-cust-orders">24 orders</strong>
+                  <strong id="insp-cust-spent">2,428 EGP spent</strong>
+                </div>
+
+                <div>
+                  <span class="eyebrow">CONTACT DETAILS</span>
+                  <p id="insp-cust-contact" class="admin-kpi-card__label"></p>
+                </div>
+
+                <div>
+                  <span class="eyebrow">PREFERENCES</span>
+                  <p id="insp-cust-usual" class="admin-kpi-card__label"></p>
+                </div>
+
+                <div class="form-field">
+                  <label for="insp-cust-points-input" class="form-field__label"
+                    >Adjust loyalty points</label
+                  >
+                  <div class="inspector-actions">
+                    <input
+                      id="insp-cust-points-input"
+                      type="number"
+                      min="0"
+                      class="form-field__input"
+                      value="120"
+                    />
+                    <button
+                      id="insp-cust-save-points-btn"
+                      type="button"
+                      class="btn btn--secondary"
+                    >
+                      Update points
+                    </button>
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </section>
+
+          <!-- =================================================================
+               PANEL 5: DISCOUNTS (20 · Discounts)
+               ================================================================= -->
+          <section class="admin-panel" data-admin-section="discounts" hidden>
+            <div class="admin-panel__header">
+              <div>
+                <h1 class="admin-panel__title">Give them a reason to return.</h1>
+                <p class="admin-panel__subtitle">
+                  Thoughtful offers. Clear rules. Measurable results.
+                </p>
+              </div>
+              <div class="admin-panel__actions">
+                <button id="admin-create-coupon-btn" type="button" class="btn btn--primary">
+                  + Create discount
+                </button>
+              </div>
+            </div>
+
+            <div class="admin-kpi-grid">
+              <div class="admin-kpi-card">
+                <span class="admin-kpi-card__label">Active discounts</span>
+                <strong class="admin-kpi-card__val">3</strong>
+              </div>
+              <div class="admin-kpi-card">
+                <span class="admin-kpi-card__label">Redemptions this month</span>
+                <strong class="admin-kpi-card__val">184</strong>
+              </div>
+              <div class="admin-kpi-card">
+                <span class="admin-kpi-card__label">Attributed revenue</span>
+                <strong class="admin-kpi-card__val">24,180 EGP</strong>
+              </div>
+              <div class="admin-kpi-card">
+                <span class="admin-kpi-card__label">Discount spend</span>
+                <strong class="admin-kpi-card__val">2,860 EGP</strong>
+              </div>
+            </div>
+
+            <div class="admin-split-grid">
+              <div class="admin-table-wrap">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>CODE / OFFER</th>
+                      <th>STATUS</th>
+                      <th>USES</th>
+                      <th>ENDS</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-coupons-tbody"></tbody>
+                </table>
+              </div>
+
+              <aside class="inspector-card" aria-label="Discount editor">
+                <h2 class="inspector-card__title">Edit discount</h2>
+                <form id="admin-coupon-editor-form" class="form-field">
+                  <div class="form-field">
+                    <label for="edit-coupon-code" class="form-field__label">Discount code</label>
+                    <input
+                      id="edit-coupon-code"
+                      type="text"
+                      class="form-field__input"
+                      required
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label for="edit-coupon-desc" class="form-field__label">Description</label>
+                    <input
+                      id="edit-coupon-desc"
+                      type="text"
+                      class="form-field__input"
+                      required
+                    />
+                  </div>
+                  <div class="inspector-row-2col">
+                    <div class="form-field">
+                      <label for="edit-coupon-type" class="form-field__label">Discount type</label>
+                      <select id="edit-coupon-type" class="form-field__input">
+                        <option value="percentage">Percentage (%)</option>
+                        <option value="fixed">Fixed (EGP)</option>
+                      </select>
+                    </div>
+                    <div class="form-field">
+                      <label for="edit-coupon-value" class="form-field__label">Value</label>
+                      <input
+                        id="edit-coupon-value"
+                        type="number"
+                        min="1"
+                        class="form-field__input"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="inspector-row-2col">
+                    <div class="form-field">
+                      <label for="edit-coupon-min" class="form-field__label"
+                        >Minimum order (EGP)</label
+                      >
+                      <input
+                        id="edit-coupon-min"
+                        type="number"
+                        min="0"
+                        class="form-field__input"
+                      />
+                    </div>
+                    <div class="form-field">
+                      <label for="edit-coupon-status" class="form-field__label">Status</label>
+                      <select id="edit-coupon-status" class="form-field__input">
+                        <option value="Active">Active</option>
+                        <option value="Scheduled">Scheduled</option>
+                        <option value="Paused">Paused</option>
+                        <option value="Expired">Expired</option>
+                      </select>
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn--primary">Save discount</button>
+                </form>
+              </aside>
+            </div>
+          </section>
+
+          <!-- =================================================================
+               PANEL 6: ANALYTICS (21 · Sales analytics)
+               ================================================================= -->
+          <section class="admin-panel" data-admin-section="analytics" hidden>
+            <div class="admin-panel__header">
+              <div>
+                <h1 class="admin-panel__title">Good decisions start here.</h1>
+                <p class="admin-panel__subtitle">
+                  Sales, habits, and the details that help your café grow.
+                </p>
+              </div>
+            </div>
+
+            <div class="admin-kpi-grid">
+              <div class="admin-kpi-card">
+                <span class="admin-kpi-card__label">Net sales (30d)</span>
+                <strong class="admin-kpi-card__val">246,800 EGP</strong>
+                <span class="admin-kpi-card__delta">↑ 18.2% vs previous 30 days</span>
+              </div>
+              <div class="admin-kpi-card">
+                <span class="admin-kpi-card__label">Orders</span>
+                <strong class="admin-kpi-card__val">2,281</strong>
+                <span class="admin-kpi-card__delta">↑ 13.6% vs previous 30 days</span>
+              </div>
+              <div class="admin-kpi-card">
+                <span class="admin-kpi-card__label">Average order</span>
+                <strong class="admin-kpi-card__val">108 EGP</strong>
+                <span class="admin-kpi-card__delta">↑ 4.0% vs previous 30 days</span>
+              </div>
+              <div class="admin-kpi-card">
+                <span class="admin-kpi-card__label">Returning customers</span>
+                <strong class="admin-kpi-card__val">64.2%</strong>
+                <span class="admin-kpi-card__delta">↑ 6.8 pts vs previous 30 days</span>
+              </div>
+            </div>
+
+            <div class="admin-split-grid">
+              <div class="admin-card">
+                <h2 class="admin-card__title">Top products (Last 30 days)</h2>
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>PRODUCT</th>
+                      <th>UNITS SOLD</th>
+                      <th>NET SALES</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Spanish Latte</strong></td>
+                      <td>632</td>
+                      <td><strong>60,040 EGP</strong></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Flat White</strong></td>
+                      <td>560</td>
+                      <td><strong>50,400 EGP</strong></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Americano</strong></td>
+                      <td>414</td>
+                      <td><strong>28,980 EGP</strong></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Butter Croissant</strong></td>
+                      <td>382</td>
+                      <td><strong>24,830 EGP</strong></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Iced Matcha</strong></td>
+                      <td>211</td>
+                      <td><strong>23,210 EGP</strong></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="admin-card">
+                <h2 class="admin-card__title">What’s in the cup</h2>
+                <span class="eyebrow">REVENUE BY CATEGORY</span>
+                <div class="progress-list">
+                  <div class="progress-item">
+                    <div class="progress-item__row">
+                      <span>Coffee</span>
+                      <strong>68%</strong>
+                    </div>
+                    <div class="progress-item__track">
+                      <div class="progress-item__fill" style="inline-size: 68%"></div>
+                    </div>
+                  </div>
+                  <div class="progress-item">
+                    <div class="progress-item__row">
+                      <span>Desserts &amp; Bakery</span>
+                      <strong>22%</strong>
+                    </div>
+                    <div class="progress-item__track">
+                      <div
+                        class="progress-item__fill progress-item__fill--terracotta"
+                        style="inline-size: 22%"
+                      ></div>
+                    </div>
+                  </div>
+                  <div class="progress-item">
+                    <div class="progress-item__row">
+                      <span>Non-Coffee &amp; Matcha</span>
+                      <strong>7%</strong>
+                    </div>
+                    <div class="progress-item__track">
+                      <div class="progress-item__fill" style="inline-size: 7%"></div>
+                    </div>
+                  </div>
+                  <div class="progress-item">
+                    <div class="progress-item__row">
+                      <span>Food &amp; Sandwiches</span>
+                      <strong>3%</strong>
+                    </div>
+                    <div class="progress-item__track">
+                      <div class="progress-item__fill" style="inline-size: 3%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- =================================================================
+               PANEL 7: STORE SETTINGS & STAFF (11 · Store settings)
+               ================================================================= -->
+          <section class="admin-panel" data-admin-section="settings" hidden>
+            <div class="admin-panel__header">
+              <div>
+                <h1 class="admin-panel__title">Your café. Your rhythm.</h1>
+                <p class="admin-panel__subtitle">Configure how and when you take orders.</p>
+              </div>
+              <div class="admin-panel__actions">
+                <button id="admin-save-settings-btn" type="button" class="btn btn--primary">
+                  Save settings
+                </button>
+              </div>
+            </div>
+
+            <div class="admin-split-grid">
+              <div class="admin-card">
+                <h2 class="admin-card__title">Pickup &amp; Local Delivery Configuration</h2>
+
+                <div class="inspector-row-2col">
+                  <div class="form-field">
+                    <label for="set-prep-minutes" class="form-field__label"
+                      >Standard preparation time (minutes)</label
+                    >
+                    <input
+                      id="set-prep-minutes"
+                      type="number"
+                      min="1"
+                      class="form-field__input"
+                      value="10"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label for="set-buffer-minutes" class="form-field__label"
+                      >Pickup buffer (minutes)</label
+                    >
+                    <input
+                      id="set-buffer-minutes"
+                      type="number"
+                      min="0"
+                      class="form-field__input"
+                      value="5"
+                    />
+                  </div>
+                </div>
+
+                <div class="inspector-row-2col">
+                  <div class="form-field">
+                    <label for="set-max-orders" class="form-field__label"
+                      >Maximum active orders</label
+                    >
+                    <input
+                      id="set-max-orders"
+                      type="number"
+                      min="1"
+                      class="form-field__input"
+                      value="12"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label for="set-delivery-fee" class="form-field__label"
+                      >Local delivery fee (EGP)</label
+                    >
+                    <input
+                      id="set-delivery-fee"
+                      type="number"
+                      min="0"
+                      class="form-field__input"
+                      value="25"
+                    />
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label for="set-min-order" class="form-field__label"
+                    >Minimum delivery order (EGP)</label
+                  >
+                  <input
+                    id="set-min-order"
+                    type="number"
+                    min="0"
+                    class="form-field__input"
+                    value="100"
+                  />
+                </div>
+
+                <h3 class="admin-card__title" style="margin-block-start: 16px">
+                  Team &amp; Staff Roster
+                </h3>
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>STAFF MEMBER</th>
+                      <th>ROLE</th>
+                      <th>STATION</th>
+                      <th>SHIFT</th>
+                      <th>STATUS</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-staff-tbody"></tbody>
+                </table>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 20px">
+                <div class="admin-card">
+                  <h2 class="admin-card__title">Maple Street</h2>
+                  <p class="admin-kpi-card__label">42 Maple Street · Zamalek, Cairo</p>
+                  <div class="feedback-banner feedback-banner--success">
+                    <p class="feedback-banner__title">●&nbsp;&nbsp;Open now · Closes at 6:00 pm</p>
+                  </div>
+                  <div class="order-totals">
+                    <div class="order-totals__row">
+                      <span>Monday–Friday</span>
+                      <strong>7:00 am – 6:00 pm</strong>
+                    </div>
+                    <div class="order-totals__row">
+                      <span>Saturday–Sunday</span>
+                      <strong>8:00 am – 5:00 pm</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="admin-card admin-card--rose">
+                  <h2 class="admin-card__title" style="color: var(--color-terracotta)">
+                    Need a breather?
+                  </h2>
+                  <p>Pause online orders without changing your regular business hours.</p>
+                  <button
+                    id="settings-pause-orders-btn"
+                    type="button"
+                    class="btn btn--secondary"
+                  >
+                    Pause online ordering
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <!-- Socket.IO Client & Admin Controller -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="module" src="js/pages/admin.js"></script>
+  </body>
+</html>
