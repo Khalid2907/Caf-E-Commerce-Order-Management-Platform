@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Barista Workspace — Common Ground</title>
+
+    <!-- Google Fonts: Instrument Serif & DM Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Modular CSS -->
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/pages/barista.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to barista queue</a>
+
+    <!-- Staff Authentication Gate Modal -->
+    <div
+      id="barista-auth-overlay"
+      class="auth-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="barista-auth-title"
+      hidden
+    >
+      <div class="auth-modal">
+        <p class="eyebrow eyebrow--pine">BARISTA WORKSPACE</p>
+        <h2 id="barista-auth-title" class="heading-serif auth-modal__title">
+          Staff sign in.
+        </h2>
+        <p class="auth-modal__desc">
+          Sign in with your Common Ground barista or manager credentials to manage live incoming
+          orders.
+        </p>
+
+        <div class="auth-modal__quick">
+          <button type="button" class="auth-modal__quick-btn" data-quick-fill="barista">
+            Fill Lead Barista (Jamie)
+          </button>
+          <button type="button" class="auth-modal__quick-btn" data-quick-fill="admin">
+            Fill Manager (Sam)
+          </button>
+        </div>
+
+        <form id="barista-login-form" class="form-field">
+          <div class="form-field">
+            <label for="barista-login-email" class="form-field__label">Staff email</label>
+            <input
+              id="barista-login-email"
+              type="email"
+              class="form-field__input"
+              value="jamie@commonground.coffee"
+              required
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="barista-login-password" class="form-field__label">Password</label>
+            <input
+              id="barista-login-password"
+              type="password"
+              class="form-field__input"
+              value="CommonGroundBarista2026!"
+              required
+            />
+          </div>
+
+          <p id="barista-login-error" class="form-field__error" aria-live="polite"></p>
+
+          <button type="submit" class="btn btn--primary">Open Barista Workspace →</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Top Operational Header (Figma node 6:27) -->
+    <header class="barista-topbar">
+      <div class="barista-topbar__inner">
+        <div class="barista-topbar__left">
+          <a class="barista-topbar__logo" href="index.html">
+            <span>COMMON</span>
+            <span>GROUND</span>
+          </a>
+          <span class="barista-topbar__label">BARISTA WORKSPACE</span>
+        </div>
+
+        <nav class="barista-tabs" aria-label="Queue filter">
+          <button id="barista-tab-live" type="button" class="barista-tabs__btn is-active">
+            Live orders · 6
+          </button>
+          <button id="barista-tab-completed" type="button" class="barista-tabs__btn">
+            Completed
+          </button>
+        </nav>
+
+        <div class="barista-topbar__right">
+          <span>Maple Street&nbsp;&nbsp;⌄</span>
+          <span id="barista-user-label" class="barista-topbar__user">Jamie · Barista</span>
+          <a class="barista-topbar__link" href="admin.html">Admin ↗</a>
+          <button id="barista-logout-btn" type="button" class="barista-topbar__link">
+            Sign out
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main id="main-content" class="barista-main">
+      <!-- Title & Live Controls (Figma nodes 6:660–6:667) -->
+      <section class="barista-header" aria-labelledby="barista-page-title">
+        <div>
+          <h1 id="barista-page-title" class="barista-header__title">The morning rhythm.</h1>
+          <p class="barista-header__time">Tuesday, November 24 · 10:20 am</p>
+        </div>
+
+        <div class="barista-header__actions">
+          <span class="live-indicator" role="status">
+            <span class="live-indicator__dot" aria-hidden="true"></span>
+            <span>Live · Updated just now</span>
+          </span>
+
+          <button id="barista-sound-btn" type="button" class="barista-ctrl-btn">Sound on</button>
+          <button id="barista-pause-btn" type="button" class="barista-ctrl-btn">
+            Pause online orders
+          </button>
+        </div>
+      </section>
+
+      <!-- 4 Operational KPI Cards (Figma nodes 6:668–6:683) -->
+      <section class="barista-metrics" aria-label="Station performance metrics">
+        <div class="metric-card">
+          <span class="metric-card__label">Active orders</span>
+          <strong id="metric-active-orders" class="metric-card__value">6</strong>
+          <span class="metric-card__sub">Across all stations</span>
+        </div>
+
+        <div class="metric-card">
+          <span class="metric-card__label">Oldest order</span>
+          <strong class="metric-card__value">9 min</strong>
+          <span class="metric-card__sub">Placed at 10:11 am</span>
+        </div>
+
+        <div class="metric-card">
+          <span class="metric-card__label">Avg. prep time</span>
+          <strong class="metric-card__value">6 min</strong>
+          <span class="metric-card__sub">2 min faster than yesterday</span>
+        </div>
+
+        <div class="metric-card">
+          <span class="metric-card__label">Picked up today</span>
+          <strong id="metric-picked-up" class="metric-card__value">38</strong>
+          <span class="metric-card__sub">44 orders including active</span>
+        </div>
+      </section>
+
+      <!-- 3-Column Live Order Kanban Board (Figma nodes 6:684–6:740) -->
+      <section id="barista-kanban-board" class="kanban-board" aria-label="Live order queues">
+        <!-- Column 1: New / Pending -->
+        <div class="kanban-col">
+          <div class="kanban-col__header">
+            <h2 class="kanban-col__title">New</h2>
+            <span id="kanban-new-count" class="kanban-col__badge">2</span>
+          </div>
+          <div id="kanban-new-list" class="kanban-list" aria-live="polite"></div>
+        </div>
+
+        <!-- Column 2: Preparing -->
+        <div class="kanban-col">
+          <div class="kanban-col__header">
+            <h2 class="kanban-col__title">Preparing</h2>
+            <span
+              id="kanban-preparing-count"
+              class="kanban-col__badge kanban-col__badge--amber"
+              >2</span
+            >
+          </div>
+          <div id="kanban-preparing-list" class="kanban-list" aria-live="polite"></div>
+        </div>
+
+        <!-- Column 3: Ready for pickup -->
+        <div class="kanban-col">
+          <div class="kanban-col__header">
+            <h2 class="kanban-col__title">Ready for pickup</h2>
+            <span id="kanban-ready-count" class="kanban-col__badge">2</span>
+          </div>
+          <div id="kanban-ready-list" class="kanban-list" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- Bottom Availability Status Bar (Figma node 6:741) -->
+      <footer class="barista-footer-bar">
+        <span id="barista-store-status-label" class="barista-footer-bar__status">
+          ●&nbsp;&nbsp;Store is accepting orders
+        </span>
+        <span class="barista-footer-bar__stock">
+          Butter Croissant: 6 left&nbsp;&nbsp;·&nbsp;&nbsp;All drinks available
+        </span>
+        <a class="barista-footer-bar__link" href="admin.html#menu">
+          <span>Manage availability</span>
+          <span aria-hidden="true">↗</span>
+        </a>
+      </footer>
+    </main>
+
+    <!-- Socket.IO Client & Barista Controller -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="module" src="js/pages/barista.js"></script>
+  </body>
+</html>
