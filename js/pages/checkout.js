@@ -110,6 +110,7 @@ function updateFulfillmentLayout() {
 
   if (deliverySection) {
     deliverySection.hidden = !isDelivery;
+    deliverySection.classList.toggle("is-hidden", !isDelivery);
     deliverySection.querySelectorAll("input").forEach((input) => {
       input.required = isDelivery;
       if (!isDelivery) {

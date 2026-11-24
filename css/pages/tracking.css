@@ -394,7 +394,7 @@
 /* ==========================================================================
    Responsive Adaptations (Tablet 768–1199px & Mobile < 768px)
    ========================================================================== */
-@media (max-width: 1199px) {
+@media (max-width: 960px) {
   .tracking-grid {
     grid-template-columns: 1fr;
   }

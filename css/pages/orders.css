@@ -301,7 +301,7 @@
 /* ==========================================================================
    Responsive Breakpoints (Tablet & Mobile)
    ========================================================================== */
-@media (max-width: 1199px) {
+@media (max-width: 960px) {
   .account-grid {
     grid-template-columns: 1fr;
   }

@@ -89,6 +89,11 @@
   flex-direction: column;
 }
 
+.checkout-section[hidden],
+.is-hidden {
+  display: none !important;
+}
+
 .checkout-section__divider {
   block-size: 1px;
   background-color: var(--color-line);
@@ -193,11 +198,11 @@
 }
 
 .checkout-field-row--address {
-  grid-template-columns: minmax(0, 315px) minmax(0, 120px) minmax(0, 1fr);
+  grid-template-columns: 2fr 1fr 1.5fr;
 }
 
 .checkout-field-row--card {
-  grid-template-columns: minmax(0, 355px) minmax(0, 170px) minmax(0, 170px);
+  grid-template-columns: 2fr 1fr 1fr;
 }
 
 .checkout-field {
@@ -594,7 +599,7 @@
 /* ==========================================================================
    Responsive Breakpoints (Tablet 768–1199px & Mobile < 768px)
    ========================================================================== */
-@media (max-width: 1199px) {
+@media (max-width: 960px) {
   .checkout-grid {
     grid-template-columns: 1fr;
   }

@@ -193,7 +193,7 @@
   color: var(--color-muted);
 }
 
-@media (max-width: 1199px) {
+@media (max-width: 960px) {
   .signin-grid {
     grid-template-columns: 1fr;
   }

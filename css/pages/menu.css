@@ -579,7 +579,7 @@
 /* ==========================================================================
    Responsive Breakpoints (Tablet 768–1199px & Mobile < 768px)
    ========================================================================== */
-@media (max-width: 1199px) {
+@media (max-width: 960px) {
   .menu-workspace__grid {
     grid-template-columns: 1fr;
     gap: var(--space-32);

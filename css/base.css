@@ -83,6 +83,10 @@ ol {
   list-style: none;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 /* Accessibility: Visible Focus Ring (04 / Built to adapt) */
 :focus-visible {
   outline: 2px solid var(--color-pine);
