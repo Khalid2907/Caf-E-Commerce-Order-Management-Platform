@@ -33,10 +33,11 @@ export function createProductCardElement(product) {
   img.loading = "lazy";
   mediaWrapper.appendChild(img);
 
-  if (product.badge) {
+  const badgeLabel = !product.available ? "SOLD OUT" : product.badge;
+  if (badgeLabel) {
     const badge = document.createElement("span");
     badge.className = "product-card__badge";
-    badge.textContent = product.badge;
+    badge.textContent = badgeLabel;
     mediaWrapper.appendChild(badge);
   }
 
@@ -77,9 +78,16 @@ export function createProductCardElement(product) {
   const addButton = document.createElement("button");
   addButton.type = "button";
   addButton.className = "btn-quick-add";
-  addButton.dataset.quickAdd = product.id;
-  addButton.setAttribute("aria-label", `Add ${product.name} to bag`);
-  addButton.textContent = "+";
+  if (!product.available) {
+    addButton.disabled = true;
+    addButton.setAttribute("aria-disabled", "true");
+    addButton.setAttribute("aria-label", `${product.name} is sold out`);
+    addButton.textContent = "×";
+  } else {
+    addButton.dataset.quickAdd = product.id;
+    addButton.setAttribute("aria-label", `Add ${product.name} to bag`);
+    addButton.textContent = "+";
+  }
 
   footer.appendChild(addButton);
   article.appendChild(footer);

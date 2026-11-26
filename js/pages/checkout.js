@@ -8,14 +8,16 @@
 import { initHeader } from "../components/header.js";
 import { showToast } from "../components/toast.js";
 import { STORAGE_KEYS, formatPrice } from "../config/constants.js";
+import { apiRequest } from "../services/apiClient.js";
 import { cartService } from "../services/cartService.js";
 import { orderService } from "../services/orderService.js";
 import { storageService } from "../services/storageService.js";
 
 const PROMO_CODES = {
-  WELCOME10: { type: "percent", value: 0.1, label: "10% off first order" },
-  MORNING15: { type: "percent", value: 0.15, label: "15% off morning ritual" },
-  COFFEEONUS: { type: "fixed", value: 30, label: "30 EGP off your order" },
+  WELCOME10: { type: "percent", value: 0.1, minOrder: 80, label: "10% off first order" },
+  MORNING15: { type: "percent", value: 0.15, minOrder: 100, label: "15% off morning ritual (min 100 EGP)" },
+  COFFEEONUS: { type: "fixed", value: 30, minOrder: 150, label: "30 EGP off orders over 150 EGP" },
+  OATLOVER: { type: "fixed", value: 20, minOrder: 95, label: "Free oat milk upgrade (20 EGP off)" },
 };
 
 const state = {
@@ -23,8 +25,10 @@ const state = {
   paymentMethod: "cash",
   tipRate: 0,
   promoCode: "",
+  appliedCoupon: null,
   discountAmount: 0,
   submitting: false,
+  idempotencyKey: `cg_chk_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
 };
 
 function setupValidationSync(form) {
@@ -174,12 +178,21 @@ function renderOrderReview() {
   });
 
   let discount = 0;
-  if (state.promoCode && PROMO_CODES[state.promoCode]) {
+  if (state.appliedCoupon && state.promoCode === state.appliedCoupon.code) {
+    if (summary.subtotal >= (state.appliedCoupon.minOrderEgp || 0)) {
+      discount =
+        state.appliedCoupon.discountType === "percentage"
+          ? Math.round(summary.subtotal * (state.appliedCoupon.discountValue / 100) * 100) / 100
+          : Math.min(summary.subtotal, state.appliedCoupon.discountValue);
+    }
+  } else if (state.promoCode && PROMO_CODES[state.promoCode]) {
     const promo = PROMO_CODES[state.promoCode];
-    discount =
-      promo.type === "percent"
-        ? Math.round(summary.subtotal * promo.value)
-        : Math.min(summary.subtotal, promo.value);
+    if (summary.subtotal >= (promo.minOrder || 0)) {
+      discount =
+        promo.type === "percent"
+          ? Math.round(summary.subtotal * promo.value)
+          : Math.min(summary.subtotal, promo.value);
+    }
   }
   state.discountAmount = discount;
 
@@ -319,18 +332,30 @@ function initCheckoutPage() {
   }
 
   if (promoApplyBtn && promoInput) {
-    promoApplyBtn.addEventListener("click", () => {
+    promoApplyBtn.addEventListener("click", async () => {
       const code = promoInput.value.trim().toUpperCase();
-      if (PROMO_CODES[code]) {
-        state.promoCode = code;
+      if (!code) return;
+      const summary = cartService.getSummary({
+        fulfillment: state.fulfillment,
+        tipRate: state.tipRate,
+      });
+      try {
+        const validated = await apiRequest("/api/coupons/validate", {
+          method: "POST",
+          body: { code, subtotalEgp: summary.subtotal },
+        });
+        state.promoCode = validated.code;
+        state.appliedCoupon = validated;
         if (promoFeedback) {
-          promoFeedback.textContent = `✓ Applied ${code} (${PROMO_CODES[code].label})`;
+          promoFeedback.textContent = `✓ Applied ${validated.code} (${validated.description})`;
         }
-      } else {
+      } catch (err) {
         state.promoCode = "";
+        state.appliedCoupon = null;
         if (promoFeedback) {
           promoFeedback.textContent =
-            "Try WELCOME10 (10% off), MORNING15 (15% off), or COFFEEONUS (30 EGP off).";
+            err.message ||
+            "Try WELCOME10 (10% off), MORNING15 (15% off min 120 EGP), or COFFEEONUS (50 EGP off min 200 EGP).";
         }
       }
       renderOrderReview();
@@ -392,9 +417,11 @@ function initCheckoutPage() {
           couponCode: state.promoCode,
           tipRate: state.tipRate,
           specialInstructions: cafeNote,
+          idempotencyKey: state.idempotencyKey,
           items: summary.items,
         });
 
+        cartService.clear();
         storageService.remove("common_ground_cafe_note_v1");
         window.location.href = `tracking.html?ref=${encodeURIComponent(
           createdOrder.orderReference

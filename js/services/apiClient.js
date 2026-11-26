@@ -569,16 +569,16 @@ const INITIAL_COUPONS = [
   {
     id: 3,
     code: "COFFEEONUS",
-    description: "50 EGP off orders over 200 EGP",
+    description: "30 EGP off orders over 150 EGP",
     discountType: "fixed",
-    discountValue: 50,
-    minOrderEgp: 200,
-    maxDiscountEgp: 50,
+    discountValue: 30,
+    minOrderEgp: 150,
+    maxDiscountEgp: 30,
     usageLimit: 200,
-    usedCount: 64,
+    usedCount: 44,
     status: "Active",
-    startsAt: "Nov 10, 2026",
-    endsAt: "Dec 31, 2026",
+    startsAt: "Nov 1, 2026",
+    endsAt: "Dec 15, 2026",
   },
   {
     id: 4,
@@ -1119,6 +1119,50 @@ function handleClientFallback(endpoint, { method = "GET", body = null } = {}) {
   }
 
   // 8. COUPONS / DISCOUNTS
+  if (path === "/api/coupons/validate" && method === "POST") {
+    const coupons = getFallbackCollection(FALLBACK_KEYS.COUPONS, INITIAL_COUPONS);
+    const code = String(body?.code || "").trim().toUpperCase();
+    const subtotalEgp = Math.max(0, Number(body?.subtotalEgp) || 0);
+    const coupon = coupons.find((c) => c.code.toUpperCase() === code);
+    if (!coupon) {
+      const err = new Error(`Promo code "${code}" was not found.`);
+      err.status = 404;
+      err.code = "COUPON_NOT_FOUND";
+      throw err;
+    }
+    if (coupon.status !== "Active" || coupon.usedCount >= coupon.usageLimit) {
+      const err = new Error(`Promo code "${code}" is no longer active.`);
+      err.status = 422;
+      err.code = "COUPON_INACTIVE";
+      throw err;
+    }
+    if (subtotalEgp < Number(coupon.minOrderEgp || 0)) {
+      const err = new Error(
+        `Promo code "${code}" requires a minimum subtotal of ${coupon.minOrderEgp} EGP.`
+      );
+      err.status = 422;
+      err.code = "COUPON_MIN_ORDER";
+      throw err;
+    }
+    let discountEgp =
+      coupon.discountType === "percentage"
+        ? Math.round(subtotalEgp * (Number(coupon.discountValue) / 100) * 100) / 100
+        : Number(coupon.discountValue);
+    if (coupon.maxDiscountEgp) {
+      discountEgp = Math.min(discountEgp, Number(coupon.maxDiscountEgp));
+    }
+    discountEgp = Math.min(discountEgp, subtotalEgp);
+    return {
+      id: coupon.id,
+      code: coupon.code,
+      description: coupon.description,
+      discountType: coupon.discountType,
+      discountValue: Number(coupon.discountValue),
+      minOrderEgp: Number(coupon.minOrderEgp || 0),
+      discountEgp: Number(discountEgp.toFixed(2)),
+    };
+  }
+
   if (path === "/api/admin/coupons" && method === "GET") {
     return getFallbackCollection(FALLBACK_KEYS.COUPONS, INITIAL_COUPONS);
   }

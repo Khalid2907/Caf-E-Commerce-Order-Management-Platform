@@ -5,11 +5,65 @@
 const express = require("express");
 const rateLimit = require("express-rate-limit");
 const db = require("../db");
-const { authenticate, requireRole } = require("../middleware/auth");
-const { hashPassword, verifyPassword, signToken } = require("../utils/crypto");
+const { authenticate, requireRole, extractToken } = require("../middleware/auth");
+const { hashPassword, verifyPassword, signToken, verifyToken } = require("../utils/crypto");
 const { sendNewOrderTelegramAlert } = require("../services/telegramService");
 
 const router = express.Router();
+
+// In-memory idempotency cache for duplicate order submission protection (BUG-006)
+const recentIdempotencyOrders = new Map();
+
+/**
+ * Strips HTML tags from user-supplied text fields to prevent Stored XSS at the DB boundary (BUG-003).
+ * @param {string} value
+ * @returns {string}
+ */
+function stripHtmlTags(value) {
+  if (value === null || value === undefined) return "";
+  return String(value)
+    .replace(/<[^>]*>/g, "")
+    .trim();
+}
+
+/**
+ * Redacts sensitive customer PII on public unauthenticated order tracking lookups (BUG-002).
+ * @param {object} order
+ * @returns {object}
+ */
+function sanitizePublicTrackingOrder(order) {
+  if (!order) return null;
+  const nameParts = String(order.customerName || "Guest").trim().split(/\s+/);
+  const firstName = nameParts[0] || "Guest";
+  const lastInitial = nameParts.length > 1 ? ` ${nameParts[nameParts.length - 1][0]}.` : "";
+
+  const digits = String(order.customerPhone || "").replace(/\D/g, "");
+  const last4 = digits.slice(-4) || "0000";
+  const maskedPhone = `+20 ••• ••• ${last4}`;
+
+  let maskedEmail = "";
+  if (order.customerEmail && order.customerEmail.includes("@")) {
+    const [local, domain] = order.customerEmail.split("@");
+    maskedEmail = `${local[0] || "u"}•••@${domain}`;
+  }
+
+  let maskedAddress = null;
+  if (order.deliveryAddress) {
+    const parts = String(order.deliveryAddress)
+      .split(",")
+      .map((p) => p.trim())
+      .filter(Boolean);
+    maskedAddress = parts.length > 1 ? parts.slice(1).join(", ") : "Delivery address on file";
+  }
+
+  return {
+    ...order,
+    customerName: `${firstName}${lastInitial}`,
+    customerPhone: maskedPhone,
+    customerEmail: maskedEmail,
+    deliveryAddress: maskedAddress,
+  };
+}
 
 // Legacy slug alias map so existing links (?id=iced-oat-latte, ?id=batch-brew, ?id=almond-croissant) work seamlessly
 const PRODUCT_SLUG_ALIASES = {
@@ -113,28 +167,46 @@ function formatProductRow(row, customizationGroups = undefined) {
 }
 
 /**
- * Helper: Loads full order with items & customizations by ID or reference.
+ * Helper: Batch-loads full orders with items & customizations in at most 3 SQL queries
+ * (Eliminates N+1 query bottleneck — BUG-004).
+ * @param {Array<object>} orderRows
+ * @returns {Promise<Array<object>>}
  */
-async function loadFullOrder(whereColumn, value) {
-  const orderRes = await db.query(
-    `SELECT * FROM orders WHERE ${whereColumn} = $1 LIMIT 1`,
-    [value]
-  );
-  if (orderRes.rows.length === 0) return null;
-  const ord = orderRes.rows[0];
+async function hydrateOrderRowsBatch(orderRows) {
+  if (!Array.isArray(orderRows) || orderRows.length === 0) return [];
 
+  const orderIds = orderRows.map((o) => o.id);
   const itemsRes = await db.query(
-    `SELECT * FROM order_items WHERE order_id = $1 ORDER BY id ASC`,
-    [ord.id]
+    `SELECT * FROM order_items WHERE order_id = ANY($1) ORDER BY id ASC`,
+    [orderIds]
   );
 
-  const items = [];
-  for (const it of itemsRes.rows) {
+  const itemIds = itemsRes.rows.map((it) => it.id);
+  const custByItemId = new Map();
+
+  if (itemIds.length > 0) {
     const custRes = await db.query(
-      `SELECT * FROM order_item_customizations WHERE order_item_id = $1 ORDER BY id ASC`,
-      [it.id]
+      `SELECT * FROM order_item_customizations WHERE order_item_id = ANY($1) ORDER BY id ASC`,
+      [itemIds]
     );
-    items.push({
+    for (const c of custRes.rows) {
+      if (!custByItemId.has(c.order_item_id)) {
+        custByItemId.set(c.order_item_id, []);
+      }
+      custByItemId.get(c.order_item_id).push({
+        groupName: c.group_name_snapshot,
+        optionName: c.option_name_snapshot,
+        priceDeltaEgp: Number(c.price_delta_egp),
+      });
+    }
+  }
+
+  const itemsByOrderId = new Map();
+  for (const it of itemsRes.rows) {
+    if (!itemsByOrderId.has(it.order_id)) {
+      itemsByOrderId.set(it.order_id, []);
+    }
+    itemsByOrderId.get(it.order_id).push({
       id: it.id,
       productId: it.product_slug_snapshot,
       name: it.product_name_snapshot,
@@ -146,11 +218,7 @@ async function loadFullOrder(whereColumn, value) {
       lineTotalEgp: Number(it.line_total_egp),
       customizationSummary: it.customization_summary || "",
       specialInstructions: it.special_instructions || "",
-      customizations: custRes.rows.map((c) => ({
-        groupName: c.group_name_snapshot,
-        optionName: c.option_name_snapshot,
-        priceDeltaEgp: Number(c.price_delta_egp),
-      })),
+      customizations: custByItemId.get(it.id) || [],
     });
   }
 
@@ -164,43 +232,57 @@ async function loadFullOrder(whereColumn, value) {
     Rejected: 0,
   };
 
-  const minutesAgo = Math.max(
-    0,
-    Math.round((Date.now() - new Date(ord.created_at).getTime()) / 60000)
-  );
+  return orderRows.map((ord) => {
+    const minutesAgo = Math.max(
+      0,
+      Math.round((Date.now() - new Date(ord.created_at).getTime()) / 60000)
+    );
+    return {
+      id: ord.id,
+      orderReference: ord.order_reference,
+      orderNumber: ord.order_reference,
+      customerId: ord.customer_id,
+      customerName: ord.customer_name,
+      customerPhone: ord.customer_phone,
+      customerEmail: ord.customer_email,
+      fulfillmentType: ord.fulfillment_type,
+      deliveryAddress: ord.delivery_address_snapshot,
+      status: ord.status,
+      uiStatus: ord.status === "Pending" ? "New" : ord.status,
+      stepIndex: stepIndexMap[ord.status] ?? 1,
+      paymentStatus: ord.payment_status,
+      paymentMethod: ord.payment_method,
+      subtotalEgp: Number(ord.subtotal_egp),
+      discountEgp: Number(ord.discount_egp),
+      deliveryFeeEgp: Number(ord.delivery_fee_egp),
+      tipEgp: Number(ord.tip_egp),
+      taxEgp: Number(ord.tax_egp),
+      totalEgp: Number(ord.total_egp),
+      subtotal: Number(ord.subtotal_egp),
+      total: Number(ord.total_egp),
+      specialInstructions: ord.special_instructions || "",
+      allergyFlag: Boolean(ord.allergy_flag),
+      estimatedWindow: ord.estimated_window || "10:25–10:30 am",
+      rejectionReason: ord.rejection_reason || "",
+      minutesAgo,
+      ageLabel: minutesAgo <= 0 ? "Just now" : `${minutesAgo} min ago`,
+      createdAt: ord.created_at,
+      items: itemsByOrderId.get(ord.id) || [],
+    };
+  });
+}
 
-  return {
-    id: ord.id,
-    orderReference: ord.order_reference,
-    orderNumber: ord.order_reference,
-    customerId: ord.customer_id,
-    customerName: ord.customer_name,
-    customerPhone: ord.customer_phone,
-    customerEmail: ord.customer_email,
-    fulfillmentType: ord.fulfillment_type,
-    deliveryAddress: ord.delivery_address_snapshot,
-    status: ord.status,
-    uiStatus: ord.status === "Pending" ? "New" : ord.status,
-    stepIndex: stepIndexMap[ord.status] ?? 1,
-    paymentStatus: ord.payment_status,
-    paymentMethod: ord.payment_method,
-    subtotalEgp: Number(ord.subtotal_egp),
-    discountEgp: Number(ord.discount_egp),
-    deliveryFeeEgp: Number(ord.delivery_fee_egp),
-    tipEgp: Number(ord.tip_egp),
-    taxEgp: Number(ord.tax_egp),
-    totalEgp: Number(ord.total_egp),
-    subtotal: Number(ord.subtotal_egp),
-    total: Number(ord.total_egp),
-    specialInstructions: ord.special_instructions || "",
-    allergyFlag: Boolean(ord.allergy_flag),
-    estimatedWindow: ord.estimated_window || "10:25–10:30 am",
-    rejectionReason: ord.rejection_reason || "",
-    minutesAgo,
-    ageLabel: minutesAgo <= 0 ? "Just now" : `${minutesAgo} min ago`,
-    createdAt: ord.created_at,
-    items,
-  };
+/**
+ * Helper: Loads full order with items & customizations by ID or reference.
+ */
+async function loadFullOrder(whereColumn, value) {
+  const orderRes = await db.query(
+    `SELECT * FROM orders WHERE ${whereColumn} = $1 LIMIT 1`,
+    [value]
+  );
+  if (orderRes.rows.length === 0) return null;
+  const hydrated = await hydrateOrderRowsBatch(orderRes.rows);
+  return hydrated[0] || null;
 }
 
 // =============================================================================
@@ -525,37 +607,45 @@ async function fetchCustomizationGroupsForProduct(productId) {
     [productId]
   );
 
-  const groups = [];
-  for (const g of groupsRes.rows) {
-    const optsRes = await db.query(
-      `SELECT * FROM customization_options
-       WHERE group_id = $1 AND is_available = TRUE
-       ORDER BY display_order ASC, id ASC`,
-      [g.id]
-    );
-    groups.push({
-      id: g.slug,
-      dbId: g.id,
-      slug: g.slug,
-      name: g.name,
-      isRequired: g.is_required,
-      minSelections: g.min_selections,
-      maxSelections: g.max_selections,
-      options: optsRes.rows.map((o) => ({
-        id: o.slug,
-        dbId: o.id,
-        slug: o.slug,
-        label: o.name,
-        name: o.name,
-        shortLabel: o.short_label || o.name,
-        priceDelta: Number(o.price_delta_egp),
-        priceDeltaEgp: Number(o.price_delta_egp),
-        priceDeltaPiastres: Number(o.price_delta_piastres),
-        isDefault: o.is_default,
-      })),
+  if (groupsRes.rows.length === 0) return [];
+  const groupIds = groupsRes.rows.map((g) => g.id);
+
+  const optsRes = await db.query(
+    `SELECT * FROM customization_options
+     WHERE group_id = ANY($1) AND is_available = TRUE
+     ORDER BY display_order ASC, id ASC`,
+    [groupIds]
+  );
+
+  const optsByGroupId = new Map();
+  for (const o of optsRes.rows) {
+    if (!optsByGroupId.has(o.group_id)) {
+      optsByGroupId.set(o.group_id, []);
+    }
+    optsByGroupId.get(o.group_id).push({
+      id: o.slug,
+      dbId: o.id,
+      slug: o.slug,
+      label: o.name,
+      name: o.name,
+      shortLabel: o.short_label || o.name,
+      priceDelta: Number(o.price_delta_egp),
+      priceDeltaEgp: Number(o.price_delta_egp),
+      priceDeltaPiastres: Number(o.price_delta_piastres),
+      isDefault: o.is_default,
     });
   }
-  return groups;
+
+  return groupsRes.rows.map((g) => ({
+    id: g.slug,
+    dbId: g.id,
+    slug: g.slug,
+    name: g.name,
+    isRequired: g.is_required,
+    minSelections: g.min_selections,
+    maxSelections: g.max_selections,
+    options: optsByGroupId.get(g.id) || [],
+  }));
 }
 
 router.get("/products", async (req, res, next) => {
@@ -987,23 +1077,122 @@ router.get("/customizations", async (req, res, next) => {
 });
 
 // =============================================================================
-// 5. ORDERS & TRANSACTIONAL ORDER PROCESSING (Stages 09 & 12E)
+// 5. COUPON VALIDATION & TRANSACTIONAL ORDER PROCESSING (Stages 09 & 12E)
 // =============================================================================
+
+router.post("/coupons/validate", async (req, res, next) => {
+  try {
+    const { code, subtotalEgp = 0 } = req.body || {};
+    if (!code || !String(code).trim()) {
+      return res.status(400).json({
+        success: false,
+        error: { code: "VALIDATION_ERROR", message: "Promo code is required." },
+      });
+    }
+
+    const normalizedCode = String(code).trim().toUpperCase();
+    const couponRes = await db.query(
+      "SELECT * FROM coupons WHERE UPPER(code) = $1 LIMIT 1",
+      [normalizedCode]
+    );
+
+    if (couponRes.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: "COUPON_NOT_FOUND",
+          message: `Promo code "${normalizedCode}" was not found.`,
+        },
+      });
+    }
+
+    const coupon = couponRes.rows[0];
+    if (coupon.status !== "Active" || coupon.used_count >= coupon.usage_limit) {
+      return res.status(422).json({
+        success: false,
+        error: {
+          code: "COUPON_INACTIVE",
+          message: `Promo code "${normalizedCode}" is no longer active.`,
+        },
+      });
+    }
+
+    const numericSubtotal = Math.max(0, Number(subtotalEgp) || 0);
+    const minOrderEgp = Number(coupon.min_order_egp) || 0;
+    if (numericSubtotal < minOrderEgp) {
+      return res.status(422).json({
+        success: false,
+        error: {
+          code: "COUPON_MIN_ORDER",
+          message: `Promo code "${normalizedCode}" requires a minimum subtotal of ${minOrderEgp} EGP.`,
+        },
+      });
+    }
+
+    let discountEgp =
+      coupon.discount_type === "percentage"
+        ? Math.round(numericSubtotal * (Number(coupon.discount_value) / 100) * 100) / 100
+        : Number(coupon.discount_value);
+
+    if (coupon.max_discount_egp) {
+      discountEgp = Math.min(discountEgp, Number(coupon.max_discount_egp));
+    }
+    discountEgp = Math.min(discountEgp, numericSubtotal);
+
+    res.json({
+      success: true,
+      data: {
+        id: coupon.id,
+        code: coupon.code,
+        description: coupon.description,
+        discountType: coupon.discount_type,
+        discountValue: Number(coupon.discount_value),
+        minOrderEgp,
+        discountEgp: Number(discountEgp.toFixed(2)),
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
 
 router.post("/orders", orderLimiter, async (req, res, next) => {
   try {
-    const {
-      customerName,
-      customerPhone,
-      customerEmail = "",
-      fulfillmentType = "pickup",
-      deliveryAddress = null,
-      paymentMethod = "cash",
-      couponCode = "",
-      tipRate = 0,
-      specialInstructions = "",
-      items = [],
-    } = req.body || {};
+    const rawBody = req.body || {};
+    const customerName = stripHtmlTags(rawBody.customerName);
+    const customerPhone = stripHtmlTags(rawBody.customerPhone);
+    const customerEmail = stripHtmlTags(rawBody.customerEmail || "");
+    const fulfillmentType = rawBody.fulfillmentType || "pickup";
+    const deliveryAddress = rawBody.deliveryAddress
+      ? {
+          streetAddress: stripHtmlTags(rawBody.deliveryAddress.streetAddress),
+          city: stripHtmlTags(rawBody.deliveryAddress.city || "Cairo"),
+          stateRegion: stripHtmlTags(rawBody.deliveryAddress.stateRegion || "Cairo"),
+          postalCode: stripHtmlTags(rawBody.deliveryAddress.postalCode || "11511"),
+          deliveryNotes: stripHtmlTags(rawBody.deliveryAddress.deliveryNotes || ""),
+        }
+      : null;
+    const paymentMethod = rawBody.paymentMethod || "cash";
+    const couponCode = stripHtmlTags(rawBody.couponCode || "");
+    const tipRate = rawBody.tipRate || 0;
+    const specialInstructions = stripHtmlTags(rawBody.specialInstructions || "");
+    const items = rawBody.items || [];
+    const idempotencyKey = stripHtmlTags(
+      req.headers["idempotency-key"] || rawBody.idempotencyKey || ""
+    );
+
+    if (idempotencyKey && recentIdempotencyOrders.has(idempotencyKey)) {
+      const cached = recentIdempotencyOrders.get(idempotencyKey);
+      if (Date.now() - cached.timestamp < 5 * 60 * 1000) {
+        const existingOrder = await loadFullOrder("id", cached.orderId);
+        if (existingOrder) {
+          return res.status(200).json({
+            success: true,
+            data: { ...existingOrder, deduplicated: true },
+          });
+        }
+      }
+    }
 
     // 1. Basic Input Validation
     if (!customerName || !String(customerName).trim()) {
@@ -1452,6 +1641,13 @@ router.post("/orders", orderLimiter, async (req, res, next) => {
 
     const fullOrder = await loadFullOrder("id", createdOrderId);
 
+    if (idempotencyKey) {
+      recentIdempotencyOrders.set(idempotencyKey, {
+        orderId: createdOrderId,
+        timestamp: Date.now(),
+      });
+    }
+
     // Emit real-time Socket.IO event to Barista & Admin dashboards
     const io = req.app.get("io");
     if (io) {
@@ -1492,7 +1688,17 @@ router.get("/orders/track/:reference", async (req, res, next) => {
         },
       });
     }
-    res.json({ success: true, data: order });
+
+    // Check if caller is authenticated staff; otherwise redact PII on public tracking (BUG-002)
+    const token = extractToken(req);
+    const decodedStaff = token ? verifyToken(token) : null;
+    const isStaff =
+      decodedStaff && ["admin", "barista"].includes(decodedStaff.role);
+
+    res.json({
+      success: true,
+      data: isStaff ? order : sanitizePublicTrackingOrder(order),
+    });
   } catch (err) {
     next(err);
   }
@@ -1556,15 +1762,11 @@ router.get(
         conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
       const ordersRes = await db.query(
-        `SELECT id FROM orders ${whereClause} ORDER BY id DESC LIMIT 50`,
+        `SELECT * FROM orders ${whereClause} ORDER BY id DESC LIMIT 50`,
         params
       );
 
-      const fullOrders = [];
-      for (const row of ordersRes.rows) {
-        const loaded = await loadFullOrder("id", row.id);
-        if (loaded) fullOrders.push(loaded);
-      }
+      const fullOrders = await hydrateOrderRowsBatch(ordersRes.rows);
 
       res.json({
         success: true,

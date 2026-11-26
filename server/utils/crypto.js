@@ -5,9 +5,13 @@
 
 const crypto = require("crypto");
 
-const DEFAULT_SECRET =
-  process.env.AUTH_TOKEN_SECRET ||
-  "common-ground-dev-hmac-secret-change-in-production-64-bytes-key";
+function getSigningSecret() {
+  return (
+    process.env.JWT_SECRET ||
+    process.env.AUTH_TOKEN_SECRET ||
+    "common-ground-dev-hmac-secret-change-in-production-64-bytes-key"
+  );
+}
 
 /**
  * Hashes a plaintext password using salted scrypt.
@@ -44,13 +48,14 @@ function verifyPassword(password, storedHash) {
  * @returns {string}
  */
 function signToken(payload, expiresInHours = 24) {
+  const secret = getSigningSecret();
   const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString(
     "base64url"
   );
-  const exp = Math.floor(Date.now() / 1000) + expiresInHours * 3600;
+  const exp = Math.floor(Date.now() / 1000) + Math.round(expiresInHours * 3600);
   const body = Buffer.from(JSON.stringify({ ...payload, exp })).toString("base64url");
   const signature = crypto
-    .createHmac("sha256", DEFAULT_SECRET)
+    .createHmac("sha256", secret)
     .update(`${header}.${body}`)
     .digest("base64url");
   return `${header}.${body}.${signature}`;
@@ -66,8 +71,9 @@ function verifyToken(token) {
   const parts = token.split(".");
   if (parts.length !== 3) return null;
   const [header, body, signature] = parts;
+  const secret = getSigningSecret();
   const expectedSig = crypto
-    .createHmac("sha256", DEFAULT_SECRET)
+    .createHmac("sha256", secret)
     .update(`${header}.${body}`)
     .digest("base64url");
 
@@ -93,4 +99,5 @@ module.exports = {
   verifyPassword,
   signToken,
   verifyToken,
+  getSigningSecret,
 };

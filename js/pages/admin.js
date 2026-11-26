@@ -145,7 +145,9 @@ function renderOverview() {
       tr.dataset.inspectOrder = ord.orderReference;
 
       const tdRef = document.createElement("td");
-      tdRef.innerHTML = `<strong>#${ord.orderReference}</strong>`;
+      const refStrong = document.createElement("strong");
+      refStrong.textContent = `#${ord.orderReference}`;
+      tdRef.appendChild(refStrong);
       const tdCust = document.createElement("td");
       tdCust.textContent = ord.customerName;
       const tdStatus = document.createElement("td");
@@ -154,7 +156,9 @@ function renderOverview() {
       pill.textContent = ord.uiStatus;
       tdStatus.appendChild(pill);
       const tdTotal = document.createElement("td");
-      tdTotal.innerHTML = `<strong>${formatPrice(ord.totalEgp)}</strong>`;
+      const totalStrong = document.createElement("strong");
+      totalStrong.textContent = formatPrice(ord.totalEgp);
+      tdTotal.appendChild(totalStrong);
 
       tr.appendChild(tdRef);
       tr.appendChild(tdCust);
@@ -202,7 +206,9 @@ function renderOrdersSection() {
     }
 
     const tdRef = document.createElement("td");
-    tdRef.innerHTML = `<strong>#${ord.orderReference}</strong>`;
+    const refStrong = document.createElement("strong");
+    refStrong.textContent = `#${ord.orderReference}`;
+    tdRef.appendChild(refStrong);
 
     const tdCust = document.createElement("td");
     const nameP = document.createElement("strong");
@@ -224,7 +230,9 @@ function renderOrdersSection() {
     tdStatus.appendChild(pill);
 
     const tdTotal = document.createElement("td");
-    tdTotal.innerHTML = `<strong>${formatPrice(ord.totalEgp)}</strong>`;
+    const totalStrong = document.createElement("strong");
+    totalStrong.textContent = formatPrice(ord.totalEgp);
+    tdTotal.appendChild(totalStrong);
 
     tr.appendChild(tdRef);
     tr.appendChild(tdCust);
@@ -409,7 +417,9 @@ function renderMenuInventorySection() {
     tdCat.textContent = prod.categoryName || prod.categoryId;
 
     const tdPrice = document.createElement("td");
-    tdPrice.innerHTML = `<strong>${formatPrice(prod.priceEgp)}</strong>`;
+    const priceStrong = document.createElement("strong");
+    priceStrong.textContent = formatPrice(prod.priceEgp);
+    tdPrice.appendChild(priceStrong);
 
     const tdStatus = document.createElement("td");
     const badge = document.createElement("span");
@@ -498,21 +508,29 @@ function renderCustomersSection() {
     }
 
     const tdName = document.createElement("td");
-    tdName.innerHTML = `<strong>${c.fullName}</strong><span class="admin-table__sku">${
-      c.email || ""
-    }</span>`;
+    const nameStrong = document.createElement("strong");
+    nameStrong.textContent = c.fullName;
+    const emailSpan = document.createElement("span");
+    emailSpan.className = "admin-table__sku";
+    emailSpan.textContent = c.email || "";
+    tdName.appendChild(nameStrong);
+    tdName.appendChild(emailSpan);
 
     const tdOrders = document.createElement("td");
     tdOrders.textContent = String(c.ordersCount);
 
     const tdSpent = document.createElement("td");
-    tdSpent.innerHTML = `<strong>${formatPrice(c.totalSpentEgp)}</strong>`;
+    const spentStrong = document.createElement("strong");
+    spentStrong.textContent = formatPrice(c.totalSpentEgp);
+    tdSpent.appendChild(spentStrong);
 
     const tdVisit = document.createElement("td");
     tdVisit.textContent = c.lastVisit || "Today";
 
     const tdPoints = document.createElement("td");
-    tdPoints.innerHTML = `<strong>${c.loyaltyPoints}</strong>`;
+    const ptsStrong = document.createElement("strong");
+    ptsStrong.textContent = String(c.loyaltyPoints);
+    tdPoints.appendChild(ptsStrong);
 
     tr.appendChild(tdName);
     tr.appendChild(tdOrders);
@@ -567,7 +585,13 @@ function renderDiscountsSection() {
     }
 
     const tdCode = document.createElement("td");
-    tdCode.innerHTML = `<strong>${c.code}</strong><span class="admin-table__sku">${c.description}</span>`;
+    const codeStrong = document.createElement("strong");
+    codeStrong.textContent = c.code;
+    const descSpan = document.createElement("span");
+    descSpan.className = "admin-table__sku";
+    descSpan.textContent = c.description;
+    tdCode.appendChild(codeStrong);
+    tdCode.appendChild(descSpan);
 
     const tdStatus = document.createElement("td");
     const pill = document.createElement("span");
@@ -656,15 +680,36 @@ function renderSettingsSection() {
     staffTbody.replaceChildren();
     state.staff.forEach((st) => {
       const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td><strong>${st.fullName}</strong><span class="admin-table__sku">${st.email}</span></td>
-        <td>${st.title} (${st.role})</td>
-        <td>${st.station}</td>
-        <td>${st.shiftLabel}</td>
-        <td><span class="status-badge status-badge--new">${
-          st.isOnShift ? "On shift" : "Off shift"
-        }</span></td>
-      `;
+
+      const tdName = document.createElement("td");
+      const nameStrong = document.createElement("strong");
+      nameStrong.textContent = st.fullName;
+      const emailSpan = document.createElement("span");
+      emailSpan.className = "admin-table__sku";
+      emailSpan.textContent = st.email;
+      tdName.appendChild(nameStrong);
+      tdName.appendChild(emailSpan);
+
+      const tdRole = document.createElement("td");
+      tdRole.textContent = `${st.title} (${st.role})`;
+
+      const tdStation = document.createElement("td");
+      tdStation.textContent = st.station;
+
+      const tdShift = document.createElement("td");
+      tdShift.textContent = st.shiftLabel;
+
+      const tdStatus = document.createElement("td");
+      const statusBadge = document.createElement("span");
+      statusBadge.className = "status-badge status-badge--new";
+      statusBadge.textContent = st.isOnShift ? "On shift" : "Off shift";
+      tdStatus.appendChild(statusBadge);
+
+      tr.appendChild(tdName);
+      tr.appendChild(tdRole);
+      tr.appendChild(tdStation);
+      tr.appendChild(tdShift);
+      tr.appendChild(tdStatus);
       staffTbody.appendChild(tr);
     });
   }
@@ -680,17 +725,27 @@ async function loadAllAdminData() {
   }
 
   try {
-    const [overview, orders, products, categories, customers, coupons, settings, staff] =
-      await Promise.all([
-        apiRequest("/api/admin/overview"),
-        apiRequest("/api/admin/orders"),
-        apiRequest("/api/products"),
-        apiRequest("/api/categories"),
-        apiRequest("/api/admin/customers"),
-        apiRequest("/api/admin/coupons"),
-        apiRequest("/api/admin/settings"),
-        apiRequest("/api/admin/staff"),
-      ]);
+    const [
+      overview,
+      orders,
+      products,
+      categories,
+      customers,
+      coupons,
+      analytics,
+      settings,
+      staff,
+    ] = await Promise.all([
+      apiRequest("/api/admin/overview"),
+      apiRequest("/api/admin/orders"),
+      apiRequest("/api/products"),
+      apiRequest("/api/categories"),
+      apiRequest("/api/admin/customers"),
+      apiRequest("/api/admin/coupons"),
+      apiRequest("/api/admin/analytics"),
+      apiRequest("/api/admin/settings"),
+      apiRequest("/api/admin/staff"),
+    ]);
 
     state.overview = overview;
     state.orders = orders || [];
@@ -698,6 +753,7 @@ async function loadAllAdminData() {
     state.categories = categories || [];
     state.customers = customers || [];
     state.coupons = coupons || [];
+    state.analytics = analytics || null;
     state.settings = settings;
     state.staff = staff || [];
 

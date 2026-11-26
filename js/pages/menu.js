@@ -106,9 +106,16 @@ function createMenuCard(product) {
   const addBtn = document.createElement("button");
   addBtn.type = "button";
   addBtn.className = "menu-card__add-btn";
-  addBtn.dataset.addProductId = product.id;
-  addBtn.setAttribute("aria-label", `Add ${product.name} to bag`);
-  addBtn.textContent = "+  Add";
+  if (!product.available) {
+    addBtn.disabled = true;
+    addBtn.setAttribute("aria-disabled", "true");
+    addBtn.setAttribute("aria-label", `${product.name} is currently sold out`);
+    addBtn.textContent = "Sold out";
+  } else {
+    addBtn.dataset.addProductId = product.id;
+    addBtn.setAttribute("aria-label", `Add ${product.name} to bag`);
+    addBtn.textContent = "+  Add";
+  }
 
   footer.appendChild(price);
   footer.appendChild(addBtn);

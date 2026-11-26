@@ -149,6 +149,7 @@ export const orderService = {
     tipRate,
     specialInstructions,
     items,
+    idempotencyKey,
   }) {
     const payload = {
       customerName: customer.fullName,
@@ -160,6 +161,7 @@ export const orderService = {
       couponCode: couponCode || "",
       tipRate: tipRate || 0,
       specialInstructions: specialInstructions || "",
+      idempotencyKey: idempotencyKey || "",
       items: items.map((item) => ({
         productId: item.productId,
         quantity: item.quantity,
