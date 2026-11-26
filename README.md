@@ -109,5 +109,11 @@ npm test
 - [DATABASE_SCHEMA.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/DATABASE_SCHEMA.md) — Complete 20-table PostgreSQL relational schema, foreign keys, constraints, and indexing strategy.
 - [API_DOCUMENTATION.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/API_DOCUMENTATION.md) — REST API endpoint reference, JSON request/response schemas, RBAC rules, and Socket.IO payloads.
 - [IMPLEMENTATION_STATUS.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/IMPLEMENTATION_STATUS.md) — Stage 1–19 completion matrix and requirements traceability table.
+- [CODEBASE_AUDIT.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/CODEBASE_AUDIT.md) — Architectural review, code quality findings, and technical debt audit.
+- [BUG_TRACKER.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/BUG_TRACKER.md) — Tracked defects (`BUG-001` through `BUG-010`), root causes, fixes, and verification status.
+- [TESTING_STRATEGY.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/TESTING_STRATEGY.md) & [TEST_RESULTS.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/TEST_RESULTS.md) — 4-tier testing strategy and 21-test execution results.
+- [SECURITY_AUDIT.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/SECURITY_AUDIT.md) — Security findings, PII redaction, XSS/SQLi prevention, and RBAC verification.
+- [PERFORMANCE_REPORT.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/PERFORMANCE_REPORT.md) — N+1 SQL query elimination benchmarks (`201 -> 3` queries) and Core Web Vitals optimization.
+- [ENHANCEMENTS.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/ENHANCEMENTS.md) — Customer, Barista, and Admin UX/operational enhancements.
 - [TESTING_REPORT.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/TESTING_REPORT.md) — Automated test suite report, security audit, and WCAG 2.1 AA accessibility verification.
 - [DEPLOYMENT_GUIDE.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/DEPLOYMENT_GUIDE.md) — Environment configuration, PostgreSQL backup/restore commands, and cloud deployment guide.
