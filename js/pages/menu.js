@@ -490,17 +490,25 @@ async function initMenuPage() {
       const product = cartService.addItem(productId, 1);
       if (!product) return;
 
+      const isAr = i18n.getLanguage() === "ar";
+      const locProduct = localizeProduct(product);
       addBtn.classList.add("is-added");
-      addBtn.textContent = "✓  Added";
+      addBtn.textContent = isAr ? "✓  تمت الإضافة" : "✓  Added";
       window.setTimeout(() => {
+        const arNow = i18n.getLanguage() === "ar";
         addBtn.classList.remove("is-added");
-        addBtn.textContent = "+  Add";
+        addBtn.textContent = arNow ? "+  إضافة" : "+  Add";
       }, 800);
 
-      showToast(`Added ${product.name} to your bag`, {
-        actionLabel: "Checkout",
-        actionHref: "checkout.html",
-      });
+      showToast(
+        isAr
+          ? `تمت إضافة ${locProduct.name} إلى سلة طلباتك`
+          : `Added ${product.name} to your bag`,
+        {
+          actionLabel: isAr ? "إتمام الطلب" : "Checkout",
+          actionHref: "checkout.html",
+        }
+      );
     });
   }
 

@@ -125,7 +125,9 @@ function renderProductDetail() {
 
   if (breadcrumbCatEl) {
     breadcrumbCatEl.textContent = categoryNameMap[primaryCat] || (isAr ? "القائمة" : "Menu");
-    breadcrumbCatEl.href = `menu.html?category=${encodeURIComponent(primaryCat)}`;
+    breadcrumbCatEl.href = `menu.html?category=${encodeURIComponent(primaryCat)}${
+      isAr ? "&lang=ar" : ""
+    }`;
   }
   if (breadcrumbNameEl) breadcrumbNameEl.textContent = product.name;
   if (imgEl) {
@@ -228,7 +230,7 @@ function renderPairings() {
     name.className = "pairing-card__name";
     const link = document.createElement("a");
     link.className = "pairing-card__link";
-    link.href = `product.html?id=${encodeURIComponent(item.id)}`;
+    link.href = `product.html?id=${encodeURIComponent(item.id)}${isAr ? "&lang=ar" : ""}`;
     link.textContent = item.name;
     name.appendChild(link);
 
@@ -364,10 +366,16 @@ async function initProductPage() {
 
       cartService.addItem(state.product.id, state.quantity, customOverrides, unitPrice);
 
+      const isAr = i18n.getLanguage() === "ar";
+      const locProd = localizeProduct(state.product);
       showToast(
-        `Added ${state.quantity} × ${state.product.name} (${formatPrice(totalPrice)}) to bag`,
+        isAr
+          ? `تمت إضافة ${formatLocaleNumber(state.quantity)} × ${locProd.name} (${formatPrice(
+              totalPrice
+            )}) إلى السلة`
+          : `Added ${state.quantity} × ${state.product.name} (${formatPrice(totalPrice)}) to bag`,
         {
-          actionLabel: "Checkout →",
+          actionLabel: isAr ? "إتمام الطلب ←" : "Checkout →",
           actionHref: "checkout.html",
         }
       );

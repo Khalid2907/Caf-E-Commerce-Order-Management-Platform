@@ -8,6 +8,7 @@
     "dev": "node --watch server/index.js",
     "db:migrate": "node server/db/migrate.js",
     "db:seed": "node server/db/seed.js",
+    "i18n:check": "node scripts/i18n-check.js",
     "test": "node --test tests/*.test.js"
   },
   "engines": {

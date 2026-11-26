@@ -434,10 +434,11 @@ function initCheckoutPage() {
       if (summary.totalCount === 0) return;
 
       const submitBtn = document.getElementById("checkout-submit-btn");
+      const isAr = i18n.getLanguage() === "ar";
       state.submitting = true;
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.textContent = "Submitting order...";
+        submitBtn.textContent = isAr ? "جاري إرسال الطلب..." : "Submitting order...";
       }
 
       const fullName = document.getElementById("customer-name")?.value || "Alex Johnson";

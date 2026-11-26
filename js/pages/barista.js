@@ -152,7 +152,13 @@ function createTicketCard(order) {
     note.className = `ticket-note ${
       order.allergyFlag ? "ticket-note--allergy" : "ticket-note--standard"
     }`;
-    note.textContent = order.specialInstructions;
+    const rawNote = order.specialInstructions;
+    note.textContent =
+      isAr && rawNote.includes("DAIRY ALLERGY")
+        ? "تنبيه حساسية ألبان • استخدم إناء تبخير نظيفاً"
+        : isAr && rawNote.startsWith("NOTE:")
+        ? rawNote.replace(/^NOTE:/i, "ملاحظة:")
+        : rawNote;
     body.appendChild(note);
   }
 
@@ -337,6 +343,7 @@ async function fetchBaristaData() {
       state.isAcceptingOrders = overview.isAcceptingOrders;
     }
     renderBaristaWorkspace();
+    translatePageDOM();
     const authOverlay = document.getElementById("barista-auth-overlay");
     if (authOverlay) authOverlay.hidden = true;
   } catch (err) {

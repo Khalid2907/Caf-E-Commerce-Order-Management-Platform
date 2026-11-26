@@ -67,6 +67,7 @@ function switchSection(sectionId) {
   };
   const crumbEl = document.getElementById("admin-crumb-current");
   if (crumbEl) crumbEl.textContent = crumbMap[sectionId] || "Overview";
+  translatePageDOM();
 }
 
 // =============================================================================
@@ -283,6 +284,7 @@ function renderOrdersSection() {
 
 function renderOrderInspector() {
   const ord = state.selectedOrder;
+  const isAr = i18n.getLanguage() === "ar";
   const titleEl = document.getElementById("insp-order-title");
   const statusEl = document.getElementById("insp-order-status");
   const metaEl = document.getElementById("insp-order-meta");
@@ -295,38 +297,59 @@ function renderOrderInspector() {
 
   if (!ord) return;
 
-  if (titleEl) titleEl.textContent = `Order #${ord.orderReference}`;
+  if (titleEl) {
+    titleEl.textContent = isAr
+      ? `طلب #${ord.orderReference}`
+      : `Order #${ord.orderReference}`;
+  }
   if (statusEl) {
     statusEl.className = `status-badge status-badge--${ord.uiStatus.toLowerCase()}`;
-    statusEl.textContent = ord.uiStatus;
+    statusEl.textContent = localizeStatus(ord.uiStatus);
   }
   if (metaEl) {
-    metaEl.textContent = `${
+    const modeLabel = localizeStatus(
       ord.fulfillmentType === "delivery" ? "Delivery" : "Pickup"
-    } · ${ord.ageLabel}`;
+    );
+    const ageText =
+      isAr && typeof ord.minutesAgo === "number"
+        ? ord.minutesAgo <= 0
+          ? "الآن"
+          : `منذ ${formatLocaleNumber(ord.minutesAgo)} د`
+        : ord.ageLabel;
+    metaEl.textContent = `${modeLabel} · ${ageText}`;
   }
   if (custNameEl) custNameEl.textContent = ord.customerName;
-  if (custPhoneEl) custPhoneEl.textContent = `${ord.customerPhone} · ${ord.paymentMethod}`;
+  if (custPhoneEl) {
+    const payLabel =
+      isAr && String(ord.paymentMethod || "").toLowerCase().includes("cash")
+        ? "نقداً عند الاستلام"
+        : ord.paymentMethod;
+    custPhoneEl.textContent = `${ord.customerPhone} · ${payLabel}`;
+  }
 
   if (itemsEl) {
     itemsEl.replaceChildren();
     (ord.items || []).forEach((it) => {
+      const locProd = localizeProduct({ id: it.productId, name: it.name });
+      const displayName = locProd?.name || it.name;
+      const displayMeta = localizeCustomizationSummary(it.customizationSummary);
+
       const row = document.createElement("div");
       row.className = "receipt-item";
       const top = document.createElement("div");
       top.className = "receipt-item__row";
       const n = document.createElement("span");
-      n.textContent = `${it.quantity} × ${it.name}`;
+      n.textContent = `${formatLocaleNumber(it.quantity)} × ${displayName}`;
       const p = document.createElement("strong");
       p.textContent = formatPrice(it.lineTotalEgp);
       top.appendChild(n);
       top.appendChild(p);
       row.appendChild(top);
 
-      if (it.customizationSummary) {
+      if (displayMeta) {
         const m = document.createElement("p");
         m.className = "receipt-item__meta";
-        m.textContent = it.customizationSummary;
+        m.textContent = displayMeta;
         row.appendChild(m);
       }
       itemsEl.appendChild(row);
@@ -336,7 +359,9 @@ function renderOrderInspector() {
   if (noteEl) {
     noteEl.hidden = !ord.specialInstructions;
     noteEl.textContent = ord.specialInstructions
-      ? `NOTE: ${ord.specialInstructions}`
+      ? isAr
+        ? `ملاحظة: ${ord.specialInstructions}`
+        : `NOTE: ${ord.specialInstructions}`
       : "";
   }
 
@@ -344,10 +369,22 @@ function renderOrderInspector() {
 
   if (advanceBtn) {
     const nextActionMap = {
-      Pending: { label: "Accept & start preparing", target: "Preparing" },
-      Accepted: { label: "Start preparing", target: "Preparing" },
-      Preparing: { label: "Mark ready for pickup", target: "Ready" },
-      Ready: { label: "Mark as completed", target: "Completed" },
+      Pending: {
+        label: isAr ? "قبول وبدء التحضير" : "Accept & start preparing",
+        target: "Preparing",
+      },
+      Accepted: {
+        label: isAr ? "بدء التحضير" : "Start preparing",
+        target: "Preparing",
+      },
+      Preparing: {
+        label: isAr ? "تحديد كجاهز للاستلام" : "Mark ready for pickup",
+        target: "Ready",
+      },
+      Ready: {
+        label: isAr ? "تحديد كمكتمل" : "Mark as completed",
+        target: "Completed",
+      },
     };
     const next = nextActionMap[ord.status];
     if (next) {
@@ -805,6 +842,7 @@ async function loadAllAdminData() {
     renderCustomersSection();
     renderDiscountsSection();
     renderSettingsSection();
+    translatePageDOM();
 
     const authOverlay = document.getElementById("admin-auth-overlay");
     if (authOverlay) authOverlay.hidden = true;
@@ -825,6 +863,7 @@ function initAdminPage() {
     renderCustomersSection();
     renderDiscountsSection();
     renderSettingsSection();
+    translatePageDOM();
     translatePageDOM();
   });
 

@@ -2,9 +2,12 @@
  * COMMON GROUND — Centralized Internationalization (i18n), RTL Direction & Locale Formatter Engine
  *
  * Responsibilities:
- * 1. Resolves active language (`en` | `ar`) via URL (`?lang=ar|en`) -> `localStorage` -> browser locale -> `en`.
- * 2. Synchronizes `<html lang="ar|en" dir="rtl|ltr">` and URL query parameter without reloading the page.
- * 3. Translates static and dynamic DOM text nodes bidirectionally (`EN <-> AR`), preserving form state and cart.
+ * 1. Resolves active language (`en` | `ar`) via `window.__CG_INITIAL_LANG__` (from synchronous `boot.js`)
+ *    or URL (`?lang=ar|en`) -> `localStorage` -> browser locale -> `en`.
+ * 2. Synchronizes `<html lang="ar|en" dir="rtl|ltr">`, removes `data-i18n-pending` the instant
+ *    synchronous DOM translation finishes, and updates internal links without page flash.
+ * 3. Translates static and dynamic DOM text nodes bidirectionally (`EN <-> AR`) using a `WeakMap`
+ *    original-text cache for O(1) zero-collision restoration and fast skip-if-unchanged checks.
  * 4. Provides helper formatters for products (`localizeProduct`), customization summaries (`localizeSummary`),
  *    status badges (`localizeStatus`), numbers (`formatLocaleNumber`), and currency (`formatLocalePrice`).
  * 5. Mounts an accessible `EN | العربية` language switcher across Customer, Barista, and Admin interfaces.
@@ -21,7 +24,7 @@ import {
 const LANG_STORAGE_KEY = "common_ground_lang_v1";
 const SUPPORTED_LANGS = ["en", "ar"];
 
-// Build reverse lookup maps for instant AR -> EN switching
+// Build reverse lookup maps for AR -> EN fallback when a node was created directly in Arabic
 const AR_TO_EN_PHRASES = Object.freeze(
   Object.fromEntries(Object.entries(EN_TO_AR_PHRASES).map(([en, ar]) => [ar, en]))
 );
@@ -30,10 +33,21 @@ const AR_TO_EN_PLACEHOLDERS = Object.freeze(
   Object.fromEntries(Object.entries(EN_TO_AR_PLACEHOLDERS).map(([en, ar]) => [ar, en]))
 );
 
+// WeakMap cache storing each Text node's original English value and last translated state
+const originalNodeTextMap = new WeakMap();
+const lastTranslatedValueMap = new WeakMap();
+
 const listeners = new Set();
 
 function detectInitialLanguage() {
   if (typeof window === "undefined") return "en";
+
+  if (
+    window.__CG_INITIAL_LANG__ &&
+    SUPPORTED_LANGS.includes(window.__CG_INITIAL_LANG__)
+  ) {
+    return window.__CG_INITIAL_LANG__;
+  }
 
   try {
     const urlParams = new URLSearchParams(window.location.search);
@@ -127,7 +141,17 @@ export function localizeProduct(product, lang = currentLang) {
   if (!product) return null;
   if (lang !== "ar") return product;
 
-  const arEntry = AR_PRODUCT_CATALOG[product.id] || AR_PRODUCT_CATALOG[product.slug];
+  const key = product.id || product.slug;
+  const arEntry =
+    AR_PRODUCT_CATALOG[key] ||
+    AR_PRODUCT_CATALOG[product.slug] ||
+    Object.values(AR_PRODUCT_CATALOG).find(
+      (_, idx) =>
+        Object.keys(AR_PRODUCT_CATALOG)[idx] ===
+        String(product.name || "")
+          .toLowerCase()
+          .replace(/\s+/g, "-")
+    );
   if (!arEntry) return product;
 
   return {
@@ -165,7 +189,7 @@ export function localizeCustomizationSummary(summary, lang = currentLang) {
     .split(/\s*·\s*/)
     .map((part) => {
       const trimmed = part.trim();
-      return AR_CUSTOMIZATION_TOKENS[trimmed] || trimmed;
+      return AR_CUSTOMIZATION_TOKENS[trimmed] || EN_TO_AR_PHRASES[trimmed] || trimmed;
     })
     .join(" · ");
 }
@@ -179,11 +203,83 @@ export function localizeCustomizationSummary(summary, lang = currentLang) {
 export function localizeStatus(status, lang = currentLang) {
   if (!status) return "";
   if (lang !== "ar") return status;
-  return AR_STATUS_MAP[status] || status;
+  return AR_STATUS_MAP[status] || EN_TO_AR_PHRASES[status] || status;
 }
 
 /**
- * Translates an exact phrase or returns the original if not found.
+ * Translates dynamic pattern strings (prices, bag counts, order numbers, stock counts, points, minutes).
+ * @param {string} normalized
+ * @param {string} lang
+ * @returns {string|null}
+ */
+function translateDynamicPattern(normalized, lang) {
+  if (lang !== "ar") return null;
+
+  // 1. "Bag · 2" -> "السلة · ٢"
+  const bagMatch = normalized.match(/^Bag\s*·\s*(\d+)$/i);
+  if (bagMatch) {
+    return `السلة · ${formatLocaleNumber(Number(bagMatch[1]), { lang: "ar" })}`;
+  }
+
+  // 2. "+20 EGP" or "1,490 EGP" or "95 EGP"
+  const priceMatch = normalized.match(/^([+-]?)\s*([\d,]+(?:\.\d+)?)\s*EGP$/i);
+  if (priceMatch) {
+    const sign = priceMatch[1] || "";
+    const num = Number(priceMatch[2].replace(/,/g, ""));
+    if (!Number.isNaN(num)) {
+      return `${sign}${formatLocaleNumber(num, { lang: "ar" })} ج.م.`;
+    }
+  }
+
+  // 3. "Order #1048" -> "طلب #1048"
+  const orderMatch = normalized.match(/^Order\s+#(\d+)$/i);
+  if (orderMatch) {
+    return `طلب #${orderMatch[1]}`;
+  }
+
+  // 4. "6 left" -> "٦ متبقي"
+  const leftMatch = normalized.match(/^(\d+)\s+left$/i);
+  if (leftMatch) {
+    return `${formatLocaleNumber(Number(leftMatch[1]), { lang: "ar" })} متبقي`;
+  }
+
+  // 5. "24 orders" -> "٢٤ طلب"
+  const ordersCountMatch = normalized.match(/^(\d+)\s+orders$/i);
+  if (ordersCountMatch) {
+    return `${formatLocaleNumber(Number(ordersCountMatch[1]), { lang: "ar" })} طلب`;
+  }
+
+  // 6. "120 points" -> "١٢٠ نقطة"
+  const pointsMatch = normalized.match(/^(\d+)\s+points$/i);
+  if (pointsMatch) {
+    return `${formatLocaleNumber(Number(pointsMatch[1]), { lang: "ar" })} نقطة`;
+  }
+
+  // 7. "9 min" -> "٩ دقائق" or "10–15 min" -> "١٠–١٥ دقيقة"
+  const minRangeMatch = normalized.match(/^(\d+)[–-](\d+)\s*min$/i);
+  if (minRangeMatch) {
+    return `${formatLocaleNumber(Number(minRangeMatch[1]), { lang: "ar" })}–${formatLocaleNumber(
+      Number(minRangeMatch[2]),
+      { lang: "ar" }
+    )} دقيقة`;
+  }
+  const minSingleMatch = normalized.match(/^(\d+)\s*min$/i);
+  if (minSingleMatch) {
+    const val = Number(minSingleMatch[1]);
+    return `${formatLocaleNumber(val, { lang: "ar" })} ${val <= 10 ? "دقائق" : "دقيقة"}`;
+  }
+
+  // 8. "1 min ago" -> "منذ ١ د"
+  const minAgoMatch = normalized.match(/^(\d+)\s*min\s+ago$/i);
+  if (minAgoMatch) {
+    return `منذ ${formatLocaleNumber(Number(minAgoMatch[1]), { lang: "ar" })} د`;
+  }
+
+  return null;
+}
+
+/**
+ * Translates an exact phrase or pattern or returns the original if not found.
  * @param {string} text
  * @param {string} [lang=currentLang]
  * @returns {string}
@@ -192,22 +288,86 @@ export function tPhrase(text, lang = currentLang) {
   if (!text) return "";
   const normalized = String(text).replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim();
   if (lang === "ar") {
-    return EN_TO_AR_PHRASES[normalized] || EN_TO_AR_PHRASES[text] || text;
+    return (
+      EN_TO_AR_PHRASES[normalized] ||
+      EN_TO_AR_PHRASES[text] ||
+      AR_STATUS_MAP[normalized] ||
+      translateDynamicPattern(normalized, "ar") ||
+      text
+    );
   }
   return AR_TO_EN_PHRASES[normalized] || AR_TO_EN_PHRASES[text] || text;
 }
 
 /**
+ * Synchronizes internal `.html` navigation links so `?lang=ar` persists across page clicks.
+ */
+function syncInternalLinks(lang) {
+  if (typeof document === "undefined") return;
+  document.querySelectorAll("a[href]").forEach((anchor) => {
+    const rawHref = anchor.getAttribute("href");
+    if (
+      !rawHref ||
+      rawHref.startsWith("#") ||
+      rawHref.startsWith("mailto:") ||
+      rawHref.startsWith("tel:") ||
+      rawHref.startsWith("http:") ||
+      rawHref.startsWith("https:")
+    ) {
+      return;
+    }
+
+    const [pathAndQuery, hashPart] = rawHref.split("#");
+    const [pathname, queryPart] = pathAndQuery.split("?");
+    if (!pathname.endsWith(".html")) return;
+
+    const params = new URLSearchParams(queryPart || "");
+    if (lang === "ar") {
+      params.set("lang", "ar");
+    } else {
+      params.delete("lang");
+    }
+    const qs = params.toString();
+    const nextHref = `${pathname}${qs ? `?${qs}` : ""}${hashPart ? `#${hashPart}` : ""}`;
+    if (nextHref !== rawHref) {
+      anchor.setAttribute("href", nextHref);
+    }
+  });
+}
+
+/**
  * Walks the document DOM to translate static text nodes, placeholders, and multi-line headings
- * bidirectionally between English and Arabic.
+ * bidirectionally between English and Arabic in O(1) per text node using WeakMap caching.
  */
 export function translatePageDOM(lang = currentLang) {
   if (typeof document === "undefined" || !document.body) return;
 
-  // 1. Update <html lang="..." dir="...">
+  // 1. Update <html lang="..." dir="..."> and localize document.title
   const htmlEl = document.documentElement;
   htmlEl.setAttribute("lang", lang);
   htmlEl.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
+
+  if (typeof document.title === "string" && document.title) {
+    if (!htmlEl.dataset.origTitle) {
+      htmlEl.dataset.origTitle = document.title;
+    }
+    const origTitle = htmlEl.dataset.origTitle;
+    const titleMapAr = {
+      "Common Ground — Coffee, considered.": "كومون جراوند — قهوة، صُنعت بعناية.",
+      "Order Menu — Common Ground": "قائمة الطلبات — كومون جراوند",
+      "Checkout — Common Ground": "إتمام الطلب — كومون جراوند",
+      "Order #1048 Tracking — Common Ground": "تتبع الطلب #1048 — كومون جراوند",
+      "My Orders & Regulars Club — Common Ground": "طلباتي ونادي الروّاد — كومون جراوند",
+      "Sign In — Common Ground": "تسجيل الدخول — كومون جراوند",
+      "Barista Workspace — Common Ground": "شاشة الباريستا — كومون جراوند",
+      "Store Management — Common Ground": "إدارة الفرع — كومون جراوند",
+    };
+    if (lang === "ar" && titleMapAr[origTitle]) {
+      document.title = titleMapAr[origTitle];
+    } else if (lang === "en" && titleMapAr[origTitle]) {
+      document.title = origTitle;
+    }
+  }
 
   // 2. Translate multi-line headings that contain <br> tags
   const multilineMap = [
@@ -256,11 +416,6 @@ export function translatePageDOM(lang = currentLang) {
       en: "Head to the pickup counter and tell us your name<br />or order number. We’ll take it from there.",
       ar: "توجّه إلى كاونتر الاستلام وأخبرنا باسمك أو برقم طلبك،<br />وسيكون مشروبك جاهزاً في انتظارك.",
     },
-    {
-      selector: ".site-footer__col-text",
-      en: "42 Maple Street, Zamalek, Cairo<br />Mon–Fri&nbsp;&nbsp;7am–6pm&nbsp;&nbsp;/&nbsp;&nbsp;Sat–Sun&nbsp;&nbsp;8am–5pm",
-      ar: "٤٢ شارع مابل، الزمالك، القاهرة<br />الإثنين–الجمعة ٧ص–٦م  /  السبت–الأحد ٨ص–٥م",
-    },
   ];
 
   multilineMap.forEach(({ selector, en, ar }) => {
@@ -283,60 +438,57 @@ export function translatePageDOM(lang = currentLang) {
     }
   });
 
-  // 4. Walk leaf text nodes across the page and translate exact phrase matches
+  // 4. Walk leaf text nodes across the page and translate with WeakMap caching
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
-  const textNodes = [];
-  let currentNode = walker.nextNode();
-  while (currentNode) {
-    const parentTag = currentNode.parentElement?.tagName;
+  let node = walker.nextNode();
+  while (node) {
+    const parentTag = node.parentElement?.tagName;
     if (parentTag !== "SCRIPT" && parentTag !== "STYLE") {
-      textNodes.push(currentNode);
+      const currentVal = node.nodeValue;
+      if (currentVal && currentVal.trim()) {
+        const lastState = lastTranslatedValueMap.get(node);
+        // If nodeValue was modified externally since our last translation, refresh original cache
+        if (!originalNodeTextMap.has(node) || (lastState && lastState.value !== currentVal)) {
+          const normalizedCurrent = currentVal
+            .replace(/\u00a0/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+          const reverseEn = AR_TO_EN_PHRASES[normalizedCurrent];
+          originalNodeTextMap.set(node, reverseEn || currentVal);
+        }
+
+        const origRaw = originalNodeTextMap.get(node) || currentVal;
+        const normalizedOrig = origRaw.replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim();
+        const leadingSpace = (origRaw.match(/^\s+/) || [""])[0];
+        const trailingSpace = (origRaw.match(/\s+$/) || [""])[0];
+
+        let nextValue = currentVal;
+
+        if (normalizedOrig === "↗" || normalizedOrig === "↖") {
+          nextValue = `${leadingSpace}${lang === "ar" ? "↖" : "↗"}${trailingSpace}`;
+        } else if (normalizedOrig === "→" || normalizedOrig === "←") {
+          nextValue = `${leadingSpace}${lang === "ar" ? "←" : "→"}${trailingSpace}`;
+        } else if (lang === "ar") {
+          const translated =
+            EN_TO_AR_PHRASES[normalizedOrig] ||
+            AR_STATUS_MAP[normalizedOrig] ||
+            translateDynamicPattern(normalizedOrig, "ar");
+          if (translated) {
+            nextValue = `${leadingSpace}${translated}${trailingSpace}`;
+          }
+        } else {
+          // Restore original English text
+          nextValue = origRaw;
+        }
+
+        if (nextValue !== currentVal) {
+          node.nodeValue = nextValue;
+        }
+        lastTranslatedValueMap.set(node, { lang, value: nextValue });
+      }
     }
-    currentNode = walker.nextNode();
+    node = walker.nextNode();
   }
-
-  textNodes.forEach((node) => {
-    const raw = node.nodeValue;
-    if (!raw || !raw.trim()) return;
-    const normalized = raw.replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim();
-
-    // Directional arrows flipping
-    if (normalized === "↗" || normalized === "↖") {
-      node.nodeValue = lang === "ar" ? "↖" : "↗";
-      return;
-    }
-    if (normalized === "→" || normalized === "←") {
-      node.nodeValue = lang === "ar" ? "←" : "→";
-      return;
-    }
-
-    // Dynamic bag counter pattern ("Bag · 2" <-> "السلة · ٢")
-    const bagMatchEn = normalized.match(/^Bag\s*·\s*(\d+)$/);
-    if (bagMatchEn && lang === "ar") {
-      node.nodeValue = `السلة · ${formatLocaleNumber(Number(bagMatchEn[1]), { lang: "ar" })}`;
-      return;
-    }
-    const bagMatchAr = normalized.match(/^السلة\s*·\s*(.+)$/);
-    if (bagMatchAr && lang === "en") {
-      const asciiDigits = bagMatchAr[1].replace(/[٠-٩]/g, (d) =>
-        "٠١٢٣٤٥٦٧٨٩".indexOf(d)
-      );
-      node.nodeValue = `Bag · ${asciiDigits}`;
-      return;
-    }
-
-    if (lang === "ar") {
-      const translated = EN_TO_AR_PHRASES[normalized] || AR_STATUS_MAP[normalized];
-      if (translated) {
-        node.nodeValue = translated;
-      }
-    } else {
-      const translatedEn = AR_TO_EN_PHRASES[normalized];
-      if (translatedEn) {
-        node.nodeValue = translatedEn;
-      }
-    }
-  });
 
   // 5. Update Language Switcher buttons active states
   document.querySelectorAll("[data-lang-switch]").forEach((btn) => {
@@ -344,6 +496,25 @@ export function translatePageDOM(lang = currentLang) {
     btn.classList.toggle("is-active", isTarget);
     btn.setAttribute("aria-pressed", isTarget ? "true" : "false");
   });
+
+  // 6. Synchronize internal links with active language parameter
+  syncInternalLinks(lang);
+
+  // 7. Release anti-FOUC pending attribute set by synchronous boot.js
+  if (htmlEl.hasAttribute("data-i18n-pending")) {
+    htmlEl.removeAttribute("data-i18n-pending");
+    if (typeof window !== "undefined") {
+      if (window.__CG_I18N_FAILSAFE__) {
+        clearTimeout(window.__CG_I18N_FAILSAFE__);
+      }
+      if (window.__CG_BOOT_START__) {
+        const now = typeof performance !== "undefined" ? performance.now() : Date.now();
+        const elapsed = Number((now - window.__CG_BOOT_START__).toFixed(2));
+        window.__CG_I18N_READY_MS__ = elapsed;
+        htmlEl.setAttribute("data-i18n-ready-ms", String(elapsed));
+      }
+    }
+  }
 }
 
 /**

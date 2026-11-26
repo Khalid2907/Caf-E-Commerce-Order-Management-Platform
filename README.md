@@ -92,11 +92,12 @@ Open in your browser:
 
 ---
 
-## 4. Running Automated Tests
+## 4. Running Automated Tests & i18n Completeness Validation
 
-Execute the full-stack automated verification suite (19 tests covering PostgreSQL schema, 18 EGP products, authentication, RBAC, SQL injection resistance, authoritative server-side order pricing, inventory stock deduction, and order lifecycle state transitions):
+Execute the automated i18n completeness validator (`9` HTML templates, `18` products, `508` UI phrases, `11` placeholders, `30` customization tokens, `23` status badges) and the full-stack 25-test verification suite:
 
 ```bash
+npm run i18n:check
 npm test
 ```
 
@@ -111,11 +112,13 @@ npm test
 - [IMPLEMENTATION_STATUS.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/IMPLEMENTATION_STATUS.md) — Stage 1–19 completion matrix and requirements traceability table.
 - [CODEBASE_AUDIT.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/CODEBASE_AUDIT.md) — Architectural review, code quality findings, and technical debt audit.
 - [BUG_TRACKER.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/BUG_TRACKER.md) — Tracked defects (`BUG-001` through `BUG-010`), root causes, fixes, and verification status.
-- [TESTING_STRATEGY.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/TESTING_STRATEGY.md) & [TEST_RESULTS.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/TEST_RESULTS.md) — 4-tier testing strategy and 21-test execution results.
+- [TESTING_STRATEGY.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/TESTING_STRATEGY.md) & [TEST_RESULTS.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/TEST_RESULTS.md) — 4-tier testing strategy and automated execution results.
 - [SECURITY_AUDIT.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/SECURITY_AUDIT.md) — Security findings, PII redaction, XSS/SQLi prevention, and RBAC verification.
 - [PERFORMANCE_REPORT.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/PERFORMANCE_REPORT.md) — N+1 SQL query elimination benchmarks (`201 -> 3` queries) and Core Web Vitals optimization.
 - [ENHANCEMENTS.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/ENHANCEMENTS.md) — Customer, Barista, and Admin UX/operational enhancements.
 - [ARABIC_LOCALIZATION_AUDIT.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/ARABIC_LOCALIZATION_AUDIT.md) & [ARABIC_GLOSSARY.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/ARABIC_GLOSSARY.md) — RTL structural audit and official English ↔ Arabic café terminology glossary.
-- [LOCALIZATION_IMPLEMENTATION.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/LOCALIZATION_IMPLEMENTATION.md) & [BILINGUAL_TEST_RESULTS.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/BILINGUAL_TEST_RESULTS.md) — Bilingual i18n architecture, Arabic typography (`Cairo` & `IBM Plex Sans Arabic`), `EGP / ج.م.` locale formatting, and 24-test verification report.
+- [LOCALIZATION_IMPLEMENTATION.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/LOCALIZATION_IMPLEMENTATION.md) & [BILINGUAL_TEST_RESULTS.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/BILINGUAL_TEST_RESULTS.md) — Bilingual i18n architecture, Arabic typography (`Cairo` & `IBM Plex Sans Arabic`), and `EGP / ج.م.` locale formatting.
+- [LOCALIZATION_BUG_REPORT.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/LOCALIZATION_BUG_REPORT.md) & [LOCALIZATION_FIXES.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/LOCALIZATION_FIXES.md) — Root cause analysis and remediation of missing translations (`L10N-BUG-001` through `L10N-BUG-007`) and English-to-Arabic flash.
+- [I18N_COMPLETENESS_REPORT.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/I18N_COMPLETENESS_REPORT.md), [LOCALIZATION_PERFORMANCE_REPORT.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/LOCALIZATION_PERFORMANCE_REPORT.md) & [LOCALIZATION_TEST_RESULTS.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/LOCALIZATION_TEST_RESULTS.md) — Automated 100% completeness audit, synchronous `<head>` initialization benchmarks, and 25-test localization verification results.
 - [TESTING_REPORT.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/TESTING_REPORT.md) — Automated test suite report, security audit, and WCAG 2.1 AA accessibility verification.
 - [DEPLOYMENT_GUIDE.md](file:///Users/khalid/Coding/Web%20Development/Cafe%20Full%20System/DEPLOYMENT_GUIDE.md) — Environment configuration, PostgreSQL backup/restore commands, and cloud deployment guide.

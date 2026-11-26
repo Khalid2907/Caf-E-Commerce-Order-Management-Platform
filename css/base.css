@@ -178,6 +178,10 @@ ol {
 /* ==========================================================================
    RTL & Arabic Localization Rules (Phase 4 & 6)
    ========================================================================== */
+html[data-i18n-pending="ar"] body {
+  opacity: 0;
+}
+
 html[lang="ar"] * {
   letter-spacing: 0 !important;
 }

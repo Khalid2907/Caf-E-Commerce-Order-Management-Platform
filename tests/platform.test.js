@@ -596,4 +596,80 @@ describe("6. Bilingual (EN <-> AR), RTL, Arabic Search & Unicode Persistence Tes
     assert.equal(tPhrase("Order online", "ar"), "اطلب أونلاين");
     assert.equal(tPhrase("اطلب أونلاين", "en"), "Order online");
   });
+
+  test("Scenario A, B, C, D & E: Early boot.js initialization, dynamic patterns, and i18n:check completeness validator", async () => {
+    const fs = require("node:fs");
+    const path = require("node:path");
+    const vm = require("node:vm");
+    const { runI18nCompletenessCheck } = require("../scripts/i18n-check.js");
+    const { tPhrase } = await import("../js/i18n/i18n.js");
+    const { EN_TO_AR_PHRASES } = await import("../js/i18n/translations.js");
+
+    // Scenario A & C: Execute synchronous boot.js in a simulated browser head environment with Arabic stored
+    const bootCode = fs.readFileSync(
+      path.join(__dirname, "../js/i18n/boot.js"),
+      "utf8"
+    );
+    const attrs = {};
+    const sandbox = {
+      window: {
+        location: { search: "" },
+        localStorage: {
+          getItem: (k) => (k === "common_ground_lang_v1" ? "ar" : null),
+          setItem: () => {},
+        },
+      },
+      navigator: { language: "en-US" },
+      document: {
+        documentElement: {
+          setAttribute: (k, v) => {
+            attrs[k] = v;
+          },
+          removeAttribute: (k) => {
+            delete attrs[k];
+          },
+        },
+      },
+      performance: { now: () => 1.25 },
+      setTimeout: () => 1,
+    };
+    vm.runInNewContext(bootCode, sandbox);
+
+    assert.equal(attrs.lang, "ar", "boot.js must synchronously set <html lang='ar'>");
+    assert.equal(attrs.dir, "rtl", "boot.js must synchronously set <html dir='rtl'>");
+    assert.equal(
+      attrs["data-i18n-pending"],
+      "ar",
+      "boot.js must set data-i18n-pending='ar' before body render to prevent English flash"
+    );
+    assert.equal(sandbox.window.__CG_INITIAL_LANG__, "ar");
+
+    // Scenario E: Dynamic pattern translation (prices, bag counts, order numbers, stock, points, minutes)
+    assert.equal(tPhrase("Bag · 3", "ar"), "السلة · ٣");
+    assert.equal(tPhrase("+25 EGP", "ar"), "+٢٥ ج.م.");
+    assert.equal(tPhrase("Order #1048", "ar"), "طلب #1048");
+    assert.equal(tPhrase("6 left", "ar"), "٦ متبقي");
+    assert.equal(tPhrase("24 orders", "ar"), "٢٤ طلب");
+    assert.equal(tPhrase("120 points", "ar"), "١٢٠ نقطة");
+    assert.equal(tPhrase("10–15 min", "ar"), "١٠–١٥ دقيقة");
+
+    // Scenario D: Completeness validator passes on production dictionaries and fails when a missing key is injected
+    const validCheck = await runI18nCompletenessCheck();
+    assert.equal(
+      validCheck.ok,
+      true,
+      `Expected 0 i18n completeness errors, got: ${validCheck.errors.join("; ")}`
+    );
+
+    const brokenCheck = await runI18nCompletenessCheck({
+      customPhrases: { ...EN_TO_AR_PHRASES, "Deliberate Untranslated Key": "" },
+      extraRequiredPhrases: ["Missing Test Key 999"],
+    });
+    assert.equal(
+      brokenCheck.ok,
+      false,
+      "Validator must fail when an empty or missing translation key is detected"
+    );
+    assert.ok(brokenCheck.errors.length >= 2);
+  });
 });
