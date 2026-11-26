@@ -388,7 +388,8 @@
   grid-template-columns: 96px minmax(0, 1fr) auto;
   align-items: center;
   gap: 18px;
-  padding: 10px 18px 10px 10px;
+  padding-block: 10px;
+  padding-inline: 10px 18px;
   border-radius: var(--radius-md); /* 8px */
   background-color: var(--color-surface);
   min-block-size: 108px;

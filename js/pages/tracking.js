@@ -8,10 +8,18 @@
 import { initHeader } from "../components/header.js";
 import { showToast } from "../components/toast.js";
 import { formatPrice } from "../config/constants.js";
+import {
+  formatLocaleNumber,
+  i18n,
+  localizeCustomizationSummary,
+  localizeProduct,
+  localizeStatus,
+} from "../i18n/i18n.js";
 import { orderService } from "../services/orderService.js";
 
 function renderTrackingOrder(order) {
   if (!order) return;
+  const isAr = i18n.getLanguage() === "ar";
 
   const eyebrowEl = document.getElementById("tracking-order-eyebrow");
   const subtitleEl = document.getElementById("tracking-order-subtitle");
@@ -28,18 +36,22 @@ function renderTrackingOrder(order) {
   const paidTotalEl = document.getElementById("receipt-paid-total");
 
   if (eyebrowEl) {
-    eyebrowEl.textContent = `ORDER #${order.orderNumber}   /   ${
-      order.dateLabel || "TUESDAY, NOVEMBER 24"
-    }`;
+    eyebrowEl.textContent = isAr
+      ? `طلب رقم #${order.orderNumber}   /   الثلاثاء، ٢٤ نوفمبر`
+      : `ORDER #${order.orderNumber}   /   ${order.dateLabel || "TUESDAY, NOVEMBER 24"}`;
   }
 
   if (subtitleEl) {
     if (order.rawStatus === "Cancelled" || order.rawStatus === "Rejected") {
-      subtitleEl.textContent = `Order #${order.orderNumber} was ${order.rawStatus.toLowerCase()}. Please contact the café if you need assistance.`;
+      subtitleEl.textContent = isAr
+        ? `تم إلغاء الطلب #${order.orderNumber}. يرجى التواصل مع المقهى إذا كنت بحاجة إلى مساعدة.`
+        : `Order #${order.orderNumber} was ${order.rawStatus.toLowerCase()}. Please contact the café if you need assistance.`;
     } else {
-      subtitleEl.textContent = `Thanks, ${
-        order.customer?.firstName || "Alex"
-      }. We’ll let you know the moment it’s ready.`;
+      subtitleEl.textContent = isAr
+        ? `شكراً لك يا ${order.customer?.firstName || "Alex"}. سنُعلمك فور جاهزية طلبك.`
+        : `Thanks, ${
+            order.customer?.firstName || "Alex"
+          }. We’ll let you know the moment it’s ready.`;
     }
   }
 
@@ -57,12 +69,18 @@ function renderTrackingOrder(order) {
     statusBadgeEl.className = `status-badge ${
       statusClassMap[order.status] || "status-badge--preparing"
     }`;
-    statusBadgeEl.textContent = order.status;
+    statusBadgeEl.textContent = localizeStatus(order.status);
   }
 
   if (etaLabelEl) {
     etaLabelEl.textContent =
-      order.fulfillment === "delivery" ? "Estimated delivery" : "Estimated pickup";
+      order.fulfillment === "delivery"
+        ? isAr
+          ? "موعد التوصيل المتوقع"
+          : "Estimated delivery"
+        : isAr
+        ? "موعد الاستلام المتوقع"
+        : "Estimated pickup";
   }
 
   if (etaWindowEl) {
@@ -82,19 +100,27 @@ function renderTrackingOrder(order) {
     node.classList.toggle("is-active", idx === stepIndex);
 
     if (circle) {
-      circle.textContent = idx < stepIndex || idx === 0 ? "✓" : String(idx + 1);
+      circle.textContent =
+        idx < stepIndex || idx === 0 ? "✓" : formatLocaleNumber(idx + 1);
     }
   });
 
   if (smsBodyEl) {
-    smsBodyEl.textContent = `We’ll text ${
-      order.customer?.phone || "+20 100 555 0142"
-    } when your order is ready. No refreshing needed.`;
+    const phoneStr = order.customer?.phone || "+20 100 555 0142";
+    smsBodyEl.textContent = isAr
+      ? `سنرسل رسالة نصية إلى ${phoneStr} فور جاهزية طلبك. لا حاجة لتحديث الصفحة.`
+      : `We’ll text ${phoneStr} when your order is ready. No refreshing needed.`;
   }
 
   if (order.fulfillment === "delivery") {
-    if (pickupEyebrowEl) pickupEyebrowEl.textContent = "DELIVERY FROM MAPLE STREET";
-    if (pickupTitleEl) pickupTitleEl.textContent = "On its way soon.";
+    if (pickupEyebrowEl)
+      pickupEyebrowEl.textContent = isAr
+        ? "التوصيل من فرع شارع مابل"
+        : "DELIVERY FROM MAPLE STREET";
+    if (pickupTitleEl)
+      pickupTitleEl.textContent = isAr
+        ? "طلبك في طريقه إليك قريباً."
+        : "On its way soon.";
     if (pickupAddressEl) {
       pickupAddressEl.textContent =
         order.customer?.address || "128 Oak Avenue, Apt 4B, Zamalek, Cairo";
@@ -104,6 +130,10 @@ function renderTrackingOrder(order) {
   if (receiptItemsEl) {
     receiptItemsEl.replaceChildren();
     (order.items || []).forEach((item) => {
+      const locProd = localizeProduct({ id: item.productId, name: item.name });
+      const displayName = locProd?.name || item.name;
+      const displayMeta = localizeCustomizationSummary(item.customizationSummary);
+
       const wrapper = document.createElement("div");
       wrapper.className = "receipt-item";
 
@@ -111,7 +141,7 @@ function renderTrackingOrder(order) {
       row.className = "receipt-item__row";
 
       const name = document.createElement("span");
-      name.textContent = `${item.quantity} × ${item.name}`;
+      name.textContent = `${formatLocaleNumber(item.quantity)} × ${displayName}`;
 
       const price = document.createElement("span");
       price.textContent = formatPrice(item.unitPrice * item.quantity);
@@ -120,10 +150,10 @@ function renderTrackingOrder(order) {
       row.appendChild(price);
       wrapper.appendChild(row);
 
-      if (item.customizationSummary && item.customizationSummary !== "Freshly baked") {
+      if (displayMeta && displayMeta !== "Freshly baked") {
         const meta = document.createElement("p");
         meta.className = "receipt-item__meta";
-        meta.textContent = item.customizationSummary;
+        meta.textContent = displayMeta;
         wrapper.appendChild(meta);
       }
 
@@ -132,10 +162,13 @@ function renderTrackingOrder(order) {
   }
 
   if (paidMethodEl) {
-    const payStatus = order.payment?.status || "Paid";
-    const methodLabel = order.payment?.method || "Cash";
+    const payStatus = localizeStatus(order.payment?.status || "Paid");
+    const methodLabel =
+      isAr && (order.payment?.method || "Cash").includes("Cash")
+        ? "الدفع نقداً عند الاستلام"
+        : order.payment?.method || "Cash";
     paidMethodEl.textContent = `${payStatus} · ${methodLabel}${
-      order.payment?.last4 ? ` ending ${order.payment.last4}` : ""
+      order.payment?.last4 ? ` (${order.payment.last4})` : ""
     }`;
   }
 
@@ -152,6 +185,10 @@ async function initTrackingPage() {
 
   let currentOrder = orderService.getActiveOrder();
   renderTrackingOrder(currentOrder);
+
+  i18n.subscribe(() => {
+    renderTrackingOrder(currentOrder);
+  });
 
   // Fetch authoritative order state from PostgreSQL backend
   try {

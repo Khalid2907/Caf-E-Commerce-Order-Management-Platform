@@ -21,17 +21,15 @@ export const APP_CONFIG = Object.freeze({
   CURRENCY: "EGP",
 });
 
+import { formatLocalePrice } from "../i18n/i18n.js";
+
 /**
- * Formats a numeric price in EGP (default: "95 EGP") or USD ("$5.80").
+ * Formats a numeric price in EGP ("95 EGP" in EN, "٩٥ ج.م." in AR) or USD ("$5.80").
  * @param {number} amount
  * @param {string} [currency=APP_CONFIG.CURRENCY]
+ * @param {string} [lang]
  * @returns {string}
  */
-export function formatPrice(amount, currency = APP_CONFIG.CURRENCY) {
-  const numeric = Number(amount) || 0;
-  if (currency === "USD") {
-    return `$${numeric.toFixed(2)}`;
-  }
-  const hasFraction = Math.abs(numeric - Math.round(numeric)) > 0.005;
-  return `${hasFraction ? numeric.toFixed(2) : Math.round(numeric)} EGP`;
+export function formatPrice(amount, currency = APP_CONFIG.CURRENCY, lang = undefined) {
+  return formatLocalePrice(amount, currency, lang);
 }

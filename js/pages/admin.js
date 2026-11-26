@@ -13,6 +13,14 @@
 
 import { showToast } from "../components/toast.js";
 import { STORAGE_KEYS, formatPrice } from "../config/constants.js";
+import {
+  formatLocaleNumber,
+  i18n,
+  localizeCustomizationSummary,
+  localizeProduct,
+  localizeStatus,
+  translatePageDOM,
+} from "../i18n/i18n.js";
 import { apiRequest } from "../services/apiClient.js";
 import { storageService } from "../services/storageService.js";
 
@@ -75,11 +83,37 @@ function renderOverview() {
   const badgeEl = document.getElementById("sidebar-active-orders-badge");
 
   if (netEl) netEl.textContent = formatPrice(ov.netSalesEgp);
-  if (ordEl) ordEl.textContent = String(ov.totalOrders);
-  if (ordSubEl)
-    ordSubEl.textContent = `${ov.activeOrders} active · ${ov.completedOrders} completed`;
+  if (ordEl) ordEl.textContent = formatLocaleNumber(ov.totalOrders);
+  if (ordSubEl) {
+    const isAr = i18n.getLanguage() === "ar";
+    ordSubEl.textContent = isAr
+      ? `${formatLocaleNumber(ov.activeOrders)} نشط · ${formatLocaleNumber(
+          ov.completedOrders
+        )} مكتمل`
+      : `${ov.activeOrders} active · ${ov.completedOrders} completed`;
+  }
   if (avgEl) avgEl.textContent = formatPrice(ov.avgOrderEgp);
-  if (badgeEl) badgeEl.textContent = String(ov.activeOrders);
+  if (badgeEl) badgeEl.textContent = formatLocaleNumber(ov.activeOrders);
+
+  const isAr = i18n.getLanguage() === "ar";
+  const arDayMap = {
+    Wed: "الأربعاء",
+    Thu: "الخميس",
+    Fri: "الجمعة",
+    Sat: "السبت",
+    Sun: "الأحد",
+    Mon: "الإثنين",
+    Tue: "الثلاثاء",
+  };
+  const arProductNameMap = {
+    "Spanish Latte": "سبانيش لاتيه",
+    "Flat White": "فلات وايت",
+    Americano: "أمريكانو",
+    "Butter Croissant": "كرواسون بالزبدة",
+    Cappuccino: "كابتشينو",
+    "Iced Matcha": "آيس ماتشا",
+    "Caramel Latte": "كراميل لاتيه",
+  };
 
   // Weekly Bar Chart
   const chartContainer = document.getElementById("ov-weekly-chart");
@@ -94,11 +128,12 @@ function renderOverview() {
       const fill = document.createElement("div");
       fill.className = "weekly-bar__fill";
       fill.style.blockSize = `${Math.max(18, Math.round((d.salesEgp / maxVal) * 140))}px`;
-      fill.title = `${d.day}: ${formatPrice(d.salesEgp)}`;
+      const dayLabel = isAr ? arDayMap[d.day] || d.day : d.day;
+      fill.title = `${dayLabel}: ${formatPrice(d.salesEgp)}`;
 
       const day = document.createElement("span");
       day.className = "weekly-bar__day";
-      day.textContent = d.day;
+      day.textContent = dayLabel;
 
       col.appendChild(fill);
       col.appendChild(day);
@@ -117,9 +152,9 @@ function renderOverview() {
       const row = document.createElement("div");
       row.className = "progress-item__row";
       const name = document.createElement("span");
-      name.textContent = f.name;
+      name.textContent = isAr ? arProductNameMap[f.name] || f.name : f.name;
       const units = document.createElement("strong");
-      units.textContent = String(f.units_sold);
+      units.textContent = formatLocaleNumber(f.units_sold);
       row.appendChild(name);
       row.appendChild(units);
 
@@ -153,7 +188,7 @@ function renderOverview() {
       const tdStatus = document.createElement("td");
       const pill = document.createElement("span");
       pill.className = `status-badge status-badge--${ord.uiStatus.toLowerCase()}`;
-      pill.textContent = ord.uiStatus;
+      pill.textContent = localizeStatus(ord.uiStatus);
       tdStatus.appendChild(pill);
       const tdTotal = document.createElement("td");
       const totalStrong = document.createElement("strong");
@@ -220,13 +255,14 @@ function renderOrdersSection() {
     tdCust.appendChild(ageSpan);
 
     const tdType = document.createElement("td");
-    tdType.textContent =
-      ord.fulfillmentType === "delivery" ? "Delivery" : "Pickup";
+    tdType.textContent = localizeStatus(
+      ord.fulfillmentType === "delivery" ? "Delivery" : "Pickup"
+    );
 
     const tdStatus = document.createElement("td");
     const pill = document.createElement("span");
     pill.className = `status-badge status-badge--${ord.uiStatus.toLowerCase()}`;
-    pill.textContent = ord.uiStatus;
+    pill.textContent = localizeStatus(ord.uiStatus);
     tdStatus.appendChild(pill);
 
     const tdTotal = document.createElement("td");
@@ -382,8 +418,10 @@ function renderMenuInventorySection() {
     state.selectedProduct = filtered[0];
   }
 
+  const isAr = i18n.getLanguage() === "ar";
   tbody.replaceChildren();
-  filtered.forEach((prod) => {
+  filtered.forEach((rawProd) => {
+    const prod = localizeProduct(rawProd);
     const tr = document.createElement("tr");
     tr.dataset.selectProductSlug = prod.slug;
     if (
@@ -405,7 +443,7 @@ function renderMenuInventorySection() {
     const title = document.createElement("strong");
     title.textContent = prod.name;
     const sku = document.createElement("span");
-    sku.className = "admin-table__sku";
+    sku.className = "admin-table__sku ltr-inline";
     sku.textContent = prod.sku;
     textWrap.appendChild(title);
     textWrap.appendChild(sku);
@@ -424,17 +462,21 @@ function renderMenuInventorySection() {
     const tdStatus = document.createElement("td");
     const badge = document.createElement("span");
     const badgeStyle =
-      prod.stockStatus === "Sold out"
+      rawProd.stockStatus === "Sold out"
         ? "status-badge--cancelled"
-        : prod.stockStatus === "Low stock"
+        : rawProd.stockStatus === "Low stock"
         ? "status-badge--preparing"
         : "status-badge--new";
     badge.className = `status-badge ${badgeStyle}`;
-    badge.textContent = prod.stockStatus;
+    badge.textContent = localizeStatus(rawProd.stockStatus);
     tdStatus.appendChild(badge);
 
     const tdStock = document.createElement("td");
-    tdStock.textContent = prod.isStockTracked ? `${prod.stockQuantity} left` : "—";
+    tdStock.textContent = prod.isStockTracked
+      ? isAr
+        ? `${formatLocaleNumber(prod.stockQuantity)} متبقي`
+        : `${prod.stockQuantity} left`
+      : "—";
 
     tr.appendChild(tdProd);
     tr.appendChild(tdCat);
@@ -775,6 +817,17 @@ async function loadAllAdminData() {
 }
 
 function initAdminPage() {
+  i18n.init();
+  i18n.subscribe(() => {
+    renderOverview();
+    renderOrdersSection();
+    renderMenuInventorySection();
+    renderCustomersSection();
+    renderDiscountsSection();
+    renderSettingsSection();
+    translatePageDOM();
+  });
+
   // Check URL hash (#orders, #menu, #customers, #discounts, #analytics, #settings)
   const initialHash = window.location.hash.replace(/^#/, "");
   if (

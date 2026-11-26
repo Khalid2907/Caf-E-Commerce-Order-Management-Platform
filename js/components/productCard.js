@@ -6,16 +6,19 @@
  */
 
 import { formatPrice } from "../config/constants.js";
+import { i18n, localizeProduct } from "../i18n/i18n.js";
 
 /**
  * Creates a DOM element for a single product card.
  * Uses DOM APIs (`createElement` / `textContent`) rather than raw `innerHTML`
  * interpolation to guarantee safe rendering of dynamic data.
  *
- * @param {object} product
+ * @param {object} rawProduct
  * @returns {HTMLElement}
  */
-export function createProductCardElement(product) {
+export function createProductCardElement(rawProduct) {
+  const product = localizeProduct(rawProduct);
+  const isAr = i18n.getLanguage() === "ar";
   const article = document.createElement("article");
   article.className = "product-card";
   article.dataset.productId = product.id;
@@ -33,7 +36,11 @@ export function createProductCardElement(product) {
   img.loading = "lazy";
   mediaWrapper.appendChild(img);
 
-  const badgeLabel = !product.available ? "SOLD OUT" : product.badge;
+  const badgeLabel = !product.available
+    ? isAr
+      ? "نفد المخزون"
+      : "SOLD OUT"
+    : product.badge;
   if (badgeLabel) {
     const badge = document.createElement("span");
     badge.className = "product-card__badge";

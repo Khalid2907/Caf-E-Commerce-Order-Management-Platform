@@ -513,3 +513,87 @@ describe("5. Frontend Domain, Cryptographic & Notification Service Unit Tests", 
     assert.equal(escaped, "Customer\\_Name \\*bold\\* \\`code\\` \\[link]");
   });
 });
+
+describe("6. Bilingual (EN <-> AR), RTL, Arabic Search & Unicode Persistence Tests", () => {
+  test("GET /api/products supports Arabic keyword search (سبانيش, كرواسون, ماتشا)", async () => {
+    const spanishRes = await request(app)
+      .get("/api/products")
+      .query({ search: "سبانيش" });
+    assert.equal(spanishRes.status, 200);
+    assert.ok(spanishRes.body.data.length >= 2);
+    assert.ok(spanishRes.body.data.some((p) => p.id === "spanish-latte"));
+
+    const croissantRes = await request(app)
+      .get("/api/products")
+      .query({ search: "كرواسون" });
+    assert.equal(croissantRes.status, 200);
+    assert.ok(croissantRes.body.data.some((p) => p.id === "butter-croissant"));
+  });
+
+  test("POST /api/orders persists Arabic customer names and special instructions without Unicode corruption", async () => {
+    const arOrderRes = await request(app)
+      .post("/api/orders")
+      .send({
+        customerName: "أحمد محمود الشناوي",
+        customerPhone: "+20 100 777 8899",
+        customerEmail: "ahmed@example.eg",
+        fulfillmentType: "pickup",
+        paymentMethod: "cash",
+        specialInstructions: "سكر خفيف وحليب الشوفان دافئ من فضلك",
+        items: [
+          {
+            productId: "spanish-latte",
+            quantity: 1,
+            customizations: {
+              size: "12oz",
+              temperature: "hot",
+              milk: "oat",
+            },
+          },
+        ],
+      });
+
+    assert.equal(arOrderRes.status, 201);
+    assert.equal(arOrderRes.body.data.customerName, "أحمد محمود الشناوي");
+    assert.equal(
+      arOrderRes.body.data.specialInstructions,
+      "سكر خفيف وحليب الشوفان دافئ من فضلك"
+    );
+  });
+
+  test("i18n engine localizes all 18 products, customization summaries, statuses, and Arabic EGP prices", async () => {
+    const {
+      formatLocalePrice,
+      formatLocaleNumber,
+      localizeProduct,
+      localizeCustomizationSummary,
+      localizeStatus,
+      tPhrase,
+    } = await import("../js/i18n/i18n.js");
+    const { PRODUCTS } = await import("../js/data/products.js");
+
+    // Verify all 18 products have distinct Arabic names and descriptions
+    for (const prod of PRODUCTS) {
+      const arProd = localizeProduct(prod, "ar");
+      assert.ok(arProd.name && arProd.name !== prod.name, `Missing AR name for ${prod.id}`);
+      assert.ok(
+        arProd.shortDescription && arProd.shortDescription !== prod.shortDescription,
+        `Missing AR description for ${prod.id}`
+      );
+    }
+
+    // Verify Arabic currency & number formatting
+    assert.equal(formatLocalePrice(95, "EGP", "en"), "95 EGP");
+    assert.equal(formatLocalePrice(95, "EGP", "ar"), "٩٥ ج.م.");
+    assert.equal(formatLocaleNumber(18, { lang: "ar" }), "١٨");
+
+    // Verify customization summary & status localization
+    assert.equal(
+      localizeCustomizationSummary("16 oz · Iced · Oat milk", "ar"),
+      "١٦ أونصة · مثلج · حليب الشوفان"
+    );
+    assert.equal(localizeStatus("Preparing", "ar"), "قيد التحضير");
+    assert.equal(tPhrase("Order online", "ar"), "اطلب أونلاين");
+    assert.equal(tPhrase("اطلب أونلاين", "en"), "Order online");
+  });
+});

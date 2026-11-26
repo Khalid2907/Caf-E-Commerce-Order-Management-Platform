@@ -12,6 +12,14 @@
 
 import { showToast } from "../components/toast.js";
 import { STORAGE_KEYS, formatPrice } from "../config/constants.js";
+import {
+  formatLocaleNumber,
+  i18n,
+  localizeCustomizationSummary,
+  localizeProduct,
+  localizeStatus,
+  translatePageDOM,
+} from "../i18n/i18n.js";
 import { apiRequest } from "../services/apiClient.js";
 import { storageService } from "../services/storageService.js";
 
@@ -48,6 +56,7 @@ function playAlertTone() {
  * Creates a DOM element for a single Barista Order Ticket matching Figma node 6:686.
  */
 function createTicketCard(order) {
+  const isAr = i18n.getLanguage() === "ar";
   const article = document.createElement("article");
   const isUrgent = Boolean(order.allergyFlag || (order.minutesAgo >= 8 && order.status !== "Completed"));
   article.className = `ticket-card${isUrgent ? " ticket-card--urgent" : ""}`;
@@ -56,7 +65,9 @@ function createTicketCard(order) {
   if (isUrgent && order.status !== "Ready" && order.status !== "Completed") {
     const alertBar = document.createElement("div");
     alertBar.className = "ticket-card__alert-bar";
-    alertBar.textContent = `NEEDS ATTENTION · ${order.minutesAgo || 8} min`;
+    alertBar.textContent = isAr
+      ? `يحتاج انتباهاً عاجلاً · ${formatLocaleNumber(order.minutesAgo || 8)} د`
+      : `NEEDS ATTENTION · ${order.minutesAgo || 8} min`;
     article.appendChild(alertBar);
   }
 
@@ -68,12 +79,16 @@ function createTicketCard(order) {
   top.className = "ticket-card__top";
 
   const ref = document.createElement("h3");
-  ref.className = "ticket-card__ref";
+  ref.className = "ticket-card__ref ltr-inline";
   ref.textContent = `#${order.orderReference}`;
 
   const age = document.createElement("span");
   age.className = "ticket-card__age";
-  age.textContent = order.ageLabel || "Just now";
+  age.textContent = isAr
+    ? order.minutesAgo <= 0
+      ? "الآن"
+      : `منذ ${formatLocaleNumber(order.minutesAgo)} د`
+    : order.ageLabel || "Just now";
 
   top.appendChild(ref);
   top.appendChild(age);
@@ -84,7 +99,14 @@ function createTicketCard(order) {
   customerRow.className = "ticket-card__customer";
 
   const custText = document.createElement("span");
-  const modeLabel = order.fulfillmentType === "delivery" ? "Delivery" : "Pickup";
+  const modeLabel =
+    order.fulfillmentType === "delivery"
+      ? isAr
+        ? "توصيل"
+        : "Delivery"
+      : isAr
+      ? "استلام"
+      : "Pickup";
   custText.textContent = `${order.customerName}  ·  ${modeLabel}`;
 
   const totalText = document.createElement("span");
@@ -100,18 +122,22 @@ function createTicketCard(order) {
   itemsList.className = "ticket-items";
 
   (order.items || []).forEach((it) => {
+    const locProd = localizeProduct({ id: it.productId, name: it.name });
+    const displayName = locProd?.name || it.name;
+    const displayMeta = localizeCustomizationSummary(it.customizationSummary);
+
     const itemDiv = document.createElement("div");
     itemDiv.className = "ticket-item";
 
     const itemName = document.createElement("p");
     itemName.className = "ticket-item__name";
-    itemName.textContent = `${it.quantity} × ${it.name}`;
+    itemName.textContent = `${formatLocaleNumber(it.quantity)} × ${displayName}`;
     itemDiv.appendChild(itemName);
 
-    if (it.customizationSummary && it.customizationSummary !== "Freshly baked") {
+    if (displayMeta && displayMeta !== "Freshly baked") {
       const itemMeta = document.createElement("p");
       itemMeta.className = "ticket-item__meta";
-      itemMeta.textContent = it.customizationSummary;
+      itemMeta.textContent = displayMeta;
       itemDiv.appendChild(itemMeta);
     }
 
@@ -140,7 +166,7 @@ function createTicketCard(order) {
     acceptPrepBtn.className = "btn btn--primary ticket-actions__btn";
     acceptPrepBtn.dataset.orderAction = "Preparing";
     acceptPrepBtn.dataset.orderRef = order.orderReference;
-    acceptPrepBtn.textContent = "Accept & start preparing";
+    acceptPrepBtn.textContent = isAr ? "قبول وبدء التحضير" : "Accept & start preparing";
     actions.appendChild(acceptPrepBtn);
 
     const secondaryRow = document.createElement("div");
@@ -151,14 +177,14 @@ function createTicketCard(order) {
     acceptOnlyBtn.className = "btn btn--secondary ticket-actions__btn";
     acceptOnlyBtn.dataset.orderAction = "Accepted";
     acceptOnlyBtn.dataset.orderRef = order.orderReference;
-    acceptOnlyBtn.textContent = "Accept";
+    acceptOnlyBtn.textContent = isAr ? "قبول" : "Accept";
 
     const rejectBtn = document.createElement("button");
     rejectBtn.type = "button";
     rejectBtn.className = "ticket-actions__reject";
     rejectBtn.dataset.orderAction = "Rejected";
     rejectBtn.dataset.orderRef = order.orderReference;
-    rejectBtn.textContent = "Reject";
+    rejectBtn.textContent = isAr ? "رفض" : "Reject";
 
     secondaryRow.appendChild(acceptOnlyBtn);
     secondaryRow.appendChild(rejectBtn);
@@ -169,7 +195,7 @@ function createTicketCard(order) {
     startPrepBtn.className = "btn btn--primary ticket-actions__btn";
     startPrepBtn.dataset.orderAction = "Preparing";
     startPrepBtn.dataset.orderRef = order.orderReference;
-    startPrepBtn.textContent = "Start preparing";
+    startPrepBtn.textContent = isAr ? "بدء التحضير" : "Start preparing";
     actions.appendChild(startPrepBtn);
   } else if (order.status === "Preparing") {
     const readyBtn = document.createElement("button");
@@ -177,7 +203,7 @@ function createTicketCard(order) {
     readyBtn.className = "btn btn--primary ticket-actions__btn";
     readyBtn.dataset.orderAction = "Ready";
     readyBtn.dataset.orderRef = order.orderReference;
-    readyBtn.textContent = "Mark ready for pickup";
+    readyBtn.textContent = isAr ? "تحديد كجاهز للاستلام" : "Mark ready for pickup";
     actions.appendChild(readyBtn);
   } else if (order.status === "Ready") {
     const completeBtn = document.createElement("button");
@@ -185,12 +211,12 @@ function createTicketCard(order) {
     completeBtn.className = "btn btn--secondary ticket-actions__btn";
     completeBtn.dataset.orderAction = "Completed";
     completeBtn.dataset.orderRef = order.orderReference;
-    completeBtn.textContent = "Mark as picked up";
+    completeBtn.textContent = isAr ? "تأكيد التسليم للعميل" : "Mark as picked up";
     actions.appendChild(completeBtn);
   } else {
     const badge = document.createElement("span");
     badge.className = `status-badge status-badge--${order.status.toLowerCase()}`;
-    badge.textContent = order.status;
+    badge.textContent = localizeStatus(order.status);
     actions.appendChild(badge);
   }
 
@@ -220,23 +246,26 @@ function renderBaristaWorkspace() {
   );
 
   const activeTotal = newOrders.length + prepOrders.length + readyOrders.length;
+  const isAr = i18n.getLanguage() === "ar";
 
   if (tabLiveCount) {
-    tabLiveCount.textContent = `Live orders · ${activeTotal}`;
+    tabLiveCount.textContent = isAr
+      ? `الطلبات المباشرة · ${formatLocaleNumber(activeTotal)}`
+      : `Live orders · ${activeTotal}`;
   }
 
   // Update Metrics
   const metricActive = document.getElementById("metric-active-orders");
   const metricPickedUp = document.getElementById("metric-picked-up");
-  if (metricActive) metricActive.textContent = String(activeTotal);
+  if (metricActive) metricActive.textContent = formatLocaleNumber(activeTotal);
   if (metricPickedUp && state.overview) {
-    metricPickedUp.textContent = String(36 + completedOrders.length);
+    metricPickedUp.textContent = formatLocaleNumber(36 + completedOrders.length);
   }
 
   if (state.activeTab === "completed") {
-    if (newBadge) newBadge.textContent = String(completedOrders.length);
-    if (prepBadge) prepBadge.textContent = "0";
-    if (readyBadge) readyBadge.textContent = "0";
+    if (newBadge) newBadge.textContent = formatLocaleNumber(completedOrders.length);
+    if (prepBadge) prepBadge.textContent = formatLocaleNumber(0);
+    if (readyBadge) readyBadge.textContent = formatLocaleNumber(0);
 
     if (newCol) {
       newCol.replaceChildren();
@@ -247,9 +276,9 @@ function renderBaristaWorkspace() {
     return;
   }
 
-  if (newBadge) newBadge.textContent = String(newOrders.length);
-  if (prepBadge) prepBadge.textContent = String(prepOrders.length);
-  if (readyBadge) readyBadge.textContent = String(readyOrders.length);
+  if (newBadge) newBadge.textContent = formatLocaleNumber(newOrders.length);
+  if (prepBadge) prepBadge.textContent = formatLocaleNumber(prepOrders.length);
+  if (readyBadge) readyBadge.textContent = formatLocaleNumber(readyOrders.length);
 
   if (newCol) {
     newCol.replaceChildren();
@@ -269,13 +298,21 @@ function renderBaristaWorkspace() {
   const footerStatus = document.getElementById("barista-store-status-label");
   if (pauseBtn) {
     pauseBtn.textContent = state.isAcceptingOrders
-      ? "Pause online orders"
+      ? isAr
+        ? "إيقاف الطلبات مؤقتاً"
+        : "Pause online orders"
+      : isAr
+      ? "استئناف استقبال الطلبات"
       : "Resume online orders";
     pauseBtn.classList.toggle("is-paused", !state.isAcceptingOrders);
   }
   if (footerStatus) {
     footerStatus.textContent = state.isAcceptingOrders
-      ? "●  Store is accepting orders"
+      ? isAr
+        ? "●  الفرع يستقبل الطلبات أونلاين"
+        : "●  Store is accepting orders"
+      : isAr
+      ? "●  الطلبات أونلاين متوقفة مؤقتاً"
       : "●  Online orders are currently paused";
   }
 }
@@ -347,6 +384,12 @@ function connectRealtimeSocket() {
 }
 
 function initBaristaPage() {
+  i18n.init();
+  i18n.subscribe(() => {
+    renderBaristaWorkspace();
+    translatePageDOM();
+  });
+
   // Bind Staff Login Modal
   const loginForm = document.getElementById("barista-login-form");
   const emailInput = document.getElementById("barista-login-email");

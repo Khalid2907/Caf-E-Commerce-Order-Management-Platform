@@ -13,6 +13,12 @@
 import { initHeader } from "../components/header.js";
 import { showToast } from "../components/toast.js";
 import { APP_CONFIG, STORAGE_KEYS, formatPrice } from "../config/constants.js";
+import {
+  formatLocaleNumber,
+  i18n,
+  localizeCustomizationSummary,
+  localizeProduct,
+} from "../i18n/i18n.js";
 import { cartService } from "../services/cartService.js";
 import { productService } from "../services/productService.js";
 import { storageService } from "../services/storageService.js";
@@ -30,15 +36,16 @@ const state = {
 function renderCategories() {
   const container = document.getElementById("menu-categories-list");
   if (!container) return;
+  const isAr = i18n.getLanguage() === "ar";
 
   const categories = [
-    { id: "favorites", name: "All favorites" },
-    { id: "coffee", name: "Coffee" },
-    { id: "non-coffee", name: "Non-Coffee" },
-    { id: "iced-drinks", name: "Iced Drinks" },
-    { id: "bakery", name: "Desserts & Bakery" },
-    { id: "food", name: "Food & Sandwiches" },
-    { id: "all", name: "Full catalog (18)" },
+    { id: "favorites", name: isAr ? "المفضلة للجميع" : "All favorites" },
+    { id: "coffee", name: isAr ? "القهوة" : "Coffee" },
+    { id: "non-coffee", name: isAr ? "مشروبات بدون قهوة" : "Non-Coffee" },
+    { id: "iced-drinks", name: isAr ? "مشروبات مثلجة" : "Iced Drinks" },
+    { id: "bakery", name: isAr ? "الحلويات والمخبوزات" : "Desserts & Bakery" },
+    { id: "food", name: isAr ? "الساندوتشات والمأكولات" : "Food & Sandwiches" },
+    { id: "all", name: isAr ? "القائمة الكاملة (١٨)" : "Full catalog (18)" },
   ];
 
   container.replaceChildren();
@@ -63,7 +70,9 @@ function renderCategories() {
 /**
  * Creates a single Menu Catalog card element matching Figma node 6:327.
  */
-function createMenuCard(product) {
+function createMenuCard(rawProduct) {
+  const product = localizeProduct(rawProduct);
+  const isAr = i18n.getLanguage() === "ar";
   const article = document.createElement("article");
   article.className = "menu-card";
   article.dataset.productId = product.id;
@@ -109,12 +118,18 @@ function createMenuCard(product) {
   if (!product.available) {
     addBtn.disabled = true;
     addBtn.setAttribute("aria-disabled", "true");
-    addBtn.setAttribute("aria-label", `${product.name} is currently sold out`);
-    addBtn.textContent = "Sold out";
+    addBtn.setAttribute(
+      "aria-label",
+      isAr ? `${product.name} غير متوفر حالياً` : `${product.name} is currently sold out`
+    );
+    addBtn.textContent = isAr ? "نفد المخزون" : "Sold out";
   } else {
     addBtn.dataset.addProductId = product.id;
-    addBtn.setAttribute("aria-label", `Add ${product.name} to bag`);
-    addBtn.textContent = "+  Add";
+    addBtn.setAttribute(
+      "aria-label",
+      isAr ? `أضف ${product.name} إلى السلة` : `Add ${product.name} to bag`
+    );
+    addBtn.textContent = isAr ? "+  إضافة" : "+  Add";
   }
 
   footer.appendChild(price);
@@ -155,24 +170,39 @@ function renderCatalog() {
     });
   }
 
-  const categoryLabels = {
-    favorites: "All favorites",
-    coffee: "Coffee",
-    "non-coffee": "Non-Coffee",
-    bakery: "Desserts & Bakery",
-    "iced-drinks": "Iced Drinks",
-    food: "Food & Sandwiches",
-    all: "Full menu catalog",
-  };
+  const isAr = i18n.getLanguage() === "ar";
+  const categoryLabels = isAr
+    ? {
+        favorites: "المفضلة للجميع",
+        coffee: "القهوة",
+        "non-coffee": "مشروبات بدون قهوة",
+        bakery: "الحلويات والمخبوزات",
+        "iced-drinks": "مشروبات مثلجة",
+        food: "الساندوتشات والمأكولات",
+        all: "القائمة الكاملة",
+      }
+    : {
+        favorites: "All favorites",
+        coffee: "Coffee",
+        "non-coffee": "Non-Coffee",
+        bakery: "Desserts & Bakery",
+        "iced-drinks": "Iced Drinks",
+        food: "Food & Sandwiches",
+        all: "Full menu catalog",
+      };
 
   if (headingEl) {
     headingEl.textContent = state.searchQuery.trim()
-      ? `Search results`
-      : categoryLabels[state.activeCategoryId] || "All favorites";
+      ? isAr
+        ? "نتائج البحث"
+        : "Search results"
+      : categoryLabels[state.activeCategoryId] || categoryLabels.favorites;
   }
 
   if (countEl) {
-    countEl.textContent = `${products.length} of ${totalCatalogSize} items`;
+    countEl.textContent = isAr
+      ? `${formatLocaleNumber(products.length)} من ${formatLocaleNumber(totalCatalogSize)} منتج`
+      : `${products.length} of ${totalCatalogSize} items`;
   }
 
   grid.replaceChildren();
@@ -181,11 +211,13 @@ function renderCatalog() {
     const empty = document.createElement("div");
     empty.className = "menu-empty";
     const msg = document.createElement("p");
-    msg.textContent = `No items matched "${state.searchQuery}".`;
+    msg.textContent = isAr
+      ? `لا توجد منتجات مطابقة للبحث "${state.searchQuery}".`
+      : `No items matched "${state.searchQuery}".`;
     const resetBtn = document.createElement("button");
     resetBtn.type = "button";
     resetBtn.className = "btn btn--secondary";
-    resetBtn.textContent = "Reset filters";
+    resetBtn.textContent = isAr ? "إعادة ضبط الفلاتر" : "Reset filters";
     resetBtn.addEventListener("click", () => {
       state.activeCategoryId = "favorites";
       state.searchQuery = "";
@@ -211,6 +243,7 @@ function renderCatalog() {
  * Renders the persistent "Your bag" panel on the right column.
  */
 function renderBagPanel(summary) {
+  const isAr = i18n.getLanguage() === "ar";
   const countEl = document.getElementById("bag-panel-count");
   const itemsContainer = document.getElementById("bag-items-list");
   const subtotalEl = document.getElementById("bag-subtotal-value");
@@ -218,9 +251,9 @@ function renderBagPanel(summary) {
   const mobileBagBtn = document.getElementById("mobile-view-bag-btn");
 
   if (countEl) {
-    countEl.textContent = `${summary.totalCount} ${
-      summary.totalCount === 1 ? "item" : "items"
-    }`;
+    countEl.textContent = isAr
+      ? `${formatLocaleNumber(summary.totalCount)} منتجات`
+      : `${summary.totalCount} ${summary.totalCount === 1 ? "item" : "items"}`;
   }
 
   if (subtotalEl) {
@@ -228,9 +261,13 @@ function renderBagPanel(summary) {
   }
 
   if (mobileBagBtn) {
-    mobileBagBtn.textContent = `View bag  ·  ${summary.totalCount} ${
-      summary.totalCount === 1 ? "item" : "items"
-    }  ·  ${formatPrice(summary.subtotal)}`;
+    mobileBagBtn.textContent = isAr
+      ? `عرض السلة  ·  ${formatLocaleNumber(summary.totalCount)} منتجات  ·  ${formatPrice(
+          summary.subtotal
+        )}`
+      : `View bag  ·  ${summary.totalCount} ${
+          summary.totalCount === 1 ? "item" : "items"
+        }  ·  ${formatPrice(summary.subtotal)}`;
   }
 
   if (checkoutBtn) {
@@ -249,7 +286,9 @@ function renderBagPanel(summary) {
   if (summary.items.length === 0) {
     const empty = document.createElement("div");
     empty.className = "bag-empty";
-    empty.textContent = "Your bag is empty. Add your daily cup from the menu.";
+    empty.textContent = isAr
+      ? "سلة طلباتك فارغة حالياً. أضف مشروبك المفضل من القائمة."
+      : "Your bag is empty. Add your daily cup from the menu.";
     itemsContainer.appendChild(empty);
     return;
   }
@@ -257,13 +296,17 @@ function renderBagPanel(summary) {
   const fragment = document.createDocumentFragment();
 
   summary.items.forEach((item) => {
+    const locProd = localizeProduct({ id: item.productId, name: item.name });
+    const displayName = locProd?.name || item.name;
+    const displaySummary = localizeCustomizationSummary(item.customizationSummary);
+
     const row = document.createElement("div");
     row.className = "bag-item";
 
     const img = document.createElement("img");
     img.className = "bag-item__img";
     img.src = item.image;
-    img.alt = item.name;
+    img.alt = displayName;
     img.width = 64;
     img.height = 64;
 
@@ -272,11 +315,11 @@ function renderBagPanel(summary) {
 
     const name = document.createElement("p");
     name.className = "bag-item__name";
-    name.textContent = item.name;
+    name.textContent = displayName;
 
     const meta = document.createElement("p");
     meta.className = "bag-item__meta";
-    meta.textContent = item.customizationSummary;
+    meta.textContent = displaySummary;
 
     const controls = document.createElement("div");
     controls.className = "bag-item__controls";
@@ -289,19 +332,25 @@ function renderBagPanel(summary) {
     decBtn.className = "bag-stepper__btn";
     decBtn.dataset.bagAction = "decrement";
     decBtn.dataset.cartItemId = item.cartItemId;
-    decBtn.setAttribute("aria-label", `Decrease quantity of ${item.name}`);
+    decBtn.setAttribute(
+      "aria-label",
+      isAr ? `تقليل كمية ${displayName}` : `Decrease quantity of ${displayName}`
+    );
     decBtn.textContent = "−";
 
     const qty = document.createElement("span");
     qty.className = "bag-stepper__qty";
-    qty.textContent = String(item.quantity);
+    qty.textContent = formatLocaleNumber(item.quantity);
 
     const incBtn = document.createElement("button");
     incBtn.type = "button";
     incBtn.className = "bag-stepper__btn";
     incBtn.dataset.bagAction = "increment";
     incBtn.dataset.cartItemId = item.cartItemId;
-    incBtn.setAttribute("aria-label", `Increase quantity of ${item.name}`);
+    incBtn.setAttribute(
+      "aria-label",
+      isAr ? `زيادة كمية ${displayName}` : `Increase quantity of ${displayName}`
+    );
     incBtn.textContent = "+";
 
     stepper.appendChild(decBtn);
@@ -331,20 +380,33 @@ function renderBagPanel(summary) {
  * Updates the fulfillment bar text between Pickup and Delivery.
  */
 function updateFulfillmentUI() {
+  const isAr = i18n.getLanguage() === "ar";
   const modeEl = document.getElementById("fulfillment-mode-label");
   const etaEl = document.getElementById("fulfillment-eta-label");
   const bagNoteEl = document.getElementById("bag-fulfillment-note");
 
   if (state.fulfillment === "delivery") {
-    if (modeEl) modeEl.textContent = "Delivery  •  Maple Street";
-    if (etaEl) etaEl.textContent = `Arrives in ${APP_CONFIG.DELIVERY_ESTIMATE} ⌄`;
+    if (modeEl)
+      modeEl.textContent = isAr ? "توصيل  •  فرع شارع مابل" : "Delivery  •  Maple Street";
+    if (etaEl)
+      etaEl.textContent = isAr
+        ? "يصل خلال ٢٥–٣٥ دقيقة ⌄"
+        : `Arrives in ${APP_CONFIG.DELIVERY_ESTIMATE} ⌄`;
     if (bagNoteEl)
-      bagNoteEl.textContent = `Delivery from Maple Street · ${APP_CONFIG.DELIVERY_ESTIMATE}`;
+      bagNoteEl.textContent = isAr
+        ? "التوصيل من فرع شارع مابل · ٢٥–٣٥ دقيقة"
+        : `Delivery from Maple Street · ${APP_CONFIG.DELIVERY_ESTIMATE}`;
   } else {
-    if (modeEl) modeEl.textContent = "Pickup  •  Maple Street";
-    if (etaEl) etaEl.textContent = `Ready in ${APP_CONFIG.PICKUP_ESTIMATE} ⌄`;
+    if (modeEl)
+      modeEl.textContent = isAr ? "استلام من الفرع  •  شارع مابل" : "Pickup  •  Maple Street";
+    if (etaEl)
+      etaEl.textContent = isAr
+        ? "جاهز خلال ١٠–١٥ دقيقة ⌄"
+        : `Ready in ${APP_CONFIG.PICKUP_ESTIMATE} ⌄`;
     if (bagNoteEl)
-      bagNoteEl.textContent = `Pickup at Maple Street · ${APP_CONFIG.PICKUP_ESTIMATE}`;
+      bagNoteEl.textContent = isAr
+        ? "الاستلام من فرع شارع مابل · ١٠–١٥ دقيقة"
+        : `Pickup at Maple Street · ${APP_CONFIG.PICKUP_ESTIMATE}`;
   }
 }
 
@@ -361,6 +423,13 @@ async function initMenuPage() {
   renderCategories();
   renderCatalog();
   updateFulfillmentUI();
+
+  i18n.subscribe(() => {
+    renderCategories();
+    renderCatalog();
+    updateFulfillmentUI();
+    renderBagPanel(cartService.getSummary());
+  });
 
   // Sync live products & stock availability from PostgreSQL backend
   productService.syncFromBackend().then(() => {

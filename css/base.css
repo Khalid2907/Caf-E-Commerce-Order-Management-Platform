@@ -174,3 +174,72 @@ ol {
 .action-link:hover .action-link__arrow {
   transform: translate(2px, -2px);
 }
+
+/* ==========================================================================
+   RTL & Arabic Localization Rules (Phase 4 & 6)
+   ========================================================================== */
+html[lang="ar"] * {
+  letter-spacing: 0 !important;
+}
+
+html[dir="rtl"] .action-link:hover .action-link__arrow {
+  transform: translate(-2px, -2px);
+}
+
+/* Mixed-direction isolation for phone numbers, order IDs, emails, and SKUs */
+.ltr-inline,
+input[type="tel"],
+input[type="email"],
+#cc-number,
+#cc-exp,
+#cc-csc {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+html[dir="rtl"] input[type="tel"],
+html[dir="rtl"] input[type="email"] {
+  text-align: end;
+}
+
+/* Language Switcher Pill ("EN | العربية") */
+.lang-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--color-muted);
+  flex-shrink: 0;
+}
+
+.lang-switcher__btn {
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.lang-switcher__btn--ar {
+  font-family: "IBM Plex Sans Arabic", "Cairo", sans-serif;
+}
+
+.lang-switcher__btn:hover {
+  color: var(--color-pine);
+}
+
+.lang-switcher__btn.is-active {
+  background-color: var(--color-pine);
+  color: var(--color-paper);
+}
+
+.lang-switcher__sep {
+  color: var(--color-line);
+  user-select: none;
+}

@@ -9,6 +9,7 @@
 import { initHeader } from "../components/header.js";
 import { showToast } from "../components/toast.js";
 import { formatPrice } from "../config/constants.js";
+import { formatLocaleNumber, i18n, localizeProduct } from "../i18n/i18n.js";
 import { cartService } from "../services/cartService.js";
 import { productService } from "../services/productService.js";
 
@@ -59,6 +60,7 @@ function calculateCurrentPrices() {
 
 function updatePriceDisplays() {
   const { unitPrice, totalPrice } = calculateCurrentPrices();
+  const isAr = i18n.getLanguage() === "ar";
 
   const unitPriceEl = document.getElementById("product-unit-price");
   const submitBtnEl = document.getElementById("product-add-submit");
@@ -68,24 +70,32 @@ function updatePriceDisplays() {
     unitPriceEl.textContent = formatPrice(unitPrice);
   }
   if (qtyValueEl) {
-    qtyValueEl.textContent = String(state.quantity);
+    qtyValueEl.textContent = formatLocaleNumber(state.quantity);
   }
   if (submitBtnEl) {
     if (state.product && !state.product.available) {
       submitBtnEl.disabled = true;
-      submitBtnEl.textContent = "Currently Sold Out";
+      submitBtnEl.textContent = isAr
+        ? "غير متوفر حالياً (نفد المخزون)"
+        : "Currently Sold Out";
     } else {
       submitBtnEl.disabled = false;
-      submitBtnEl.textContent = `Add to bag  ·  ${formatPrice(totalPrice)}`;
+      submitBtnEl.textContent = isAr
+        ? `أضف إلى السلة  ·  ${formatPrice(totalPrice)}`
+        : `Add to bag  ·  ${formatPrice(totalPrice)}`;
     }
   }
 }
 
 function renderProductDetail() {
-  const product = state.product;
-  if (!product) return;
+  const rawProduct = state.product;
+  if (!rawProduct) return;
+  const product = localizeProduct(rawProduct);
+  const isAr = i18n.getLanguage() === "ar";
 
-  document.title = `${product.name} — Common Ground`;
+  document.title = isAr
+    ? `${product.name} — كومون جراوند`
+    : `${product.name} — Common Ground`;
 
   const breadcrumbCatEl = document.getElementById("breadcrumb-category");
   const breadcrumbNameEl = document.getElementById("breadcrumb-product-name");
@@ -97,16 +107,24 @@ function renderProductDetail() {
   const drinkOptionsContainer = document.getElementById("drink-customization-options");
 
   const primaryCat = product.categoryId || product.categoryIds?.[0] || "coffee";
-  const categoryNameMap = {
-    coffee: "Coffee",
-    "non-coffee": "Non-Coffee",
-    bakery: "Desserts & Bakery",
-    "iced-drinks": "Iced Drinks",
-    food: "Food & Sandwiches",
-  };
+  const categoryNameMap = isAr
+    ? {
+        coffee: "القهوة",
+        "non-coffee": "مشروبات بدون قهوة",
+        bakery: "الحلويات والمخبوزات",
+        "iced-drinks": "مشروبات مثلجة",
+        food: "الساندوتشات والمأكولات",
+      }
+    : {
+        coffee: "Coffee",
+        "non-coffee": "Non-Coffee",
+        bakery: "Desserts & Bakery",
+        "iced-drinks": "Iced Drinks",
+        food: "Food & Sandwiches",
+      };
 
   if (breadcrumbCatEl) {
-    breadcrumbCatEl.textContent = categoryNameMap[primaryCat] || "Menu";
+    breadcrumbCatEl.textContent = categoryNameMap[primaryCat] || (isAr ? "القائمة" : "Menu");
     breadcrumbCatEl.href = `menu.html?category=${encodeURIComponent(primaryCat)}`;
   }
   if (breadcrumbNameEl) breadcrumbNameEl.textContent = product.name;
@@ -116,7 +134,10 @@ function renderProductDetail() {
   }
   if (originTextEl) {
     originTextEl.textContent =
-      product.originNote || "Small batch • Prepared fresh daily at Maple Street";
+      product.originNote ||
+      (isAr
+        ? "تحميص بكميات صغيرة • يُحضر طازجاً يومياً في الزمالك"
+        : "Small batch • Prepared fresh daily at Maple Street");
   }
   if (titleEl) titleEl.textContent = product.name;
   if (descEl) {
@@ -125,7 +146,10 @@ function renderProductDetail() {
   }
   if (allergenEl) {
     allergenEl.textContent =
-      product.allergenNote || "Prepared in a kitchen that handles nuts, wheat, and dairy.";
+      product.allergenNote ||
+      (isAr
+        ? "يُحضر في مطبخ يتعامل مع المكسرات والقمح ومنتجات الألبان."
+        : "Prepared in a kitchen that handles nuts, wheat, and dairy.");
   }
 
   const baseSizePrice =
@@ -133,10 +157,14 @@ function renderProductDetail() {
   const size12Label = document.getElementById("size-12oz-label");
   const size16Label = document.getElementById("size-16oz-label");
   if (size12Label) {
-    size12Label.textContent = `12 oz  ·  ${formatPrice(baseSizePrice)}`;
+    size12Label.textContent = isAr
+      ? `١٢ أونصة  ·  ${formatPrice(baseSizePrice)}`
+      : `12 oz  ·  ${formatPrice(baseSizePrice)}`;
   }
   if (size16Label) {
-    size16Label.textContent = `16 oz  ·  ${formatPrice(baseSizePrice + 15)}`;
+    size16Label.textContent = isAr
+      ? `١٦ أونصة  ·  ${formatPrice(baseSizePrice + 15)}`
+      : `16 oz  ·  ${formatPrice(baseSizePrice + 15)}`;
   }
 
   if (drinkOptionsContainer) {
@@ -162,23 +190,25 @@ function renderProductDetail() {
 function renderPairings() {
   const container = document.getElementById("pairings-grid");
   if (!container) return;
+  const isAr = i18n.getLanguage() === "ar";
 
   const pairingConfigs = [
     {
       id: "butter-croissant",
-      tagline: "Buttery, flaky, baked today.",
+      tagline: isAr ? "مورق بالزبدة الطبيعية، مخبوز اليوم." : "Buttery, flaky, baked today.",
     },
     {
       id: "americano",
-      tagline: "A second cup, for a friend.",
+      tagline: isAr ? "كوب ثانٍ، تشاركه مع صديق." : "A second cup, for a friend.",
     },
   ];
 
   container.replaceChildren();
 
   pairingConfigs.forEach(({ id, tagline }) => {
-    const item = productService.getProductById(id);
-    if (!item) return;
+    const rawItem = productService.getProductById(id);
+    if (!rawItem) return;
+    const item = localizeProduct(rawItem);
 
     const card = document.createElement("article");
     card.className = "pairing-card";
@@ -219,7 +249,7 @@ function renderPairings() {
     addBtn.className = "pairing-card__add";
     addBtn.dataset.pairingAdd = item.id;
     addBtn.setAttribute("aria-label", `Add ${item.name} to bag`);
-    addBtn.textContent = "+ Add";
+    addBtn.textContent = isAr ? "+ إضافة" : "+ Add";
 
     card.appendChild(img);
     card.appendChild(body);
@@ -234,10 +264,17 @@ function renderPairings() {
       if (!btn) return;
       const added = cartService.addItem(btn.dataset.pairingAdd, 1);
       if (added) {
-        showToast(`Added ${added.name} (${formatPrice(added.price)}) to your bag`, {
-          actionLabel: "View bag",
-          actionHref: "menu.html#your-bag",
-        });
+        const locAdded = localizeProduct(added);
+        const ar = i18n.getLanguage() === "ar";
+        showToast(
+          ar
+            ? `تمت إضافة ${locAdded.name} (${formatPrice(added.price)}) إلى السلة`
+            : `Added ${added.name} (${formatPrice(added.price)}) to your bag`,
+          {
+            actionLabel: ar ? "عرض السلة" : "View bag",
+            actionHref: "menu.html#your-bag",
+          }
+        );
       }
     });
     container.dataset.bound = "true";
@@ -265,6 +302,11 @@ async function initProductPage() {
 
   renderProductDetail();
   renderPairings();
+
+  i18n.subscribe(() => {
+    renderProductDetail();
+    renderPairings();
+  });
 
   // Hydrate live product from PostgreSQL backend
   await productService.syncFromBackend();

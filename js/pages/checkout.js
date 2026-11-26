@@ -8,6 +8,12 @@
 import { initHeader } from "../components/header.js";
 import { showToast } from "../components/toast.js";
 import { STORAGE_KEYS, formatPrice } from "../config/constants.js";
+import {
+  formatLocaleNumber,
+  i18n,
+  localizeCustomizationSummary,
+  localizeProduct,
+} from "../i18n/i18n.js";
 import { apiRequest } from "../services/apiClient.js";
 import { cartService } from "../services/cartService.js";
 import { orderService } from "../services/orderService.js";
@@ -85,6 +91,7 @@ function setupValidationSync(form) {
 
 function updateFulfillmentLayout() {
   const isDelivery = state.fulfillment === "delivery";
+  const isAr = i18n.getLanguage() === "ar";
 
   const heroTitle = document.getElementById("checkout-page-title");
   const deliverySection = document.getElementById("delivery-address-section");
@@ -98,7 +105,11 @@ function updateFulfillmentLayout() {
 
   if (heroTitle) {
     heroTitle.textContent = isDelivery
-      ? "Good coffee, to your door."
+      ? isAr
+        ? "قهوتك المختصة، حتى باب منزلك."
+        : "Good coffee, to your door."
+      : isAr
+      ? "خطوة واحدة تفصلك عن قهوتك."
       : "Your next good moment.";
   }
 
@@ -115,32 +126,62 @@ function updateFulfillmentLayout() {
   }
 
   if (detailsHeading) {
-    detailsHeading.textContent = isDelivery ? "03  /  Your details" : "02  /  Your details";
+    detailsHeading.textContent = isDelivery
+      ? isAr
+        ? "٠٣  /  بيانات التواصل"
+        : "03  /  Your details"
+      : isAr
+      ? "٠٢  /  بيانات التواصل"
+      : "02  /  Your details";
   }
 
   if (paymentHeading) {
-    paymentHeading.textContent = isDelivery ? "04  /  Payment" : "03  /  Payment";
+    paymentHeading.textContent = isDelivery
+      ? isAr
+        ? "٠٤  /  طريقة الدفع"
+        : "04  /  Payment"
+      : isAr
+      ? "٠٣  /  طريقة الدفع"
+      : "03  /  Payment";
   }
 
   if (timeLabel) {
-    timeLabel.textContent = isDelivery ? "Estimated delivery" : "Pickup time";
+    timeLabel.textContent = isDelivery
+      ? isAr
+        ? "وقت التوصيل المتوقع"
+        : "Estimated delivery"
+      : isAr
+      ? "موعد الاستلام"
+      : "Pickup time";
   }
 
   if (timeSelect) {
     timeSelect.options[0].textContent = isDelivery
-      ? "ASAP · Arrives in 25–35 minutes"
+      ? isAr
+        ? "في أقرب وقت · يصل خلال ٢٥–٣٥ دقيقة"
+        : "ASAP · Arrives in 25–35 minutes"
+      : isAr
+      ? "في أقرب وقت · جاهز خلال ١٠–١٥ دقيقة"
       : "ASAP · Ready in 10–15 minutes";
   }
 
   if (locationSubnote) {
     locationSubnote.textContent = isDelivery
-      ? "Delivered from Maple Street · 25 EGP delivery fee"
+      ? isAr
+        ? "يُوصل من فرع شارع مابل بالزمالك · رسوم التوصيل ٢٥ ج.م."
+        : "Delivered from Maple Street · 25 EGP delivery fee"
+      : isAr
+      ? "٤٢ شارع مابل، الزمالك، القاهرة · مفتوح حتى ٦:٠٠ مساءً"
       : "42 Maple Street, Zamalek, Cairo · Open until 6:00 pm";
   }
 
   if (deliverySubtext) {
     deliverySubtext.textContent = isDelivery
-      ? "Available within 5 km"
+      ? isAr
+        ? "متاح في نطاق ٥ كم من الفرع"
+        : "Available within 5 km"
+      : isAr
+      ? "أدخل عنوانك للتوصيل السريع"
       : "Enter an address to check availability";
   }
 
@@ -198,17 +239,22 @@ function renderOrderReview() {
 
   const finalTotal = Math.max(0, Number((summary.total - discount).toFixed(2)));
 
+  const isAr = i18n.getLanguage() === "ar";
   const itemsContainer = document.getElementById("checkout-review-items");
   if (itemsContainer) {
     itemsContainer.replaceChildren();
     summary.items.forEach((item) => {
+      const locProd = localizeProduct({ id: item.productId, name: item.name });
+      const displayName = locProd?.name || item.name;
+      const displayMeta = localizeCustomizationSummary(item.customizationSummary);
+
       const row = document.createElement("div");
       row.className = "review-item";
 
       const img = document.createElement("img");
       img.className = "review-item__img";
       img.src = item.image;
-      img.alt = item.name;
+      img.alt = displayName;
       img.width = 72;
       img.height = 72;
 
@@ -217,11 +263,11 @@ function renderOrderReview() {
 
       const name = document.createElement("p");
       name.className = "review-item__name";
-      name.textContent = `${item.quantity} × ${item.name}`;
+      name.textContent = `${formatLocaleNumber(item.quantity)} × ${displayName}`;
 
       const meta = document.createElement("p");
       meta.className = "review-item__meta";
-      meta.textContent = item.customizationSummary;
+      meta.textContent = displayMeta;
 
       const price = document.createElement("p");
       price.className = "review-item__price";
@@ -265,7 +311,13 @@ function renderOrderReview() {
 
   if (submitBtn && !state.submitting) {
     const actionVerb =
-      state.fulfillment === "delivery" ? "Place delivery order" : "Place pickup order";
+      state.fulfillment === "delivery"
+        ? isAr
+          ? "تأكيد طلب التوصيل"
+          : "Place delivery order"
+        : isAr
+        ? "تأكيد طلب الاستلام"
+        : "Place pickup order";
     submitBtn.textContent = `${actionVerb}  ·  ${formatPrice(finalTotal)}`;
     submitBtn.disabled = summary.totalCount === 0;
   }
@@ -273,6 +325,10 @@ function renderOrderReview() {
 
 function initCheckoutPage() {
   initHeader();
+
+  i18n.subscribe(() => {
+    updateFulfillmentLayout();
+  });
 
   const params = new URLSearchParams(window.location.search);
   const modeParam = params.get("mode");

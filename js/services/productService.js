@@ -7,6 +7,7 @@
  */
 
 import { CATEGORIES, CUSTOMIZATION_OPTIONS, PRODUCTS } from "../data/products.js";
+import { localizeProduct } from "../i18n/i18n.js";
 import { apiRequest } from "./apiClient.js";
 
 const SLUG_ALIASES = {
@@ -109,12 +110,15 @@ export const productService = {
         (Array.isArray(product.categoryIds) && product.categoryIds.includes(categoryId)) ||
         product.categoryId === categoryId;
 
+      const arProd = localizeProduct(product, "ar");
       const matchesQuery =
         !normalizedQuery ||
         product.name.toLowerCase().includes(normalizedQuery) ||
         product.shortDescription.toLowerCase().includes(normalizedQuery) ||
         (product.menuDescription &&
-          product.menuDescription.toLowerCase().includes(normalizedQuery));
+          product.menuDescription.toLowerCase().includes(normalizedQuery)) ||
+        (arProd && arProd.name.toLowerCase().includes(normalizedQuery)) ||
+        (arProd && arProd.shortDescription.toLowerCase().includes(normalizedQuery));
 
       return matchesCategory && matchesQuery;
     });

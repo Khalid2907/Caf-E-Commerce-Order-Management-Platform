@@ -8,12 +8,14 @@
 import { initHeader } from "../components/header.js";
 import { showToast } from "../components/toast.js";
 import { formatPrice } from "../config/constants.js";
+import { i18n, localizeProduct, localizeStatus } from "../i18n/i18n.js";
 import { cartService } from "../services/cartService.js";
 import { orderService } from "../services/orderService.js";
 
 function renderActiveOrderCard() {
   const order = orderService.getActiveOrder();
   if (!order) return;
+  const isAr = i18n.getLanguage() === "ar";
 
   const numEl = document.getElementById("active-order-number");
   const itemsEl = document.getElementById("active-order-items");
@@ -22,24 +24,40 @@ function renderActiveOrderCard() {
   const greetingEl = document.getElementById("account-greeting-title");
 
   if (greetingEl) {
-    greetingEl.textContent = `Good morning, ${order.customer?.firstName || "Alex"}.`;
+    const firstName = order.customer?.firstName || "Alex";
+    greetingEl.textContent = isAr
+      ? `صباح الخير، ${firstName}.`
+      : `Good morning, ${firstName}.`;
   }
 
   if (numEl) {
-    numEl.textContent = `Order #${order.orderNumber}`;
+    numEl.textContent = isAr
+      ? `طلب رقم #${order.orderNumber}`
+      : `Order #${order.orderNumber}`;
   }
 
   if (itemsEl) {
-    const names = (order.items || []).map((i) => i.name.toLowerCase());
+    const names = (order.items || []).map(
+      (i) => localizeProduct({ id: i.productId, name: i.name })?.name || i.name
+    );
     itemsEl.textContent = names.length
-      ? names[0].charAt(0).toUpperCase() + names.join(", ").slice(1)
-      : "Iced oat latte, almond croissant";
+      ? names.join(isAr ? "، " : ", ")
+      : isAr
+      ? "سبانيش لاتيه، كرواسون بالزبدة"
+      : "Spanish latte, butter croissant";
   }
 
   if (metaEl) {
-    const modeLabel = order.fulfillment === "delivery" ? "Delivery" : "Pickup";
+    const modeLabel =
+      order.fulfillment === "delivery"
+        ? isAr
+          ? "توصيل"
+          : "Delivery"
+        : isAr
+        ? "استلام من الفرع"
+        : "Pickup";
     metaEl.textContent = `${
-      order.createdAtLabel || "Today · 10:14 am"
+      isAr ? "اليوم · ١٠:١٤ ص" : order.createdAtLabel || "Today · 10:14 am"
     }   /   ${modeLabel} · ${formatPrice(order.total)}`;
   }
 
@@ -53,13 +71,14 @@ function renderActiveOrderCard() {
     statusEl.className = `status-badge ${
       statusClassMap[order.status] || "status-badge--preparing"
     }`;
-    statusEl.textContent = order.status;
+    statusEl.textContent = localizeStatus(order.status);
   }
 }
 
 function renderPastOrdersTable() {
   const tbody = document.getElementById("past-orders-tbody");
   if (!tbody) return;
+  const isAr = i18n.getLanguage() === "ar";
 
   const pastOrders = orderService.getPastOrders();
   tbody.replaceChildren();
@@ -68,7 +87,7 @@ function renderPastOrdersTable() {
     const tr = document.createElement("tr");
 
     const tdOrder = document.createElement("td");
-    tdOrder.className = "order-table__id";
+    tdOrder.className = "order-table__id ltr-inline";
     tdOrder.textContent = `#${entry.orderNumber}`;
 
     const tdDate = document.createElement("td");
@@ -76,7 +95,17 @@ function renderPastOrdersTable() {
     tdDate.textContent = entry.date;
 
     const tdItems = document.createElement("td");
-    tdItems.textContent = entry.itemsSummary;
+    const localizedSummary = isAr
+      ? (entry.reorderItems || [])
+          .map(
+            (r) =>
+              `${localizeProduct({ id: r.productId, name: r.productId })?.name || r.productId}${
+                r.quantity > 1 ? ` × ${r.quantity}` : ""
+              }`
+          )
+          .join("، ")
+      : entry.itemsSummary;
+    tdItems.textContent = localizedSummary;
 
     const tdTotal = document.createElement("td");
     tdTotal.className = "order-table__total";
@@ -89,7 +118,7 @@ function renderPastOrdersTable() {
     btn.type = "button";
     btn.className = "reorder-btn";
     btn.dataset.reorderId = entry.orderNumber;
-    btn.textContent = "Reorder  ↗";
+    btn.textContent = isAr ? "إعادة الطلب  ↖" : "Reorder  ↗";
 
     tdAction.appendChild(btn);
 
@@ -101,28 +130,42 @@ function renderPastOrdersTable() {
     tbody.appendChild(tr);
   });
 
-  tbody.addEventListener("click", (event) => {
-    const btn = event.target.closest("[data-reorder-id]");
-    if (!btn) return;
-    const orderNum = btn.dataset.reorderId;
-    const found = pastOrders.find((o) => o.orderNumber === orderNum);
-    if (!found) return;
+  if (!tbody.dataset.bound) {
+    tbody.addEventListener("click", (event) => {
+      const btn = event.target.closest("[data-reorder-id]");
+      if (!btn) return;
+      const orderNum = btn.dataset.reorderId;
+      const found = pastOrders.find((o) => o.orderNumber === orderNum);
+      if (!found) return;
 
-    (found.reorderItems || []).forEach(({ productId, quantity }) => {
-      cartService.addItem(productId, quantity);
-    });
+      (found.reorderItems || []).forEach(({ productId, quantity }) => {
+        cartService.addItem(productId, quantity);
+      });
 
-    showToast(`Added Order #${found.orderNumber} (${found.itemsSummary}) to your bag`, {
-      actionLabel: "Checkout →",
-      actionHref: "checkout.html",
+      const ar = i18n.getLanguage() === "ar";
+      showToast(
+        ar
+          ? `تمت إضافة طلب #${found.orderNumber} إلى سلة طلباتك`
+          : `Added Order #${found.orderNumber} (${found.itemsSummary}) to your bag`,
+        {
+          actionLabel: ar ? "إتمام الطلب ←" : "Checkout →",
+          actionHref: "checkout.html",
+        }
+      );
     });
-  });
+    tbody.dataset.bound = "true";
+  }
 }
 
 async function initOrdersPage() {
   initHeader();
   renderActiveOrderCard();
   renderPastOrdersTable();
+
+  i18n.subscribe(() => {
+    renderActiveOrderCard();
+    renderPastOrdersTable();
+  });
   try {
     const active = orderService.getActiveOrder();
     if (active && active.orderNumber) {

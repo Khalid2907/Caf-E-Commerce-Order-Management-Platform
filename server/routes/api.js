@@ -72,6 +72,23 @@ const PRODUCT_SLUG_ALIASES = {
   "almond-croissant": "butter-croissant",
 };
 
+// Arabic keyword search mapping for bilingual catalog queries (Phase 8)
+const ARABIC_PRODUCT_SEARCH_MAP = [
+  { keywords: ["سبانيش", "اسبانيش", "لاتيه", "قهوة"], slugs: ["spanish-latte", "iced-spanish-latte", "caramel-latte"] },
+  { keywords: ["كراميل", "ماكياتو"], slugs: ["caramel-latte", "iced-caramel-macchiato"] },
+  { keywords: ["امريكانو", "أمريكانو", "بلاك"], slugs: ["americano", "iced-americano"] },
+  { keywords: ["كابتشينو"], slugs: ["cappuccino"] },
+  { keywords: ["فلات", "وايت"], slugs: ["flat-white"] },
+  { keywords: ["ماتشا", "شاي"], slugs: ["iced-matcha"] },
+  { keywords: ["شوكولاتة", "شوكليت", "هوت"], slugs: ["iced-chocolate", "hot-chocolate", "chocolate-brownie"] },
+  { keywords: ["براوني", "كيك", "حلو"], slugs: ["chocolate-brownie", "cheesecake", "cinnamon-roll"] },
+  { keywords: ["كرواسون", "زبدة", "مخبوزات"], slugs: ["butter-croissant", "turkey-croissant"] },
+  { keywords: ["تشيز", "سان"], slugs: ["cheesecake"] },
+  { keywords: ["سينابون", "قرفة", "رول"], slugs: ["cinnamon-roll"] },
+  { keywords: ["ساندوتش", "دجاج", "فراخ", "تركي", "جبنة"], slugs: ["chicken-sandwich", "turkey-croissant", "grilled-cheese-sandwich"] },
+  { keywords: ["ايس", "آيس", "مثلج", "بارد"], slugs: ["iced-matcha", "iced-chocolate", "iced-spanish-latte", "iced-americano", "iced-caramel-macchiato"] },
+];
+
 // Strict Order Status State Machine
 const ALLOWED_STATUS_TRANSITIONS = {
   Pending: ["Accepted", "Preparing", "Rejected", "Cancelled"],
@@ -669,10 +686,28 @@ router.get("/products", async (req, res, next) => {
     }
 
     if (search && String(search).trim()) {
-      params.push(`%${String(search).trim().toLowerCase()}%`);
-      conditions.push(
-        `(LOWER(p.name) LIKE $${params.length} OR LOWER(p.short_description) LIKE $${params.length} OR LOWER(p.sku) LIKE $${params.length})`
-      );
+      const qLower = String(search).trim().toLowerCase();
+      params.push(`%${qLower}%`);
+      const likeParamIdx = params.length;
+
+      const matchedArSlugs = new Set();
+      for (const entry of ARABIC_PRODUCT_SEARCH_MAP) {
+        if (entry.keywords.some((kw) => qLower.includes(kw))) {
+          entry.slugs.forEach((s) => matchedArSlugs.add(s));
+        }
+      }
+
+      if (matchedArSlugs.size > 0) {
+        params.push(Array.from(matchedArSlugs));
+        const arParamIdx = params.length;
+        conditions.push(
+          `(LOWER(p.name) LIKE $${likeParamIdx} OR LOWER(p.short_description) LIKE $${likeParamIdx} OR LOWER(p.sku) LIKE $${likeParamIdx} OR p.slug = ANY($${arParamIdx}))`
+        );
+      } else {
+        conditions.push(
+          `(LOWER(p.name) LIKE $${likeParamIdx} OR LOWER(p.short_description) LIKE $${likeParamIdx} OR LOWER(p.sku) LIKE $${likeParamIdx})`
+        );
+      }
     }
 
     const whereClause =

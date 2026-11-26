@@ -5,6 +5,7 @@
  */
 
 import { initHeader } from "../components/header.js";
+import { i18n } from "../i18n/i18n.js";
 
 function initSignInPage() {
   initHeader();
@@ -38,7 +39,10 @@ function initSignInPage() {
     }
 
     if (feedbackBanner && feedbackText) {
-      feedbackText.textContent = `We sent a sign-in link to ${emailInput.value}. Check your inbox to open your Regulars Club account.`;
+      const isAr = i18n.getLanguage() === "ar";
+      feedbackText.textContent = isAr
+        ? `تم إرسال رابط تسجيل الدخول إلى ${emailInput.value}. تفقد بريدك الإلكتروني لفتح حساب نادي الروّاد.`
+        : `We sent a sign-in link to ${emailInput.value}. Check your inbox to open your Regulars Club account.`;
       feedbackBanner.hidden = false;
     }
   });
